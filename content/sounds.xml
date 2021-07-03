@@ -1,0 +1,11 @@
+<sounds root="sfx/">
+	<sound name="Shatter">
+		<sample weight="1" path="effects/effect_shatter.wav"/>
+	</sound>
+	<sound name="Candle blow">
+		<sample weight="1" path="effects/candle_blow.wav" />
+	</sound>
+	<sound name="Apparition Death">
+		<sample weight="1" path="effects/apparition_death.wav" />
+	</sound>
+</sounds>

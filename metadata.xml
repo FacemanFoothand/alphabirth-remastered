@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+    <name>aB: Remastered</name>
+    <directory>alphabirth-remastered</directory>
+    <id>848056541</id>
+    <description>The Binding of Isaac Alphabirth: Mom's Closet
+is the first of many packs to be developed by TeamAlpha! 
+
+Download the complete Alphabirth collection here: http://steamcommunity.com/sharedfiles/filedetails/?id=866199068
+
+This one in particular adds:
+
+&gt; 31 new items! (including 3 unlockables)
+&gt; 2 new trinkets!
+&gt; 1 enemy variant!
+&gt; 1 new transformation!
+&gt; 1 new pickup (unlockable)
+&gt; 1 new character!
+&gt; and 4 new challenges, all making use of our items!
+
+This mod requires AlphaAPI to function: http://steamcommunity.com/sharedfiles/filedetails/?id=908404046
+
+Visit our wiki for information: https://alphabirth.gamepedia.com/Alphabirth_Wiki
+
+Feel free to contact us at our DISCORD SERVER for Questions, Bug Reports, and Communication: 
+https://discord.gg/Yypj3Ee
+
+We are working to ensure quality and intend to respond as quickly as we can!
+
+For those of you who may have less time on your hands, I hear there's a certain starting_room_enabled variable in the code that may assist you!
+
+Special thanks to AwesomeX357 for contributing a few ideas!</description>
+    <version>1.8</version>
+    <visibility>Public</visibility>
+    <tag id="Lua"/>
+    <tag id="Items"/>
+    <tag id="Active Items"/>
+    <tag id="Trinkets"/>
+    <tag id="Pickups"/>
+    <tag id="Player Characters"/>
+    <tag id="Familiars"/>
+    <tag id="Enemies"/>
+    <tag id="Hazards"/>
+    <tag id="Challenges"/>
+</metadata>

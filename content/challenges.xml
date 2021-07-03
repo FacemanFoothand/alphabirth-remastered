@@ -1,0 +1,15 @@
+<challenges version = "1">
+    <!-- Pack 1 -->
+    <challenge name = "$#!7tiest day ever!" playertype = "4" endstage = "6" canshoot = "false" />
+    <challenge name = "Exploding Head Syndrome!" playertype = "1" endstage = "6" canshoot = "false" />
+    <challenge name = "Faust" maxhp="20" playertype = "0" roomfilter = "4" endstage="10" altpath="true" canshoot = "true" />
+
+    <!-- Pack 2 -->
+    <challenge name = "The Collector" playertype = "0" endstage = "8" />
+    <challenge name = "Restless Leg Syndrome!" playertype = "0" endstage = "8" />
+    <challenge name = "For the hoard!" playertype = "0" endstage = "10" />
+    <challenge name = "Empty" playertype = "0" endstage = "6" />
+
+    <!-- Pack 3 -->
+    <challenge name = "It follows!" playertype = "0" endstage = "8" />
+</challenges>

@@ -1,0 +1,227 @@
+<entities anm2root="gfx/animations/" version="5">
+
+    <!--
+    ##############################
+                Pack 1
+    ##############################
+    -->
+	<entity anm2path="familiars/animation_familiar_stonedbuddy.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="99" collisionRadius="14" friction="1" id="3" name="Stoned Buddy" numGridCollisionPoints="0" shadowSize="11" stageHP="0" variant="234">
+		<gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+	</entity>
+
+    <entity anm2path="familiars/animation_familiar_divine_wrath.anm2" baseHP="0" boss="0" champion="0" collisionDamage="10" collisionMass="6" collisionRadius="9" friction="0.9" id="3" name="Divine Wrath" numGridCollisionPoints="10" shadowSize="10" stageHP="0" variant="235">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity anm2path="effects/animation_effect_icefart.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="0" collisionRadius="0" friction="0" id="1000" name="Ice Fart" numGridCollisionPoints="0" shadowSize="0" stageHP="0" variant="150">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity anm2path="effects/animation_effect_greencandle.anm2" baseHP="0" boss="0" champion="0" collisionDamage="1" collisionMass="0" collisionRadius="16" friction="0.9" id="1000" name="Green Candle" numGridCollisionPoints="10" shadowSize="0" stageHP="0" variant="52" subtype="20">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity anm2path="enemies/animation_enemy_bombdip.anm2" id="217" name="Bomb Dip" variant="404" reroll="true" baseHP="3" stageHP="0" boss="0" champion="0" collisionDamage="1" collisionMass="6" collisionRadius="9" friction="1" numGridCollisionPoints="12" shadowSize="12">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+	<entity anm2path="familiars/animation_familiar_candlekit.anm2" id="3" baseHP="0" boss="0" champion="11" collisionDamage="5" mass="0" collisionRadius="13" friction="1" name="Candle Kit" numGridCollisionPoints="12" shadowSize="15" stageHP="0" variant="242">
+				<gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+	</entity>
+
+	<entity name="Glitched Pickups" anm2path="effects/animation_effect_glitchedpickups.anm2" id="5" variant="435" subtype="0" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="14" stageHP="0" >
+		<gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+	</entity>
+
+    <!--
+    ##############################
+                Pack 2
+    ##############################
+    -->
+    <entity anm2path="familiars/animation_familiar_blooderfly.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0.1" collisionMass="0.1" collisionRadius="2" friction="1.2" id="3" name="Blooderfly" numGridCollisionPoints="12" shadowSize="11" stageHP="0" variant="238">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity anm2path="familiars/animation_familiar_spiriteye.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="0" collisionRadius="2" friction="1.2" id="3" name="Spirit Eye" numGridCollisionPoints="12" shadowSize="11" stageHP="0" variant="240">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity anm2path="familiars/animation_familiar_infestedbaby.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="0" collisionRadius="2" friction="1.2" id="3" name="Infested Baby" numGridCollisionPoints="12" shadowSize="11" stageHP="0" variant="241">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity anm2path="familiars/animation_familiar_subconscious.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="0" collisionRadius="2" friction="1.2" id="3" name="Subconscious" numGridCollisionPoints="12" shadowSize="11" stageHP="0">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity anm2path="effects/animation_effect_alastorscandle.anm2" baseHP="0" boss="0" champion="0" collisionDamage="8" collisionMass="0.1" collisionRadius="9" friction="1" id="3" name="Alastor's Flame" numGridCollisionPoints="10" shadowSize="10" stageHP="0" variant="239">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity anm2path="effects/animation_effect_chaliceofblood.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="99" collisionRadius="9" friction="0" id="3" name="Chalice of Blood" numGridCollisionPoints="10" shadowSize="10" stageHP="0" variant="242">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity anm2path="familiars/animation_familiar_infestedbaby.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="0" collisionRadius="2" friction="1.2" id="3" name="Infested Baby" numGridCollisionPoints="12" shadowSize="11" stageHP="0" variant="241">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity anm2path="familiars/animation_familiar_stonenugget.anm2" baseHP="0" boss="0" champion="0" collisionDamage="1" collisionMass="4" collisionRadius="17" friction="0.6" id="3" name="Stone Nugget" numGridCollisionPoints="0" shadowSize="11" stageHP="0" variant="244" gridCollision="walls">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity id="741" variant="2" anm2path="enemies/animation_enemy_lobotomygaper.anm2" reroll="true" baseHP="10" boss="0" champion="1" collisionDamage="1" collisionMass="5" collisionRadius="13" friction="1" name="Lobotomy" numGridCollisionPoints="12" shadowSize="14" stageHP="0">
+        <gibs amount="6" blood="1" bone="1" eye="1" gut="1" large="0" />
+        <preload-snd id="165" /> <!-- SOUND_ZOMBIE_WALKER_KID -->
+    </entity>
+
+    <entity id="741" variant="1" anm2path="enemies/animation_enemy_zygote.anm2" reroll="true" baseHP="15" boss="0" champion="0" collisionDamage="1" collisionMass="3" collisionRadius="13" friction="1" name="Zygote" numGridCollisionPoints="12" shadowSize="22" stageHP="0">
+        <gibs amount="4" blood="1" bone="0" eye="0" gut="1" large="0" />
+        <preload-snd id="205" /> <!-- SOUND_GOOATTACH0 -->
+    </entity>
+
+    <entity anm2path="enemies/animation_enemy_roundwormtrio.anm2" id="244" variant="200" name="Round Worm Trio" reroll="true" baseHP="20" stageHP="0" boss="0" champion="0" collisionDamage="1" collisionMass="100" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="0" portrait="97">
+        <gibs amount="6" blood="1" bone="0" eye="1" gut="1" large="0" />
+        <preload-snd id="318" /> <!-- SOUND_WORM_SPIT -->
+    </entity>
+
+    <entity anm2path="enemies/animation_enemy_injuredroundworm.anm2" id="244" variant="201" name="Injured Round Worm" reroll="true" baseHP="14" stageHP="0" boss="0" champion="0" collisionDamage="1" collisionMass="100" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="0" portrait="97">
+        <gibs amount="6" blood="1" bone="0" eye="1" gut="1" large="0" />
+        <preload-snd id="318" /> <!-- SOUND_WORM_SPIT -->
+    </entity>
+
+    <entity id="255" anm2path="enemies/animation_enemy_3eyednightcrawler.anm2" reroll="true" variant="125" name="3 Eyed Night Crawler" baseHP="35" stageHP="0" boss="0" champion="0" collisionDamage="1" collisionMass="100" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="0" portrait="97">
+        <gibs amount="6" blood="1" bone="0" eye="1" gut="1" large="0" />
+    </entity>
+
+    <entity id="289" variant="222" name="Dip Ulcer" reroll="true" baseHP="10" stageHP="0" boss="0" champion="0" collisionDamage="1" collisionMass="100" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="0"  anm2path="enemies/animation_enemy_dipulcer.anm2">
+        <gibs amount="6" blood="1" bone="0" eye="1" gut="1" large="0" />
+    </entity>
+
+    <entity id="242" variant="223" name="Leech Creep" baseHP="10" stageHP="0" boss="0" champion="0" collisionDamage="1" collisionMass="14" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="0" portrait="95" anm2path="enemies/animation_enemy_leechcreep.anm2">
+        <gibs amount="4" blood="1" bone="0" eye="0" gut="1" large="0" />
+    </entity>
+
+    <entity id="25" variant="0" subtype="200" name="Kamikaze Fly" baseHP="10" stageHP="0" boss="0" champion="0" collisionDamage="1" collisionMass="12" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="0" portrait="95" gridCollision="walls" anm2path="enemies/animation_enemy_kamikazefly.anm2">
+        <gibs amount="4" blood="1" bone="0" eye="0" gut="1" large="0" />
+    </entity>
+
+    <entity id="24" variant="0" subtype="1" name="Devourer Globin" anm2path="enemies/animation_enemy_devourerglobin.anm2" baseHP="22" stageHP="0" boss="0" champion="0" collisionDamage="1" collisionMass="1" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="0" portrait="95">
+        <gibs amount="6" blood="1" bone="1" eye="0" gut="1" large="0" worm="1" />
+        <preload-snd id="165" /> <!-- SOUND_ZOMBIE_WALKER_KID -->
+    </entity>
+
+    <entity anm2path="effects/animation_tears_crackedrock.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="8" collisionRadius="8" friction="1" id="2" name="Cracked Rock Tear" numGridCollisionPoints="8" shadowSize="8" stageHP="0" variant="45">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity id="41" variant="0" subtype="1" name="Oozing Knight" anm2path="enemies/animation_enemy_oozingknight.anm2" reroll="true" baseHP="20" boss="0" champion="1" collisionDamage="1" collisionMass="10" collisionRadius="13" friction="1" numGridCollisionPoints="12">
+        <gibs amount="6" blood="0" bone="1" eye="0" gut="1" large="0" worm="1" />
+    </entity>
+
+    <entity anm2path="enemies/animation_enemy_demonbony.anm2" id="227" variant="1" subtype="1" name="Devil Bony" reroll="true" baseHP="8" stageHP="2" boss="0" champion="0" collisionDamage="1" collisionMass="14" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="14">
+        <gibs amount="10" blood="0" bone="1" eye="0" gut="0" large="0" />
+		<preload id="9" variant="1" />
+        <preload-snd id="116" /> <!-- SOUND_MONSTER_ROAR_1 -->
+        <preload-snd id="249" /> <!-- SOUND_SCAMPER -->
+    </entity>
+
+    <entity anm2path="effects/animation_tears_bone.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="8" collisionRadius="2" friction="1" id="2" name="Bones Tear" numGridCollisionPoints="8" shadowSize="8" stageHP="0" variant="1270">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity id="1000" variant="420" name="BookOfTheDeadEffect" anm2path="effects/animation_effect_bones.anm2" reroll="false" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="0" collisionRadius="0" friction="1" numGridCollisionPoints="12">
+        <gibs amount="6" blood="0" bone="1" eye="0" gut="1" large="0" worm="1" />
+    </entity>
+
+    <entity anm2path="effects/animation_familiar_blasphemousbrimstone.anm2" baseHP="0" boss="0" champion="0" collisionDamage="10" collisionMass="6" collisionRadius="9" friction="0.9" id="3" name="Blasphemous Laser" numGridCollisionPoints="10" shadowSize="10" stageHP="0" variant="266">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <!--
+    ##############################
+                Pack 3
+    ##############################
+    -->
+
+    <entity anm2path="familiars/animation_familiar_smartbombs.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="10" collisionRadius="2" friction="1" id="3" name="Smart Bomb" numGridCollisionPoints="12" shadowSize="11" stageHP="0" variant="1111">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+    <entity anm2path="effects/animation_effect_pluto.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0.2" collisionMass="3" collisionRadius="4" friction="1" id="3" name="Cosmos Pluto" numGridCollisionPoints="12" shadowSize="4" stageHP="0">
+		<gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+	</entity>
+	<entity anm2path="effects/animation_effect_venus.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0.4" collisionMass="3" collisionRadius="10" friction="1" id="3" name="Cosmos Venus" numGridCollisionPoints="12" shadowSize="10" stageHP="0">
+		<gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+	</entity>
+	<entity anm2path="effects/animation_effect_mercury.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0.8" collisionMass="3" collisionRadius="7" friction="1" id="3" name="Cosmos Mercury" numGridCollisionPoints="12" shadowSize="7" stageHP="0">
+		<gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+	</entity>
+    <entity anm2path="enemies/animation_enemy_apparition.anm2" baseHP="10" boss="0" champion="0" collisionDamage="0" friction="0.2" id="741" variant="5" name="Apparition" collisionMass="5" collisionRadius="13" numGridCollisionPoints="12" shadowSize="14" stageHP="0" shutdoors="false">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+    <entity anm2path="enemies/animation_enemy_meathead.anm2" baseHP="35" boss="0" champion="0" collisionDamage="0" friction="0.6" id="741" variant="4" name="Meathead" collisionMass="5" collisionRadius="13" numGridCollisionPoints="12" shadowSize="14" stageHP="0">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+    <entity anm2path="enemies/animation_enemy_planetoid.anm2" baseHP="1" boss="0" champion="0" collisionDamage="0" friction="1" id="741" variant="6" name="Planetoid" collisionMass="5" collisionRadius="13" numGridCollisionPoints="12" shadowSize="14" stageHP="0" shutdoors="false">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+    <entity anm2path="enemies/animation_enemy_fleshyplanetoid.anm2" baseHP="15" boss="0" champion="0" collisionDamage="0" friction="1" id="741" variant="6" subtype="1" name="Fleshy Planetoid" collisionMass="5" collisionRadius="13" numGridCollisionPoints="12" shadowSize="14" stageHP="0" shutdoors="true">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+	    <entity anm2path="enemies/animation_enemy_brimhost.anm2" baseHP="20" boss="0" champion="0" collisionDamage="0" collisionMass="15" collisionRadius="13" friction="0.3" id="27" name="Brimstone Host" numGridCollisionPoints="12" shadowSize="25" stageHP="2" variant="0" subtype="20" portrait="24">
+        <gibs amount="6" blood="1" bone="1" eye="0" gut="0" large="0" worm="1" />
+        <preload-snd id="166" /> <!-- SOUND_ANIMAL_SQUISH -->
+    </entity>
+    <entity id="741" variant="3" anm2path="enemies/animation_enemy_stargazer.anm2" reroll="true" baseHP="40" boss="0" champion="1" collisionDamage="1" collisionMass="15" collisionRadius="13" friction="0.9" name="Star Gazer" numGridCollisionPoints="12" shadowSize="0" stageHP="0">
+        <gibs amount="6" blood="1" bone="1" eye="1" gut="1" large="0" />
+    </entity>
+    <entity id="741" variant="3" subtype="1" anm2path="enemies/animation_enemy_laserup.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="1" collisionRadius="15" friction="1" name="Laser Up" numGridCollisionPoints="12" shadowSize="0" stageHP="0">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity id="741" variant="3" subtype="2" anm2path="enemies/animation_enemy_laserdown.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="1" collisionRadius="15" friction="1" name="Laser Down" numGridCollisionPoints="12" shadowSize="0" stageHP="0">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity anm2path="pickups/animation_pickup_meteor.anm2" baseHP="0" boss="0" champion="0" collisionMass="10" collisionRadius="1" friction="1" id="5" name="Meteor Shard" numGridCollisionPoints="12" shadowSize="5" stageHP="0" variant="1110">
+		<gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+	</entity>
+
+    <entity name="Large Sack" anm2path="pickups/animation_pickup_largesack.anm2" id="5" variant="1109" subtype="0" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="14" stageHP="0" >
+		<gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+	</entity>
+
+    <entity anm2path="effects/animation_statuseffects.anm2" baseHP="0" boss="0" champion="0" collisionMass="0" collisionRadius="0" friction="0.5" id="1000" name="Crystal" numGridCollisionPoints="0" shadowSize="0" stageHP="0" variant="1109">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+	<entity anm2path="enemies/animation_enemy_wizeeker.anm2" baseHP="35" boss="0" champion="0" collisionDamage="1" friction="1" id="741" variant="7" name="Wizeeker" collisionMass="10" collisionRadius="13" numGridCollisionPoints="12" shadowSize="21" stageHP="5" portrait="86" bestiary="true" bestiaryTransform="0,0,1" bestiaryAnim="AppearDown">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+	<entity anm2path="effects/animation_effect_fire.anm2" baseHP="0" boss="0" champion="0" collisionDamage="1" collisionMass="1" collisionRadius="4" friction="1" id="1000" name="Fire" numGridCollisionPoints="12" shadowSize="0" stageHP="0" variant="51" subtype="1">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+
+    <entity anm2path="familiars/animation_familiar_hushyfly.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0.8" collisionMass="3" collisionRadius="7" friction="1" id="3" name="Hushy Fly" numGridCollisionPoints="12" shadowSize="7" stageHP="0" variant="1108">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+    <entity anm2path="familiars/animation_familiar_lilminer.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="99" collisionRadius="7" friction="0.8" id="3" name="Lil Miner" numGridCollisionPoints="12" shadowSize="7" stageHP="0"  variant="2108">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+	<entity anm2path="familiars/animation_familiar_hivehead.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="13" friction="1" id="3" name="Hive Head Orbital" numGridCollisionPoints="12" shadowSize="8" stageHP="0" variant="3108">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity name="Lil Alastor" id="3" variant="3109" anm2path="familiars/animation_familiar_lilalastor.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="0" collisionRadius="2" friction="1.2" numGridCollisionPoints="12" shadowSize="11" stageHP="0">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+    <entity name="Alastor's Flame" id="3" variant="3110" anm2path="effects/animation_effect_alastorscandle.anm2" baseHP="0" boss="0" champion="0" collisionDamage="8" collisionMass="0" collisionRadius="9" friction="1" numGridCollisionPoints="10" shadowSize="10" stageHP="0">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+
+
+
+
+</entities>

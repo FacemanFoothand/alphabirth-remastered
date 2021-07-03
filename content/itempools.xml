@@ -1,0 +1,383 @@
+<ItemPools>
+    <Pool Name="boss">
+        <!-- Pack 2 -->
+        <Item Name="Brunch" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="treasure">
+        <!-- Pack 1 -->
+        <Item Name="Lifeline" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Bugged Bombs" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Graphics Error" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Stoned Buddy" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Cool Bean" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Black Pepper" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Tearleporter" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Mutant Fetus" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Cologne" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Delirium's Brain" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Furnace" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="White Candle" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Pseudobulbar Affect" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Talisman of Absorption" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+
+        <!-- Pack 2 -->
+        <Item Name="Mirror" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Hoarder" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Bionic Arm" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Blood Drive" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Hemophilia" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Tech Alpha" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Aimbot" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Birth Control" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Hot Coals" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Blooderfly" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Infested Baby" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Quill Feather" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Stone Nugget" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Endor's Hat" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Subconscious" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Owl Totem" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 3 -->
+        <Item Name="The Cosmos" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Hushy Fly" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Lil Miner" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Miniature Meteor" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Crystallized" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Peanut Butter" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Poly-Mitosis" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Shooting Star" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Mr Squishy" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Leaking Bombs" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Hive Head" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Alastor's Candle" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Faithful Ambivalence" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+    </Pool>
+
+    <Pool Name="shop">
+        <!-- Pack 1 -->
+        <Item Name="Old Controller" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Addicted" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Isaac's Apple" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Black Pepper" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Cologne" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Beggar's Cup" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="White Candle" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Green Candle" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Candle Kit" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        
+        <!-- Pack 2 -->
+        <Item Name="Blacklight" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Cauldron" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Surgeon Simulator" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Quill Feather" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Mirror" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Birth Control" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Endor's Hat" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 3 -->
+        <Item Name="Rocket Shoes" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Paint Palette" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Peanut Butter" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+    </Pool>
+
+    <Pool Name="devil">
+        <!-- Pack 1 -->
+        <Item Name="Satan's Contract" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 2 -->
+        <Item Name="Judas Fez" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Infested Baby" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Gloom Skull" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Chalice of Blood" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Blasphemous" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 3 -->
+        <Item Name="Lil Alastor" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+    </Pool>
+
+    <Pool Name="angel">
+        <!-- Pack 1 -->
+        <Item Name="Divine Wrath" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="White Candle" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Diligence" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Patience" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Charity" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Temperance" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Humility" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Chastity" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Kindness" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Candle Kit" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+
+        <!-- Pack 2 -->
+        <Item Name="Spirit Eye" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Book of the Dead" weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="secret">
+        <!-- Pack 1 -->
+        <Item Name="Old Controller" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Graphics Error" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Trash Bag" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Diligence" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Patience" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Charity" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Temperance" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Humility" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Chastity" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Kindness" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Candle Kit" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+
+        <!-- Pack 2 -->
+        <Item Name="Cauldron" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Hoarder" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Gloom Skull" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Hot Coals" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Spirit Eye" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Abyss" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 3 -->
+        <Item Name="The Cosmos" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Smart Bombs" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+		<Item Name="Entropy" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Poly-Mitosis" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Shooting Star" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Infection" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Isaac's Skull" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+    </Pool>
+
+    <Pool Name="library">
+        <!-- Pack 2 -->
+        <Item Name="Book of the Dead" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="beggar">
+        <!-- Pack 1 -->
+        <Item Name="Trash Bag" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Beggar's Cup" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Talisman of Absorption" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Kindness" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+
+        <!-- Pack 3 -->
+        <Item Name="Hushy Fly" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Paint Palette" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+    </Pool>
+
+    <Pool Name="bombBum">
+        <!-- Pack 1 -->
+        <Item Name="Bugged Bombs" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 3 -->
+        <Item Name="Smart Bombs" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+		<Item Name="Leaking Bombs" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+    </Pool>
+
+    <Pool Name="redChest">
+        <!-- Pack 1 -->
+        <Item Name="Trash Bag" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 2 -->
+        <Item Name="Gloom Skull" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Birth Control" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Spirit Eye" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Abyss" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Possessed Shot" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 3 -->
+        <Item Name="Entropy" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Mr Squishy" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Infection" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Lil Alastor" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Alastor's Candle" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Faithful Ambivalence" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+    </Pool>
+
+    <Pool Name="curse">
+        <!-- Pack 2 -->
+        <Item Name="Blacklight" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Possessed Shot" weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Subconscious" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Blasphemous" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 3 -->
+		<Item Name="Faithful Ambivalence" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+    </Pool>
+
+    <Pool Name="greedTreasure">
+        <!-- Pack 1 -->
+        <Item Name="Bugged Bombs" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Graphics Error" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Lifeline" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Stoned Buddy" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Cool Bean" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Black Pepper" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Tearleporter" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Mutant Fetus" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Cologne" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Delirium's Brain" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Furnace" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Pseudobulbar Affect" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="White Candle" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+
+        <!-- Pack 2 -->
+        <Item Name="Mirror" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Hoarder" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Bionic Arm" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Blood Drive" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Hemophilia" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Tech Alpha" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Aimbot" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Birth Control" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Hot Coals" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Blooderfly" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Infested Baby" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Quill Feather" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Stone Nugget" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Endor's Hat" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Subconscious" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Owl Totem" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 3 -->
+        <Item Name="The Cosmos" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Hushy Fly" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Lil Miner" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Miniature Meteor" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Crystallized" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Peanut Butter" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Poly-Mitosis" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Shooting Star" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Mr Squishy" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Leaking Bombs" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Lil Alastor" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Alastor's Candle" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Faithful Ambivalence" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+    </Pool>
+
+    <Pool Name="greedShop">
+        <!-- Pack 1 -->
+        <Item Name="Addicted" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Old Controller" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Isaac's Apple" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Black Pepper" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Cologne" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Green Candle" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="White Candle" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Candle Kit" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+
+        <!-- Pack 2 --> 
+        <Item Name="Blacklight" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Cauldron" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Surgeon Simulator" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Quill Feather" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Mirror" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Birth Control" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Endor's Hat" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 3 --> 
+        <Item Name="Rocket Shoes" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Paint Palette" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Peanut Butter" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+    </Pool>
+    
+    <Pool Name="greedDevil">
+        <!-- Pack 1 --> 
+        <Item Name="Satan's Contract" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 2 -->
+        <Item Name="Cracked Rock" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Judas Fez" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Infested Baby" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Gloom Skull" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Chalice of Blood" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Blasphemous" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="greedAngel">
+        <!-- Pack 1 --> 
+        <Item Name="Divine Wrath" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="White Candle" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Diligence" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Patience" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Charity" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Temperance" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Humility" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Chastity" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Kindness" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Candle Kit" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+
+        <!-- Pack 2 --> 
+        <Item Name="Spirit Eye" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Book of the Dead" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="greedSecret">
+        <!-- Pack 1 --> 
+        <Item Name="Old Controller" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Graphics Error" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Trash Bag" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Diligence" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Patience" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Charity" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Temperance" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Humility" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Chastity" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Kindness" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Candle Kit" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+
+        <!-- Pack 2 -->
+        <Item Name="Cauldron" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Hoarder" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Gloom Skull" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Hot Coals" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Spirit Eye" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Alastor's Candle" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Abyss" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 3 -->
+		<Item Name="The Cosmos" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Smart Bombs" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+		<Item Name="Entropy" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Poly-Mitosis" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Shooting Star" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Infection" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Isaac's Skull" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+    </Pool>
+
+    <Pool Name="greedLibrary">
+        <!-- Pack 2 -->
+        <Item Name="Book of the Dead" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+    </Pool>
+
+    <Pool Name="greedCurse">
+        <!-- Pack 2 -->
+        <Item Name="Blacklight" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Possessed Shot" weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Subconscious" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 3 -->
+        <Item Name="Faithful Ambivalence" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+    </Pool>
+
+    <Pool Name="challenge">
+        <!-- Pack 2 -->
+        <Item Name="Blooderfly" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Infested Baby" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Spirit Eye" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Cauldron" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+        <Item Name="Abyss" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 3 -->
+		<Item Name="Hushy Fly" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+    </Pool>
+
+    <Pool Name="goldenChest">
+        <!-- Pack 2 -->
+        <Item Name="Gloom Skull" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+
+        <!-- Pack 3 -->
+		<Item Name="Hive Head" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+		<Item Name="Isaac's Skull" RemoveOn="0.1" DecreaseBy="1" Weight="1"/>
+    </Pool>
+
+</ItemPools>

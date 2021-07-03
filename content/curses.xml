@@ -1,0 +1,11 @@
+<curses>
+    <!-- Pack 1 -->
+	<curse name="Blessing of Freedom" />
+    <curse name="Blessing of Knowledge" />
+
+    <!-- Pack 2 -->
+    <curse name="Curse of the Lonely" />
+    <curse name="Blessing of Duality" />
+    <curse name="Blessing of Freedom" />
+    <curse name="Blessing of Knowledge" />
+</curses>

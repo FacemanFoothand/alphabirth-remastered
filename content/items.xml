@@ -1,0 +1,99 @@
+<items gfxroot="gfx/items/" version="1">
+  <!-- Pack 1 -->
+  <active description="This is much easier!" gfx="collectible_debug.png" maxcharges="0" name="Debug" />
+  <active description="Sure hope nobody pulls the plug!" gfx="collectible_lifeline.png" maxcharges="6" name="Lifeline" />
+  <active description="Gravity up!" gfx="collectible_isaacsapple.png" maxcharges="1" name="Isaac's Apple" />
+  <active description="Chilled to the bean." gfx="collectible_coolbean.png" maxcharges="2" name="Cool Bean" />
+  <active description="This really.. gets in your no... AHH" gfx="collectible_blackpepper.png" maxcharges="2" name="Black Pepper" />
+  <active description="Flaming gas, in many ways!" cache="tearcolor" gfx="collectible_greencandle.png" maxcharges="1" name="Green Candle" />
+  <active description="Warping tears and reality!" gfx="collectible_tearleporter.png" maxcharges="0" cooldown="30" name="Tearleporter" />
+  <active description="Return to sender" gfx="collectible_deliriumsbrain.png" maxcharges="3" name="Delirium's Brain" />
+  <active description="One man's trash..." gfx="collectible_trashbag.png" maxcharges="3" name="Trash Bag" />
+  <passive description="Stress just changes me, ok?" cache="tearcolor" gfx="collectible_addicted.png" name="Addicted" />
+  <passive description="Read the fine print." blackhearts="2" cache="damage flying tearcolor" gfx="collectible_satanscontract.png" devilprice="2" name="Satan's Contract" />
+  <familiar description="Personal pushover." cache="familiars" gfx="collectible_stonedbuddy.png" name="Stoned Buddy" />
+  <passive description="Bomb tears?" cache="tearcolor" gfx="collectible_mutantfetus.png" name="Mutant Fetus" />
+  <passive description="Rhymes with alone..." cache="tearcolor" gfx="collectible_cologne.png" name="Cologne" />
+  <passive description="Luck to the destitute" cache="luck tearcolor" gfx="collectible_beggarscup.png" name="Beggar's Cup" />
+  <passive description="Hot and ready to blow" cache="tearcolor" gfx="collectible_furnace.png" name="Furnace" />
+  <passive description="Spread the light" cache="tearcolor"  gfx="collectible_whitecandle.png" name="White Candle" />
+  <passive description="I'm always so sad..." cache="tearcolor"  gfx="collectible_pseudobulbaraffect.png" name="Pseudobulbar Affect" />
+  <passive description="Lasers heal" cache="tearcolor" gfx="collectible_talismanofabsorption.png" name="Talisman of Absorption" />
+  <passive description="Holy light barrage!" cache="tearcolor" gfx="collectible_divinewrath.png" name="Divine Wrath" />
+  <passive description="The Lord protects me" cache="tearcolor" gfx="collectible_diligence.png" name="Diligence" />
+  <passive description="Light in pocket, heavy in heart" cache="range damage speed tearcolor" gfx="collectible_charity.png" name="Charity" />
+  <passive description="Breathe" cache="damage tearcolor" gfx="collectible_patience.png" name="Patience" />
+  <passive description="True power is in restraint" cache="range damage speed tearcolor" gfx="collectible_temperance.png" name="Temperance" />
+  <passive description="I hereby promise to abstain from council with the wicked" cache="range damage shotspeed speed tearcolor" gfx="collectible_chastity.png" name="Chastity" />
+  <passive description="May your enemies' pride be their downfall" cache="tearcolor" gfx="collectible_humility.png" name="Humility" />
+  <passive description="May your intentions be pure" cache="tearcolor" gfx="collectible_kindness.png" name="Kindness" />
+  <familiar description="Don't burn it at both ends" cache="tearcolor familiars" gfx="collectible_candlekit.png" name="Candle Kit" />
+  <passive description="Third Party Revival" gfx="collectible_oldcontroller.png" name="Old Controller" />
+  <passive description="424f4f4d21" gfx="collectible_buggedbombs.png" name="Bugged Bombs" />
+  <passive description="[WARN] Exception Caught..." gfx="collectible_graphicserror.png" name="Graphics Error" />
+  <trinket description="I am not afraid." gfx="trinket_emperorscrown.png" name="Emperor's Crown" />
+  <trinket description="I got eye in my poop!" gfx="trinket_browneye.png" name="Brown Eye" />
+
+  <!-- Pack 2 -->
+  <active gfx="collectible_surgeonsimulator.png" maxcharges="0" name="Surgeon Simulator" description="Bzzt"/>
+  <active gfx="collectible_empty.png" maxcharges="0" name="Cauldron" description="I really hope this pays off"/>
+  <active gfx="collectible_mirror.png" maxcharges="0" name="Mirror" description="I am the enemy"/>
+  <active gfx="collectible_bionicarm.png" cache="damage" maxcharges="12" name="Bionic Arm" description="Strength of the machine"/>
+  <active gfx="collectible_blacklight.png" maxcharges="0" name="Blacklight" description="Pain = Darkness" />
+  <active gfx="collectible_blooddrive.png" maxcharges="0" name="Blood Drive" description="Mass blood loss"/>
+  <active gfx="collectible_empty.png" cache="damage shotspeed" maxcharges="1" devilprice="1" name="Chalice of Blood" description="Consume thy enemy" />
+  <active gfx="collectible_stonenugget.png" maxcharges="1" cache="familiars" name="Stone Nugget" description="Stoned fly" />
+  <active gfx="collectible_bookofthedead.png" maxcharges="4" name="Book of the Dead" description="Bardo Thodol" />
+  <active gfx="collectible_blasphemous.png" maxcharges="2" cache="familiars" devilprice="1" name="Blasphemous" description="My sin follows" />
+
+  <passive gfx="collectible_crackedrock.png" devilprice="1" name="Cracked Rock" description="Shockwave Shots!"/>
+  <passive gfx="collectible_hemophilia.png" name="Hemophilia" description="What a bloody mess..." />
+  <passive gfx="collectible_gloomskull.png" cache="damage" name="Gloom Skull" devilprice="1" description="Damage up + Evil Up + You feel scared" />
+  <passive gfx="collectible_techalpha.png" cache="shotspeed" name="Tech Alpha" description="Laser Tears!"/>
+  <passive gfx="collectible_aimbot.png" name="Aimbot" description="L33T_H4X"/>
+  <passive gfx="collectible_brunch.png" cache="firedelay" hearts="2" maxhearts="2" name="Brunch" description="Health + Tears Up"/>
+  <passive gfx="collectible_birthcontrol.png" cache="all" name="Birth Control" description="Familiars = Stats Up"/>
+  <passive gfx="collectible_quillfeather.png" name="Quill Feather" description="Inksplosive Tears"/>
+  <passive gfx="collectible_judasfez.png" cache="damage" devilprice="1" name="Judas' Fez" description="Become the betrayer"/>
+  <passive gfx="collectible_hotcoals.png" cache="damage" name="Hot Coals" description="Kinetic Dmg Up + Fire Feet"/>
+  <passive gfx="collectible_abyss.png" name="Abyss" description="They shall fear the abyss"/>
+  <passive gfx="collectible_hoarder.png" name="Hoarder" description="Mind if I roll need?"/>
+  <passive gfx="collectible_possessedshot.png" cache="tearcolor" name="Possessed Shot" description="Possessed Tears"/>
+  <passive gfx="collectible_endorshat.png" soulhearts="1" name="Endor's Hat" description="Spirit Heart Regen"/>
+  <passive gfx="collectible_owltotem.png" name="Owl Totem" description="It watches your back"/>
+  <passive gfx="collectible_subconscious.png" cache="familiars" name="Subconscious" description="Follow your heart's intentions"/>
+
+  <familiar gfx="collectible_blooderfly.png" cache="familiars" name="Blooderfly" description="Bloody Friend" />
+  <familiar gfx="collectible_spiriteye.png" cache="familiars" name="Spirit Eye" description="Other-Worldly Friend" />
+  <familiar gfx="collectible_infestedbaby.png" cache="familiars" devilprice="1" name="Infested Baby" description="Eight-Legged Friends"/>
+
+  <!-- Pack 3 -->
+  <familiar description="The center of the universe" cache="familiars" gfx="collectible_cosmos.png" name="The Cosmos"/>
+  <familiar description="Littler Hush" cache="familiars" gfx="collectible_hushyfly.png" name="Hushy Fly"/>
+  <familiar description="Wriggle Digger" cache="familiars" gfx="collectible_lilminer.png" name="Lil Miner"/>
+
+  <passive gfx="collectible_smartbombs.png" name="Smart Bombs" description="Seek and Destroy"/>
+  <passive cache="speed" description="GO GO ROCKET SHOES" gfx="collectible_rocketshoes.png" name="Rocket Shoes"/>
+  <passive description="It looks like it broke apart." gfx="collectible_miniaturemeteor.png" name="Miniature Meteor"/>
+  <passive cache="firedelay" description="Thermodynamics at it's finest!" gfx="collectible_entropy.png" name="Entropy"/>
+  <passive description="Feel the PAIN...t" gfx="collectible_paintpalette.png" name="Paint Palette"/>
+  <passive description="Can you feel the energy?" cache="tearcolor" gfx="collectible_crystallized.png" name="Crystallized"/>
+	<passive name="Peanut Butter" description="PB and Slay" gfx="collectible_peanutbutter.png" cache="damage shotspeed firedelay"/>
+	<passive name="Poly-Mitosis" cache="damage firedelay" description="Splitting Tears" gfx="collectible_polymitosis.png"/>
+	<passive name="Shooting Star" description="Homing Comet Tears" gfx="collectible_shootingstar.png"/>
+  <passive name="Mr. Squishy" description="Arrhythmiac Splat!" gfx="collectible_mrsquishy.png"/>
+  <passive name="Leaking Bombs" description="Push and Run!" gfx="collectible_leakybombs.png"/>
+  <passive name="Infection" description="Enemy Epidemic!" gfx="collectible_infection.png"/>
+	<passive name="Hive Head" description="Queen Status" gfx="collectible_hivehead.png" />
+
+  <!-- Stuff added from the cut "Alphabirth Mini Pack 1: Alastor's Rage!" pack (shame you guys missed it, huh?) -->
+  <active name="Alastor's Candle" description="It burns with Alastor's rage" gfx="collectible_alastorscandle.png" maxcharges="3"/>
+  <active name="Isaac's Skull" description="Don't ask how this is possible..." gfx="collectible_isaacsskull.png" maxcharges="4"/>
+  <familiar name="Lil Alastor" description="Like Alastor. But little." gfx="collectible_lilalastor.png"/>
+  <passive name="Faithful Ambivalence" description="Divine intervention" gfx="collectible_faithfulambivalence.png"/>
+
+
+  <trinket name="Moonrock" description="I wonder where it's from?" gfx="trinket_moonrock.png"/>
+
+
+</items>

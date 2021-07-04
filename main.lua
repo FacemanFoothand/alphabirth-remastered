@@ -1,3 +1,9 @@
+if AlphaAPI then
+	print("API Already loaded!")
+else
+	require("alpha_api.lua")
+end
+
 --------------------------------------------------
 ----------- Alphabirth: Remastered -------------
 -- This pack requires the Team Alpha API to run --

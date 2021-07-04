@@ -162,7 +162,7 @@
     <entity anm2path="enemies/animation_enemy_meathead.anm2" baseHP="35" boss="0" champion="0" collisionDamage="0" friction="0.6" id="741" variant="4" name="Meathead" collisionMass="5" collisionRadius="13" numGridCollisionPoints="12" shadowSize="14" stageHP="0">
         <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
     </entity>
-    <entity anm2path="enemies/animation_enemy_planetoid.anm2" baseHP="1" boss="0" champion="0" collisionDamage="0" friction="1" id="741" variant="6" name="Planetoid" collisionMass="5" collisionRadius="13" numGridCollisionPoints="12" shadowSize="14" stageHP="0" shutdoors="false">
+    <entity anm2path="enemies/animation_enemy_planetoid.anm2" baseHP="1" boss="0" champion="0" collisionDamage="0" friction="1" id="741" variant="6" name="Planetoid Orbital" collisionMass="5" collisionRadius="13" numGridCollisionPoints="12" shadowSize="14" stageHP="0" shutdoors="false">
         <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
     </entity>
     <entity anm2path="enemies/animation_enemy_fleshyplanetoid.anm2" baseHP="15" boss="0" champion="0" collisionDamage="0" friction="1" id="741" variant="6" subtype="1" name="Fleshy Planetoid" collisionMass="5" collisionRadius="13" numGridCollisionPoints="12" shadowSize="14" stageHP="0" shutdoors="true">

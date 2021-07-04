@@ -15,8 +15,12 @@ local Alphabirth = {}
 -- CONFIG
 ----------------------------------------
 
+--[[ Useful functions ]]
+local VECTOR_ZERO = Vector(0,0)
+
 -- RNG setup
 local rng = RNG()
+local modRNG = RNG() -- The RNG to be used across the mod
 rng:SetSeed(Random(), 1)
 
 local function random(min, max) -- Re-implements math.random()
@@ -28,6 +32,13 @@ local function random(min, max) -- Re-implements math.random()
     return rng:RandomFloat() -- float [0,1)
 end
 
+local function getVectorFromDirection(direction)
+    if direction == Direction.NO_DIRECTION then
+        return VECTOR_ZERO
+    end
+    return Vector.FromAngle(-180 + direction * 90)
+end
+
 ----------------------------------------
 -- New Flag Constants
 ----------------------------------------
@@ -37,11 +48,33 @@ end
 -------------------
 local CONFIG = {
 	START_ROOM_ENABLED_PACK1 = false,
-    START_ROOM_ENABLED_PACK2 = true,
+    START_ROOM_ENABLED_PACK2 = false,
+	START_ROOM_ENABLED_PACK3 = true,
     UNLOCKS_ENABLED = true,
     NEW_RUNE_CHANCE = 24,
     ABYSS_PULL_RADIUS = 300,
-    CURSE_CHANCES = 8
+    CURSE_CHANCES = 8,
+    PEANUTBUTTER_CONTROLLER_SWITCH_CHANCE = 240,
+    APPARITION_VOLUME = 0.60,
+    PLANETOID_MAXSPEED = 10,
+    LITTLEMINER_FINDCHANCE = 15,
+    LITTLEMINER_MAXPICKUPSPERROOM = 1,
+    ITFOLLOWSLASER_SLOWAMOUNT = 1.5,
+    INFECTION_TEARCHANCE = 10,
+    INFECTION_SPREADCHANCE = 12,
+    PEANUTBUTTER_BANNEDENTITIES = {
+		EntityType.ENTITY_BUTTLICKER,
+		EntityType.ENTITY_SQUIRT,
+		EntityType.ENTITY_DINGA,
+		EntityType.ENTITY_BIGSPIDER,
+		EntityType.ENTITY_MULLIGAN,
+		EntityType.ENTITY_HIVE,
+		EntityType.ENTITY_NEST,
+		EntityType.ENTITY_DUKIE,
+		EntityType.ENTITY_SWARMER,
+		EntityType.ENTITY_GUTS,
+        EntityType.ENTITY_BRAIN
+    }
 }
 local COSTUMES
 local CURSES
@@ -57,11 +90,15 @@ local CHALLENGES
 local RUN_PARAMS
 local ENTITY_FLAGS = {}
 local LOCKS = {}
+local FAMILIARS = {}
+local SOUNDS
+local SYNERGIES = {}
 
 local stage_number
 local frame
 local room_frame
 local sfx_manager
+local SFX_MANAGER
 local beggarscup_previous_total
 
 
@@ -78,6 +115,7 @@ local birthControl_pool
 -------------------
 local function start()
 	sfx_manager = SFXManager()
+	SFX_MANAGER = sfx_manager
     api_mod = AlphaAPI.registerMod(mod) -- Register the mod with the AlphaAPI
 
 	Alphabirth.itemSetup()
@@ -89,6 +127,12 @@ local function start()
 	Alphabirth.miscEntityHandling()
 	Alphabirth.activeItemRenderSetup()
 
+	SOUNDS = {
+		SHATTER = Isaac.GetSoundIdByName("Shatter"),
+		CANDLE_BLOW = Isaac.GetSoundIdByName("Candle blow"),
+        APPARITION_DEATH = Isaac.GetSoundIdByName("Apparition Death")
+    }
+
     CHALLENGES =
     {
 		-- Pack 1
@@ -99,7 +143,9 @@ local function start()
 		EMPTY = Isaac.GetChallengeIdByName("Empty"),
 		THE_COLLECTOR = Isaac.GetChallengeIdByName("The Collector"),
 		FOR_THE_HOARD = Isaac.GetChallengeIdByName("For the hoard!"),
-		RESTLESS_LEG_SYNDROME = Isaac.GetChallengeIdByName("Restless Leg Syndrome!")
+		RESTLESS_LEG_SYNDROME = Isaac.GetChallengeIdByName("Restless Leg Syndrome!"),
+		-- Pack 3
+		IT_FOLLOWS = Isaac.GetChallengeIdByName("It follows!")
 	}
 
 	-- Register the Waxed transformation along with its trigger callback
@@ -126,8 +172,9 @@ local function start()
 
 
 	-- New Room Logic
-	function Alphabirth:NewRoom()
+	function Alphabirth:postNewRoom()
 		local room = AlphaAPI.GAME_STATE.ROOM
+		local game = AlphaAPI.GAME_STATE.GAME
 		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
 
 		-- Charity Logic
@@ -177,13 +224,23 @@ local function start()
 	    if player:HasCollectible(ITEMS.PASSIVE.WHITE_CANDLE.id) and room:IsFirstVisit() and level:GetCurrentRoomIndex() ~= level:GetStartingRoomIndex() then
 	        level:AddAngelRoomChance(0.1)
 		end
+
+		if game.Challenge == CHALLENGES.IT_FOLLOWS and level:GetCurrentRoomIndex() ~= level:GetStartingRoomIndex() then
+			AlphaAPI.callDelayed(function()
+				local room = AlphaAPI.GAME_STATE.ROOM
+				local laser = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.HUSH_LASER, 0, room:GetCenterPos(), Vector(0, 0), nil)
+				laser:GetData().itFollowsLaser = true
+			end, 10)
+		end
 	end
-	mod:AddCallback( ModCallbacks.MC_POST_NEW_ROOM, Alphabirth.NewRoom)
 
     function Alphabirth.floorChanged()
         api_mod.data.run.seenTreasure = false
+		api_mod.data.run.miniatureMeteorBonus = 0
+		api_mod.data.run.apparitionRooms = {}
     end
 
+	mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Alphabirth.postNewRoom)
     mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Alphabirth.floorChanged)
 
 	----------------------------------------
@@ -390,6 +447,58 @@ local function start()
 	            end
 		    end
 
+
+			if CONFIG.START_ROOM_ENABLED_PACK3 then
+				local items = {
+					ITEMS.ACTIVE.ALASTORS_CANDLE.id,
+					ITEMS.ACTIVE.ISAACS_SKULL.id,
+					ITEMS.PASSIVE.SMART_BOMBS.id,
+					ITEMS.PASSIVE.THE_COSMOS.id,
+					ITEMS.PASSIVE.ROCKET_SHOES.id,
+					ITEMS.PASSIVE.MINIATURE_METEOR.id,
+					ITEMS.PASSIVE.ENTROPY.id,
+					ITEMS.PASSIVE.PAINT_PALETTE.id,
+					ITEMS.PASSIVE.CRYSTALLIZED.id,
+					ITEMS.PASSIVE.POLYMITOSIS.id,
+					ITEMS.PASSIVE.HUSHY_FLY.id,
+					ITEMS.PASSIVE.SHOOTING_STAR.id,
+					ITEMS.PASSIVE.MR_SQUISHY.id,
+					ITEMS.PASSIVE.PEANUT_BUTTER.id,
+					ITEMS.PASSIVE.LIL_MINER.id,
+					ITEMS.PASSIVE.HIVE_HEAD.id,
+					ITEMS.PASSIVE.LEAK_BOMBS.id,
+					ITEMS.PASSIVE.INFECTION.id,
+					ITEMS.PASSIVE.LIL_ALASTOR.id,
+					ITEMS.PASSIVE.FAITHFUL_AMBIVALENCE.id,
+					ITEMS.TRINKET.MOONROCK.id
+				}
+				local row = 31
+				for i, item in ipairs(items) do
+					local position = AlphaAPI.GAME_STATE.ROOM:GetGridPosition(i + row)
+					if item < 500 then
+						Isaac.Spawn(
+							EntityType.ENTITY_PICKUP,       -- Type
+							PickupVariant.PICKUP_TRINKET,   -- Variant
+							item,                           -- Subtype
+							position,                       -- Position
+							Vector(0, 0),                   -- Velocity
+							nil                         -- Spawner
+						)
+					else
+						Isaac.Spawn(EntityType.ENTITY_PICKUP,
+							PickupVariant.PICKUP_COLLECTIBLE,
+							item,
+							position,
+							Vector(0, 0),
+							nil
+						)
+					end
+					if i % 11 == 0 then
+						row = row + 19
+					end
+				end
+			end
+
 		    -- Give challenge items
 		    local challenge = Isaac.GetChallenge()
 		    if challenge == CHALLENGES.SHI7TIEST_DAY_EVER then
@@ -418,6 +527,12 @@ local function start()
 	    end
 	end
 	mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, Alphabirth.updateCache)
+end
+
+function Alphabirth.hushLaserUpdate(entity, data)
+    if data.itFollowsLaser then
+        entity.Friction = entity.Friction / CONFIG.ITFOLLOWSLASER_SLOWAMOUNT
+    end
 end
 
 function Alphabirth.miscTablesSetup()
@@ -514,8 +629,20 @@ function Alphabirth.miscEntityHandling()
         CRACKED_ROCK_SHOT = AlphaAPI.createFlag(),
         HEMOPHILIA_APPLIED = AlphaAPI.createFlag(),
         MORPH_TRIED = AlphaAPI.createFlag(),
+		LOCKED_ATTEMPT = AlphaAPI.createFlag(),
+		SMART_BOMB = AlphaAPI.createFlag(),
+        METEOR_SHOT = AlphaAPI.createFlag(),
+        ENTROPY_TEAR = AlphaAPI.createFlag(),
+        PAINTED = AlphaAPI.createFlag(),
+        CRYSTAL = AlphaAPI.createFlag(),
+        POLYMITOSIS_TEAR = AlphaAPI.createFlag(),
+        SHOOTINGSTAR_TEAR = AlphaAPI.createFlag(),
+        PEANUTBUTTER_TEAR = AlphaAPI.createFlag(),
+        PEANUTBUTTER_STICKY = AlphaAPI.createFlag(),
+        SQUISHY_TEAR = AlphaAPI.createFlag(),
         TEAR_IGNORE = AlphaAPI.createFlag(),
-        LOCKED_ATTEMPT = AlphaAPI.createFlag()
+        INFECTION_TEAR = AlphaAPI.createFlag(),
+        INFECTED = AlphaAPI.createFlag()
     }
 
 end
@@ -573,7 +700,7 @@ function Alphabirth.itemSetup()
 	---------------------------------------
     -- ITEM DECLARATION/CALLBACKS
     ---------------------------------------
-    --ITEMS.PASSIVE.NEW_ITEM = alpha_mod:registerItem(name, costume, sGtats)
+    --ITEMS.PASSIVE.NEW_ITEM = api_mod:registerItem(name, costume, sGtats)
     --stats = AlphaAPI.createStat(cache_flag, number, modifier ("+", "-", "*", "/", "="") )
 
 	COSTUMES = {
@@ -878,6 +1005,100 @@ function Alphabirth.itemSetup()
     ITEMS.POCKET.SOWILO:setAsVariant{id = EntityType.ENTITY_PICKUP, variant = PickupVariant.PICKUP_TAROTCARD, chance = CONFIG.NEW_RUNE_CHANCE}
     ITEMS.POCKET.SOWILO:addLock(LOCKS.SOWILO)
     ITEMS.POCKET.SOWILO:addCallback(AlphaAPI.Callbacks.CARD_USE, Alphabirth.triggerSowiloEffect)
+
+	--------------
+	--  PACK 3  --
+	--------------
+
+	ITEMS.ACTIVE.ALASTORS_CANDLE = api_mod:registerItem("Alastor's Candle")
+    ITEMS.ACTIVE.ALASTORS_CANDLE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.useAlastorsCandle)
+
+    ITEMS.ACTIVE.ISAACS_SKULL = api_mod:registerItem("Isaac's Skull")
+    ITEMS.ACTIVE.ISAACS_SKULL:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.useIsaacsSkull)
+    mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Alphabirth.isaacsSkullNewRoom)
+
+    ITEMS.PASSIVE.FAITHFUL_AMBIVALENCE = api_mod:registerItem("Faithful Ambivalence", "gfx/animations/costumes/accessories/animation_costume_faithfulambivalence.anm2")
+    ITEMS.PASSIVE.FAITHFUL_AMBIVALENCE:addCallback(AlphaAPI.Callbacks.ROOM_NEW, Alphabirth.faithfulAmbivalenceNewRoom)
+
+    ITEMS.PASSIVE.LIL_ALASTOR = api_mod:registerItem("Lil Alastor")
+    ITEMS.PASSIVE.LIL_ALASTOR:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateLilAlastor)
+
+    -- PASSIVES
+    ITEMS.PASSIVE.SMART_BOMBS = api_mod:registerItem("Smart Bombs")
+    ITEMS.PASSIVE.SMART_BOMBS:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.onPickupBombItem)
+
+    ITEMS.PASSIVE.LEAK_BOMBS = api_mod:registerItem("Leaking Bombs", "gfx/animations/costumes/accessories/animation_costume_leakybombs.anm2")
+    ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.onPickupBombItem)
+    ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.leakingBombsUpdate, EntityType.ENTITY_BOMBDROP)
+    ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.leakingBombsCreepUpdate, EntityType.ENTITY_EFFECT, EffectVariant.PLAYER_CREEP_BLACKPOWDER)
+    ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.leakingBombsDamage)
+
+    ITEMS.PASSIVE.ROCKET_SHOES = api_mod:registerItem("Rocket Shoes", "gfx/animations/costumes/accessories/animation_costume_rocketshoes.anm2")
+    ITEMS.PASSIVE.ROCKET_SHOES:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleRocketShoes)
+    ITEMS.PASSIVE.ROCKET_SHOES:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateRocketShoes)
+
+    ITEMS.PASSIVE.THE_COSMOS = api_mod:registerItem("The Cosmos")
+    ITEMS.PASSIVE.THE_COSMOS:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.cosmosDamage)
+    ITEMS.PASSIVE.THE_COSMOS:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateCosmos)
+
+    ITEMS.PASSIVE.MINIATURE_METEOR = api_mod:registerItem("Miniature Meteor", "gfx/animations/costumes/accessories/animation_costume_miniaturemeteor.anm2")
+    ITEMS.PASSIVE.MINIATURE_METEOR:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.miniatureMeteorDamage)
+    ITEMS.PASSIVE.MINIATURE_METEOR:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.miniatureMeteorAppear, EntityType.ENTITY_TEAR)
+    ITEMS.PASSIVE.MINIATURE_METEOR:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.onMeteorPickup)
+
+    ITEMS.PASSIVE.ENTROPY = api_mod:registerItem("Entropy", "gfx/animations/costumes/accessories/animation_costume_entropy.anm2")
+    ITEMS.PASSIVE.ENTROPY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.entropyCache)
+    ITEMS.PASSIVE.ENTROPY:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.entropyNewTear, EntityType.ENTITY_TEAR)
+
+    ITEMS.PASSIVE.PAINT_PALETTE = api_mod:registerItem("Paint Palette", "gfx/animations/costumes/accessories/animation_costume_palette.anm2")
+    ITEMS.PASSIVE.PAINT_PALETTE:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.paintPaletteDamage)
+    ITEMS.PASSIVE.PAINT_PALETTE:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.onPaintPaletteTearUpdate, EntityType.ENTITY_TEAR)
+    ITEMS.PASSIVE.PAINT_PALETTE:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.onPaintPaletteTearUpdate, EntityType.ENTITY_LASER)
+
+    ITEMS.PASSIVE.CRYSTALLIZED = api_mod:registerItem("Crystallized", "gfx/animations/costumes/accessories/animation_costume_crystallized.anm2")
+    ITEMS.PASSIVE.CRYSTALLIZED:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.crystalTearDamage)
+    ITEMS.PASSIVE.CRYSTALLIZED:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.crystallizedUpdate)
+    ITEMS.PASSIVE.CRYSTALLIZED:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateCrystallized)
+
+    ITEMS.PASSIVE.POLYMITOSIS = api_mod:registerItem("Poly-Mitosis", "gfx/animations/costumes/accessories/animation_costume_polymitosis.anm2")
+    ITEMS.PASSIVE.POLYMITOSIS:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.polyMitosisNewTear, EntityType.ENTITY_TEAR)
+    ITEMS.PASSIVE.POLYMITOSIS:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.polyMitosisUpdate, EntityType.ENTITY_TEAR)
+    ITEMS.PASSIVE.POLYMITOSIS:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.polyMitosisCache)
+
+    ITEMS.PASSIVE.SHOOTING_STAR = api_mod:registerItem("Shooting Star", "gfx/animations/costumes/accessories/animation_costume_shootingstar.anm2")
+    ITEMS.PASSIVE.SHOOTING_STAR:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.shootingStarBounce)
+    ITEMS.PASSIVE.SHOOTING_STAR:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.shootingStarNewTear, EntityType.ENTITY_TEAR)
+    ITEMS.PASSIVE.SHOOTING_STAR:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.shootingStarTearUpdate, EntityType.ENTITY_TEAR)
+
+    ITEMS.PASSIVE.PEANUT_BUTTER = api_mod:registerItem("Peanut Butter", "gfx/animations/costumes/accessories/animation_costume_peanutbutter.anm2")
+    ITEMS.PASSIVE.PEANUT_BUTTER:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.peanutButterCache)
+    ITEMS.PASSIVE.PEANUT_BUTTER:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.peanutButterNewTear, EntityType.ENTITY_TEAR)
+    ITEMS.PASSIVE.PEANUT_BUTTER:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.peanutButterEntityUpdate)
+    ITEMS.PASSIVE.PEANUT_BUTTER:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.peanutButterDamage)
+
+    ITEMS.PASSIVE.MR_SQUISHY = api_mod:registerItem("Mr. Squishy", "gfx/animations/costumes/accessories/animation_costume_mrsquishy.anm2")
+    ITEMS.PASSIVE.MR_SQUISHY:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.mrSquishyNewTear, EntityType.ENTITY_TEAR)
+    ITEMS.PASSIVE.MR_SQUISHY:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.mrSquishyTearUpdate, EntityType.ENTITY_TEAR)
+
+    ITEMS.PASSIVE.INFECTION = api_mod:registerItem("Infection", "gfx/animations/costumes/accessories/animation_costume_infection.anm2")
+    ITEMS.PASSIVE.INFECTION:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.infectionTearAppear, EntityType.ENTITY_TEAR)
+    ITEMS.PASSIVE.INFECTION:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.infectionUpdate)
+    ITEMS.PASSIVE.INFECTION:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.infectionDamage)
+
+    ITEMS.PASSIVE.HUSHY_FLY = api_mod:registerItem("Hushy Fly")
+    ITEMS.PASSIVE.HUSHY_FLY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateHushyFly)
+
+    ITEMS.PASSIVE.LIL_MINER = api_mod:registerItem("Lil Miner")
+    ITEMS.PASSIVE.LIL_MINER:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateLilMiner)
+
+	ITEMS.PASSIVE.HIVE_HEAD = api_mod:registerItem( "Hive Head", "gfx/animations/costumes/accessories/animation_costume_hivehead.anm2" )
+	ITEMS.PASSIVE.HIVE_HEAD:addCallback(AlphaAPI.Callbacks.ROOM_CLEARED, Alphabirth.onHiveHeadRoomClear)
+	ITEMS.PASSIVE.HIVE_HEAD:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.onHiveHeadPickup)
+
+    -- TRINKETS
+    ITEMS.TRINKET.MOONROCK = api_mod:registerTrinket("Moonrock")
+    ITEMS.TRINKET.MOONROCK:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.moonrockNewTear, EntityType.ENTITY_TEAR)
+
 end
 
 -- Setup Function for Entities
@@ -1047,6 +1268,87 @@ function Alphabirth.entitySetup()
     }
     ENTITIES.OOZING_KNIGHT:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onOozingKnightUpdate)
 
+	-------------------------------
+	-- 			PACK 3			 --
+	-------------------------------
+
+	FAMILIARS.MERCURY = api_mod:getEntityConfig("Cosmos Mercury", 0)
+	FAMILIARS.VENUS = api_mod:getEntityConfig("Cosmos Venus", 0)
+	FAMILIARS.PLUTO = api_mod:getEntityConfig("Cosmos Pluto", 0)
+
+	FAMILIARS.HUSHY_FLY = api_mod:getEntityConfig("Hushy Fly", 0)
+	FAMILIARS.LIL_MINER = api_mod:getEntityConfig("Lil Miner", 0)
+	FAMILIARS.HIVE_HEAD = api_mod:getEntityConfig("Hive Head Orbital", 0)
+
+	FAMILIARS.LIL_ALASTOR = api_mod:getEntityConfig("Lil Alastor", 0)
+	FAMILIARS.ALASTORS_FLAME = api_mod:getEntityConfig("Alastor's Flame", 0)
+
+	ENTITIES.METEOR_SHARD = api_mod:getPickupConfig("Meteor Shard", 0)
+	ENTITIES.APPARITION = api_mod:getEntityConfig("Apparition", 0)
+	ENTITIES.MEATHEAD = api_mod:getEntityConfig("Meathead", 0)
+	ENTITIES.CRYSTAL = api_mod:getEntityConfig("Crystal", 0)
+	ENTITIES.WIZEEKER = api_mod:getEntityConfig("Wizeeker", 0)
+	ENTITIES.PLANETOID = api_mod:getEntityConfig("Planetoid Orbital")
+	ENTITIES.LASERUP = api_mod:getEntityConfig("Laser Up", 1)
+	ENTITIES.LASERDOWN = api_mod:getEntityConfig("Laser Down", 2)
+	ENTITIES.STARGAZER = api_mod:getEntityConfig("Star Gazer", 0)
+	ENTITIES.BRIMSTONE_HOST = api_mod:getEntityConfig("Brimstone Host", 20)
+	ENTITIES.LARGESACK = api_mod:getPickupConfig("Large Sack", 0)
+
+    FAMILIARS.ALASTORS_FLAME:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateAlastorsFlame)
+    FAMILIARS.LIL_ALASTOR:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateLilAlastor)
+
+    ENTITIES.LARGESACK:addCallback(AlphaAPI.Callbacks.PICKUP_PICKUP, Alphabirth.onLargeSackPickup)
+
+    -- Spawn Familiars
+    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.smartBombsEntityAppear, EntityType.ENTITY_BOMBDROP)
+    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.smartBombsEntityUpdate, EntityType.ENTITY_BOMBDROP)
+
+    ENTITIES.LASERUP:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onLaserUpUpdate)
+    ENTITIES.LASERDOWN:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onLaserDownUpdate)
+    ENTITIES.STARGAZER:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onStarGazerUpdate)
+
+    ENTITIES.BRIMSTONE_HOST:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onBrimstoneHostUpdate)
+
+    ENTITIES.METEOR_SHARD:addCallback(AlphaAPI.Callbacks.PICKUP_PICKUP, Alphabirth.meteorShardPickup)
+
+    LOCKS.APPARITION = api_mod:createUnlock("alphaApparitionLock")
+    ENTITIES.APPARITION:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.apparitionUpdate)
+    ENTITIES.APPARITION:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.apparitionDamage)
+    ENTITIES.APPARITION:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.apparitionAppear)
+
+    ENTITIES.MEATHEAD:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.meatheadUpdate)
+
+	ENTITIES.WIZEEKER:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.wizeekerUpdate)
+
+    ENTITIES.PLANETOID:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.planetoidAppear)
+    ENTITIES.PLANETOID:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.planetoidUpdate)
+    ENTITIES.PLANETOID:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.planetoidTakeDamage)
+
+    ENTITIES.CRYSTAL:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.crystalUpdate)
+
+    FAMILIARS.MERCURY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeMercury)
+    FAMILIARS.MERCURY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateMercury)
+
+    FAMILIARS.VENUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeVenus)
+    FAMILIARS.VENUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateVenus)
+
+    FAMILIARS.PLUTO:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializePluto)
+    FAMILIARS.PLUTO:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updatePluto)
+
+    FAMILIARS.HUSHY_FLY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeHushyFly)
+    FAMILIARS.HUSHY_FLY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateHushyFly)
+
+    FAMILIARS.LIL_MINER:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeLilMiner)
+    FAMILIARS.LIL_MINER:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateLilMiner)
+
+	FAMILIARS.HIVE_HEAD:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeHiveHead)
+    FAMILIARS.HIVE_HEAD:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateHiveHead)
+	mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, Alphabirth.updateHiveHeadMod, -FAMILIARS.HIVE_HEAD.variant)
+
+    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.hushLaserUpdate, EntityType.ENTITY_EFFECT, EffectVariant.HUSH_LASER)
+     api_mod:addCallback(AlphaAPI.Callbacks.CHALLENGE_COMPLETED, Alphabirth.completeChallenge)
+
 end
 
 function Alphabirth.activeItemRenderSetup()
@@ -1137,6 +1439,9 @@ function Alphabirth.completeChallenge(challenge)
 	elseif challenge == CHALLENGES.THE_COLLECTOR and not LOCKS.FEHU:isUnlocked() then
 		LOCKS.GEBO:setUnlocked(true)
 		AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/achievement/achievement_gebo.png")
+	elseif challenge == CHALLENGES.IT_FOLLOWS then
+        LOCKS.APPARITION:setUnlocked(true)
+        AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/achievement/achievement_apparition.png")
 	end
 end
 
@@ -3181,7 +3486,7 @@ do
 					true
 				)
 				tears[i]:ChangeVariant(1)
-				tears[i].TearFlags = 0
+				tears[i].TearFlags = BitSet128(0)
 				tears[i].Scale = 1
 				tears[i].Height = -60
 				tears[i].FallingSpeed = -4 + random()*-4
@@ -4051,7 +4356,7 @@ function Alphabirth.onBlooderflyUpdate(blooderfly)
                     )
 
                     tears[i]:ChangeVariant(1)
-                    tears[i].TearFlags = 0
+                    tears[i].TearFlags = BitSet128(0)
                     tears[i].Scale = 1
                     tears[i].Height = -30
                     tears[i].FallingSpeed = -4 + random()*-4
@@ -4679,6 +4984,12 @@ function Alphabirth:modUpdate()
     handlePossessedShot()
     handleBlacklight()
 
+	Alphabirth.apparitionSpawnCheck()
+	Alphabirth.checkEnemyFlames()
+	if globalStargazerCountdown > 0 then
+		globalStargazerCountdown = globalStargazerCountdown - 1
+	end
+
 end
 
 function Alphabirth.cauldronUpdate(sprite)
@@ -4762,6 +5073,8 @@ function Alphabirth.ActiveItemRender()
 	if rendering then
 		sprite:RenderLayer(0, Vector(16, 16))
 	end
+
+	Alphabirth.peanutButter60FPS()
 end
 
 ---------------------------------------
@@ -5028,6 +5341,23 @@ function Alphabirth.entityTakeDamage(entity, damage_amount, damage_flags, damage
 			end
 		end
 	end
+
+	local ply = entity:ToPlayer()
+	if ply ~= nil then
+		Alphabirth.removeFlies()
+ 	end
+
+    if damage_source ~= nil then
+
+        if entity.Type == EntityType.ENTITY_FIREPLACE then
+           return
+        end
+
+		if entity:IsVulnerableEnemy() and damage_source.SpawnerVariant == Alphabirth.FlameSpawnerVariant then
+			return false
+		end
+
+    end
 end
 
 -- Entity Handling
@@ -5354,6 +5684,1950 @@ do
         end
     end
 end
+
+-------------------------------------------------------------------------------
+---- ALASTOR'S RAGE ITEMS AND FAMILIARS
+------------------------------------------------------------------------------
+-------------------
+-- Alastor's Candle
+-------------------
+function Alphabirth.useAlastorsCandle()
+	local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+
+    if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
+        return
+    end
+
+    local offset
+    for i = 1, 2 do
+        local flame = FAMILIARS.ALASTORS_FLAME:spawn(player.Position, Vector(0,0), nil)
+        local data = flame:GetData()
+        if i == 1 then
+            offset = math.pi
+        elseif i == 2 then
+            offset = 0
+        end
+        data.offset = offset
+        data.roomIdx = AlphaAPI.GAME_STATE.LEVEL:GetCurrentRoomIndex()
+        data.center_distance = 100
+    end
+
+    return true
+end
+
+local dist_modifier
+function Alphabirth.updateAlastorsFlame(flame)
+    local room = AlphaAPI.GAME_STATE.ROOM
+    local room_index = AlphaAPI.GAME_STATE.LEVEL:GetCurrentRoomIndex()
+    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+
+    local frame = AlphaAPI.GAME_STATE.GAME:GetFrameCount()
+    local data = flame:GetData()
+
+    if data.roomIdx ~= room_index or room:GetFrameCount() == 1 then
+        flame:Remove()
+    end
+
+    if data.center_distance == 100 then
+        dist_modifier = 1
+    elseif data.center_distance == 30 then
+        dist_modifier = -1
+    end
+
+    local off = (frame / 10) + data.offset
+
+    local x_offset = math.cos(off) * data.center_distance
+    local y_offset = math.sin(off) * data.center_distance
+    flame.Velocity = Vector(player.Position.X + x_offset, player.Position.Y + y_offset) - flame.Position
+
+    data.center_distance = data.center_distance - dist_modifier
+
+    --Add Fear to Nearby entities
+    for _, entity in ipairs(AlphaAPI.entities.enemies) do
+        if entity.Position:Distance(flame.Position) < 60 and math.random(100) == 1 then
+            entity:AddFear(EntityRef(flame), 60)
+        end
+    end
+end
+
+-------------------
+-- Isaac's Skull
+-------------------
+function Alphabirth.useIsaacsSkull()
+    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+    if not api_mod.data.run.godheads then
+        api_mod.data.run.godheads = 0
+    end
+
+    if not api_mod.data.run.brimstones then
+        api_mod.data.run.brimstones = 0
+    end
+
+    if random() > 0.5 then
+        player:AddCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE, 0, false)
+        api_mod.data.run.brimstones = api_mod.data.run.brimstones + 1
+    else
+        player:AddCollectible(CollectibleType.COLLECTIBLE_GODHEAD, 0, false)
+        api_mod.data.run.godheads = api_mod.data.run.godheads + 1
+    end
+
+    return true
+end
+
+function Alphabirth.isaacsSkullNewRoom()
+    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+    if api_mod.data.run.godheads or api_mod.data.run.brimstones then
+        for i = 1, api_mod.data.run.godheads do
+            player:RemoveCollectible(CollectibleType.COLLECTIBLE_GODHEAD)
+        end
+
+        for i = 1, api_mod.data.run.brimstones do
+            player:RemoveCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE)
+        end
+
+        api_mod.data.run.godheads = 0
+        api_mod.data.run.brimstones = 0
+    end
+end
+
+-------------------
+-- Lil Alastor
+-------------------
+function Alphabirth.evaluateLilAlastor(player, flag)
+    if flag == CacheFlag.CACHE_FAMILIARS then
+        local amount_to_spawn = player:GetCollectibleNum(ITEMS.PASSIVE.LIL_ALASTOR.id) * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
+        player:CheckFamiliar(FAMILIARS.LIL_ALASTOR.variant, amount_to_spawn, modRNG)
+    end
+end
+
+function Alphabirth.updateLilAlastor(familiar)
+    local data = familiar:GetData()
+    local sprite = familiar:GetSprite()
+	if data.ShootCD then
+	    if data.ShootCD > 0 then
+			data.ShootCD = data.ShootCD - 1
+		end
+	else
+		data.ShootCD = 0
+	end
+
+	familiar:FollowParent()
+    local frame = AlphaAPI.GAME_STATE.GAME:GetFrameCount()
+
+	local player = familiar.Player or AlphaAPI.GAME_STATE.PLAYERS[1]
+	local fireDelay = 50
+	local animationFrames = 4
+	if not data.charge then
+		data.charge = fireDelay
+	end
+
+	if player:GetFireDirection() ~= -1 then
+		if data.charge > 0 then
+			data.charge = data.charge - 1
+		end
+		if data.charge == 0 then
+			familiar.Color = Color(1, 1, 1, 1, (frame % 30)*2, 1, 1)
+		end
+		local fireDirAnm
+		if player:GetFireDirection() == 0 then
+			fireDirAnm = "FloatChargeSide"
+			data.direction = "Left"
+			sprite.FlipX = true
+		elseif player:GetFireDirection() == 1 then
+			fireDirAnm = "FloatChargeUp"
+			data.direction = "Up"
+			sprite.FlipX = false
+		elseif player:GetFireDirection() == 2 then
+			fireDirAnm = "FloatChargeSide"
+			data.direction = "Right"
+			sprite.FlipX = false
+		elseif player:GetFireDirection() == 3 then
+			fireDirAnm = "FloatChargeDown"
+			data.direction = "Down"
+			sprite.FlipX = false
+		end
+		sprite:SetFrame(fireDirAnm, math.floor((fireDelay - data.charge)/animationFrames))
+	else
+		familiar.Color = Color(1, 1, 1, 1, 1, 1, 1)
+		if data.charge < 5 then
+			if data.direction == "Left" then
+				direction = Vector(-1, 0)
+			elseif data.direction == "Up" then
+				direction = Vector(0, -1)
+			elseif data.direction == "Right" then
+				direction = Vector(1, 0)
+			elseif data.direction == "Down" then
+				direction = Vector(0, 1)
+			end
+			local fire = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.RED_CANDLE_FLAME, 0, familiar.Position, direction*10, familiar)
+			fire:ToEffect().CollisionDamage = 7
+			if data.direction ~= "Left" or data.direction ~= "Right" then
+				sprite:SetFrame("FloatShoot"..data.direction, 0)
+			else
+				sprite:SetFrame("FloatShootSide", 0)
+			end
+			data.ShootCD = 10
+		else
+			sprite:Play("IdleDown")
+		end
+		data.charge = fireDelay
+	end
+end
+
+-------------------
+-- Faithful Ambivalence
+-------------------
+function Alphabirth.faithfulAmbivalenceNewRoom(room)
+    local type = room:GetType()
+    local pool = AlphaAPI.GAME_STATE.GAME:GetItemPool()
+    if room:IsFirstVisit() and type == RoomType.ROOM_ANGEL or type == RoomType.ROOM_DEVIL then
+        local item
+        if type == RoomType.ROOM_ANGEL then
+            item = pool:GetCollectible(ItemPoolType.POOL_DEVIL, true, room:GetSpawnSeed())
+        else
+            item = pool:GetCollectible(ItemPoolType.POOL_ANGEL, true, room:GetSpawnSeed())
+        end
+
+        if item then
+            Isaac.Spawn(
+                EntityType.ENTITY_PICKUP,
+                PickupVariant.PICKUP_COLLECTIBLE,
+                item,
+                room:GetCenterPos() + Vector(0, 10),
+                VECTOR_ZERO,
+                nil
+            )
+        end
+    end
+end
+
+-------------------------------------------------------------------------------
+---- PASSIVE ITEM LOGIC
+------------------------------------------------------------------------------
+-------------------
+-- Smart Bombs
+-------------------
+
+local DOOR_SLOTS = {
+    DoorSlot.LEFT0,
+    DoorSlot.UP0,
+    DoorSlot.RIGHT0,
+    DoorSlot.DOWN0,
+    DoorSlot.LEFT1,
+    DoorSlot.UP1,
+    DoorSlot.RIGHT1,
+    DoorSlot.DOWN1
+}
+
+function Alphabirth.onPickupBombItem()
+    AlphaAPI.GAME_STATE.PLAYERS[1]:AddBombs(5)
+end
+
+function Alphabirth.smartBombsEntityAppear(bomb, data)
+    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+    local room = AlphaAPI.GAME_STATE.ROOM
+    if player:HasCollectible(ITEMS.PASSIVE.SMART_BOMBS.id)
+    and bomb.SpawnerType == EntityType.ENTITY_PLAYER
+    and not AlphaAPI.hasFlag(bomb, ENTITY_FLAGS.SMART_BOMB)
+    and room:IsClear() then
+        local target_entity
+        for i, entity in pairs(AlphaAPI.entities.grid) do
+            if entity:ToRock() then --It must be a rock
+                local rock_index = entity:GetGridIndex()
+                if rock_index == room:GetDungeonRockIdx() then
+                    target_entity = entity
+                    break
+                elseif rock_index == room:GetTintedRockIdx() then
+                    target_entity = entity
+                    break
+                end
+            end
+        end
+
+
+        for _, slot in pairs(DOOR_SLOTS) do
+            local door = room:GetDoor(slot)
+            if door then
+                if door:IsRoomType(RoomType.ROOM_SECRET) or door:IsRoomType(RoomType.ROOM_SUPERSECRET) then
+                   target_entity = door
+                    break
+                end
+            end
+        end
+
+        if target_entity ~= nil then
+            if target_entity.State == 2 then
+                target_entity = nil
+            else
+                local smart_bomb = bomb:ToBomb()
+                AlphaAPI.addFlag(smart_bomb, ENTITY_FLAGS.SMART_BOMB)
+                smart_bomb:GetData().target = target_entity
+
+                --- smart_bomb:ToBomb():SetExplosionCountdown(???)
+
+                local sprite = smart_bomb:GetSprite()
+                sprite:Load("gfx/animations/familiars/animation_familiar_smartbombs.anm2", true)
+                sprite:Play("LegsAppear", true)
+            end
+        end
+    end
+end
+
+function Alphabirth.smartBombsEntityUpdate(entity, data)
+    if AlphaAPI.hasFlag(entity, ENTITY_FLAGS.SMART_BOMB) then
+        if entity.FrameCount % 20 == 1 then
+            local sprite = entity:GetSprite()
+            if not sprite:IsPlaying("LegsAppear") and not sprite:IsPlaying("PulseWalk") then
+                sprite:Play("PulseWalk", true)
+            end
+            if sprite:IsPlaying("PulseWalk") then
+                local target_position = entity:GetData().target.Position
+                local direction_vector = (target_position - entity.Position):Normalized()
+                local angle = direction_vector:GetAngleDegrees() + math.random(-50, 50)
+                entity.Velocity = entity.Velocity + (Vector.FromAngle(angle) * 6)
+            end
+        end
+    end
+end
+
+-------------------
+-- Leaking Bombs
+-------------------
+function Alphabirth.leakingBombsUpdate(bomb, data)
+    bomb.Mass = bomb.Mass / 3
+    if bomb.SpawnerType == EntityType.ENTITY_PLAYER then
+        if bomb.FrameCount % 4 == 0 and bomb.Velocity:Length() > bomb.Size / 4 then
+            local creep = Isaac.Spawn(EntityType.ENTITY_EFFECT,
+                EffectVariant.PLAYER_CREEP_BLACKPOWDER,
+                0,
+                bomb.Position,
+                Vector(0, 0),
+                AlphaAPI.GAME_STATE.PLAYERS[1]
+            ):ToEffect()
+            creep:SetTimeout(999999)
+            creep:GetData().LeakyBomb = bomb
+        end
+    end
+end
+
+function Alphabirth.leakingBombsCreepUpdate(creep, data)
+    local leakyBomb = data.LeakyBomb
+    if leakyBomb and leakyBomb:GetSprite():IsPlaying("Explode") then
+        Isaac.Explode(creep.Position, leakyBomb, leakyBomb.ExplosionDamage)
+        creep:SetTimeout(1)
+    end
+end
+
+function Alphabirth.leakingBombsDamage(entity, amount, flags, source)
+    source = AlphaAPI.getEntityFromRef(source)
+    if source then
+        local data = source:GetData()
+        if not data.damagedEntities then
+            data.damagedEntities = {entity.Index}
+        elseif AlphaAPI.tableContains(data.damagedEntities, entity.Index) then
+            return false
+        else
+            data.damagedEntities[#data.damagedEntities + 1] = entity.Index
+        end
+    end
+end
+
+-------------------
+-- Infection
+-------------------
+local INFECTION_GREEN = Color(0.5, 1, 0.5, 1, 0, 0, 0)
+function Alphabirth.infectionTearAppear(tear, data)
+    if not AlphaAPI.hasFlag(tear, ENTITY_FLAGS.INFECTION_TEAR) and AlphaAPI.getLuckRNG(CONFIG.INFECTION_TEARCHANCE, 4) then
+        tear = tear:ToTear()
+        AlphaAPI.addFlag(tear, ENTITY_FLAGS.INFECTION_TEAR)
+        tear:SetColor(INFECTION_GREEN, -1, 999, false)
+    end
+end
+
+local blacklistedInfectionEnts = {
+    EntityType.ENTITY_MOM,
+    EntityType.ENTITY_MOMS_HEART,
+    EntityType.ENTITY_SATAN,
+    EntityType.ENTITY_HUSH,
+    EntityType.ENTITY_DELIRIUM,
+    EntityType.ENTITY_MEGA_SATAN,
+    EntityType.ENTITY_MEGA_SATAN_2
+}
+
+local function addInfectionToEntity(entity)
+    if not AlphaAPI.tableContains(blacklistedInfectionEnts, entity.Type) then
+        AlphaAPI.addFlag(entity, ENTITY_FLAGS.INFECTED)
+        local infectionEffect = ENTITIES.CRYSTAL:spawn(entity.Position, VECTOR_ZERO, entity):ToEffect()
+        infectionEffect.Parent = entity
+        infectionEffect:GetData().infected = true
+        infectionEffect:GetSprite():Play("Infection", true)
+        entity:SetColor(INFECTION_GREEN, -1, 999, false)
+    end
+end
+
+function Alphabirth.infectionDamage(entity, amount, flags, source)
+    source = AlphaAPI.getEntityFromRef(source)
+    if source then
+        if AlphaAPI.hasFlag(source, ENTITY_FLAGS.INFECTION_TEAR) and not AlphaAPI.hasFlag(entity, ENTITY_FLAGS.INFECTED) and entity:IsActiveEnemy() and entity:IsVulnerableEnemy() then
+            addInfectionToEntity(entity)
+        end
+
+        if source:GetData().infectionCreep then
+            if AlphaAPI.getLuckRNG(CONFIG.INFECTION_SPREADCHANCE, 4) and not AlphaAPI.hasFlag(entity, ENTITY_FLAGS.INFECTED) then
+                addInfectionToEntity(entity)
+            end
+
+            local data = entity:GetData()
+            if data.creepDamage then data.creepDamage =  data.creepDamage - 1 end
+            if not data.creepDamage then
+                entity:TakeDamage(1, 0, EntityRef(AlphaAPI.GAME_STATE.PLAYERS[1]), 1)
+                data.creepDamage = 8
+            end
+
+            return false
+        end
+    end
+end
+
+function Alphabirth.infectionUpdate(entity, data)
+    if AlphaAPI.hasFlag(entity, ENTITY_FLAGS.INFECTED) then
+        if entity.FrameCount % 8 == 1 then
+            local creep = Isaac.Spawn(
+                EntityType.ENTITY_EFFECT,
+                EffectVariant.PLAYER_CREEP_GREEN,
+                0,
+                entity.Position,
+                VECTOR_ZERO,
+                AlphaAPI.GAME_STATE.PLAYERS[1]
+            ):ToEffect()
+            creep:SetTimeout(120)
+            creep:GetData().infectionCreep = true
+        end
+    end
+end
+
+-------------------
+-- Rocket Shoes
+-------------------
+function Alphabirth.handleRocketShoes()
+    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+    if player:GetLastActionTriggers() & ActionTriggers.ACTIONTRIGGER_MOVED ~= 0 then
+        local max_speed = player.MoveSpeed * 5
+        if player.Velocity:Length() < max_speed then
+            player.Velocity = player:GetMovementVector():Resized(max_speed)
+        end
+    elseif player:GetLastActionTriggers() & ActionTriggers.ACTIONTRIGGER_MOVED == 0 then
+        player.Velocity = player.Velocity * 0
+    end
+end
+
+function Alphabirth.evaluateRocketShoes(player, cache_flag)
+    if cache_flag == CacheFlag.CACHE_SPEED then
+        player.MoveSpeed = player.MoveSpeed + 0.1
+    end
+end
+
+-------------------
+-- Miniature Meteor
+-------------------
+
+function Alphabirth.onMeteorPickup()
+    if not api_mod.data.run.miniatureMeteorBonus then
+        api_mod.data.run.miniatureMeteorBonus = 0
+    end
+end
+
+function Alphabirth.miniatureMeteorAppear(e, _)
+    if AlphaAPI.getLuckRNG(10, 3) then
+        AlphaAPI.addFlag(e, ENTITY_FLAGS.METEOR_SHOT)
+        local tear_sprite = e:GetSprite()
+        tear_sprite:Load("gfx/animations/effects/animation_tears_miniaturemeteor.anm2", true)
+        local sprite_index = math.floor((api_mod.data.run.miniatureMeteorBonus / 2) + 1)
+        if sprite_index > 6 then
+            sprite_index = 6
+        end
+        tear_sprite:Play("Stone"..sprite_index.."Move")
+        tear_sprite:LoadGraphics()
+        if api_mod.data.run.miniatureMeteorBonus then
+            e.CollisionDamage = e.CollisionDamage + (api_mod.data.run.miniatureMeteorBonus * 0.5)
+        end
+    end
+end
+
+function Alphabirth.miniatureMeteorDamage(entity, amount, damage_flag, source, invincibility_frames)
+    if AlphaAPI.hasFlag(source.Entity, ENTITY_FLAGS.METEOR_SHOT) and random() < 0.4 then
+        Isaac.Spawn(ENTITIES.METEOR_SHARD.id, ENTITIES.METEOR_SHARD.variant, 0, entity.Position, Vector(0,0), AlphaAPI.GAME_STATE.PLAYERS[1])
+    end
+end
+
+function Alphabirth.meteorShardPickup()
+    SFX_MANAGER:Play(SoundEffect.SOUND_SCAMPER, 1, 0, false, 1)
+    api_mod.data.run.miniatureMeteorBonus = api_mod.data.run.miniatureMeteorBonus + 1
+    return true
+end
+
+-------------------
+-- Crystallized
+-------------------
+local crystal_enemies = {}
+
+function Alphabirth.crystalTearDamage(entity, amount, damage_flag, source, invincibility_frames)
+    if entity.Type ~= EntityType.ENTITY_PLAYER and entity:IsActiveEnemy() and entity:IsVulnerableEnemy() and not AlphaAPI.hasFlag(entity, ENTITY_FLAGS.CRYSTAL) and source.Type < 10 and not (source.Type == EntityType.ENTITY_FAMILIAR and (source.Variant == FamiliarVariant.BLUE_SPIDER or source.Variant == FamiliarVariant.BLUE_FLY)) then
+        AlphaAPI.addFlag(entity, ENTITY_FLAGS.CRYSTAL)
+        local crystal = ENTITIES.CRYSTAL:spawn(entity.Position, Vector(0, 0), nil)
+        crystal.Parent = entity
+        crystal:GetData().crystal = true
+        crystal_enemies[#crystal_enemies + 1]  = entity
+    end
+end
+
+function Alphabirth.crystallizedUpdate()
+    for i, ent in ipairs(crystal_enemies) do
+        if not ent:Exists() or ent:IsDead() then
+            table.remove(crystal_enemies, i)
+        end
+    end
+
+    local numCrystallized = #crystal_enemies
+    local numEnemies = Isaac.CountEnemies()
+    if numCrystallized > 2 and ((numCrystallized == numEnemies) or (numCrystallized > numEnemies / 2 and random(1, 1000) == 1)) then
+        for _, ent in ipairs(crystal_enemies) do
+            AlphaAPI.clearFlag(ent, ENTITY_FLAGS.CRYSTAL)
+            ent:GetData().crystalDamage = true
+        end
+
+        crystal_enemies = {}
+    end
+end
+
+function Alphabirth.crystalUpdate(entity, data)
+    if entity.Parent then
+        if data.crystal and entity.Parent:GetData().crystalDamage then
+            local sprite = entity:GetSprite()
+            if not sprite:IsPlaying("CrystalBreak") then
+                if sprite:IsFinished("CrystalBreak") then
+                    SFX_MANAGER:Play(SOUNDS.SHATTER, 1, 0, false, 1)
+                    entity.Parent:TakeDamage(AlphaAPI.GAME_STATE.PLAYERS[1].Damage * 2, 0, EntityRef(entity), 0)
+                    entity.Parent:GetData().crystalDamage = false
+                    entity:Remove()
+                    return
+                else
+                    sprite:Play("CrystalBreak", true)
+                end
+            end
+        end
+
+        if not entity.Parent:Exists() or entity.Parent:IsDead() then
+            entity:Remove()
+        end
+
+        local target = entity.Parent
+        entity:ToEffect().Position = target.Position
+        entity:GetSprite().Offset = target:GetSprite().Offset - Vector(0, target.Size * (target.SizeMulti.Y * 3))
+        entity.Visible = target.Visible
+    else
+        entity:Remove()
+    end
+end
+
+function Alphabirth.evaluateCrystallized(player, flag)
+    if flag == CacheFlag.CACHE_TEARCOLOR then
+        player.TearColor = Color(0.529, 0.807, 0.98, 0.9, 0, 0, 0)
+    end
+end
+
+-------------------
+-- Paint Palette
+-------------------
+local TEAR_COLORS = {
+    Color(1, 0, 0, 1, 1, 0, 0), -- R
+    Color(0, 1, 0, 1, 0, 1, 0), -- G
+    Color(0, 0, 1, 1, 0, 0, 1) -- B
+}
+local COLOR_FLAGS = {
+    AlphaAPI.createFlag(), -- R
+    AlphaAPI.createFlag(), -- G
+    AlphaAPI.createFlag() -- B
+}
+local tear_index = 1
+function Alphabirth.onPaintPaletteTearUpdate(tear, _)
+    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+    if tear.SpawnerType ~= EntityType.ENTITY_PLAYER then
+        return
+    end
+    AlphaAPI.addFlag(tear, COLOR_FLAGS[tear_index])
+    tear.Color = TEAR_COLORS[tear_index]
+    if tear_index == 3 then
+        tear_index = 1
+    else
+        tear_index = tear_index + 1
+    end
+end
+
+function Alphabirth.paintPaletteDamage(entity, amount, damage_flag, source, invincibility_frames)
+    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+    if entity.Type ~= EntityType.ENTITY_PLAYER then
+        if AlphaAPI.hasFlag(entity, ENTITY_FLAGS.PAINTED) then
+            AlphaAPI.clearFlag(entity, ENTITY_FLAGS.PAINTED)
+            return true
+        end
+        if not AlphaAPI.hasFlag(entity, COLOR_FLAGS[1]) and not AlphaAPI.hasFlag(entity, COLOR_FLAGS[2]) and not AlphaAPI.hasFlag(entity, COLOR_FLAGS[3]) then
+            entity.Color = source.Entity.Color
+            for _, flag in pairs(COLOR_FLAGS) do
+                if AlphaAPI.hasFlag(source.Entity, flag) then
+                    AlphaAPI.addFlag(entity, flag)
+                end
+            end
+        else
+            for _, flag in pairs(COLOR_FLAGS) do
+                if AlphaAPI.hasFlag(entity, flag) then
+                    for _, entity2 in pairs(AlphaAPI.entities.enemies) do
+                        if AlphaAPI.hasFlag(entity2, flag) and entity2.Index ~= entity.Index then
+                            AlphaAPI.addFlag(entity2, ENTITY_FLAGS.PAINTED)
+                            entity2:TakeDamage(amount, flag, EntityRef(player), 0)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+local splitFlags = {
+    TearFlags.TEAR_SPLIT,
+    TearFlags.TEAR_QUADSPLIT,
+    TearFlags.TEAR_BONE
+}
+
+local allSplitFlag = TearFlags.TEAR_SPLIT | TearFlags.TEAR_QUADSPLIT | TearFlags.TEAR_BONE
+
+-------------------
+-- Entropy
+-------------------
+function Alphabirth.entropyCache(player, flag)
+    if flag == CacheFlag.CACHE_FIREDELAY then
+        player.MaxFireDelay = player.MaxFireDelay - 3
+    end
+end
+
+function Alphabirth.entropyNewTear(entity)
+    if AlphaAPI.hasFlag(entity, ENTITY_FLAGS.TEAR_IGNORE) then return end
+    if not AlphaAPI.hasFlag(entity, ENTITY_FLAGS.ENTROPY_TEAR) and AlphaAPI.getLuckRNG(66, 5) then
+        local angle = entity.Velocity:GetAngleDegrees()
+        local length = entity.Velocity:Length()
+        local oldTear = entity:ToTear()
+        local flags = oldTear.TearFlags
+        local variance = 10 --in degrees
+        local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+        local entropyTears = {oldTear}
+
+        for _, flag in ipairs(splitFlags) do
+            if flags & flag == flag then
+                if AlphaAPI.getLuckRNG(66, 5) then
+                    local tear = player:FireTear(player.Position, Vector.FromAngle(angle + random(-variance,variance)):Resized(length), true, false, false)
+                    AlphaAPI.addFlag(tear, ENTITY_FLAGS.ENTROPY_TEAR)
+                    entropyTears[#entropyTears + 1] = tear
+                end
+            end
+        end
+
+        local tear = player:FireTear(player.Position, Vector.FromAngle(angle + random(-variance,variance)):Resized(length), true, false, false)
+        entropyTears[#entropyTears + 1] = tear
+        AlphaAPI.addFlag(tear, ENTITY_FLAGS.ENTROPY_TEAR)
+
+        for _, tear in ipairs(entropyTears) do
+            tear.TearFlags = tear.TearFlags & ~allSplitFlag
+        end
+    end
+end
+
+-------------------
+-- Poly-Mitosis
+-------------------
+function Alphabirth.polyMitosisNewTear(tear)
+    tear = tear:ToTear()
+    local data = tear:GetData()
+    if not AlphaAPI.hasFlag(tear, ENTITY_FLAGS.POLYMITOSIS_TEAR) and not AlphaAPI.hasFlag(tear, ENTITY_FLAGS.TEAR_IGNORE) then
+        AlphaAPI.addFlag(tear, ENTITY_FLAGS.POLYMITOSIS_TEAR)
+
+        data.splitFlags = 0
+        for _, flag in ipairs(splitFlags) do
+            if tear.TearFlags & flag == flag then
+                data.splitFlags = data.splitFlags + 1
+            end
+        end
+
+        tear.TearFlags = tear.TearFlags & ~allSplitFlag
+
+        tear:GetData().Polymitosis = 0
+    end
+end
+
+function Alphabirth.polyMitosisUpdate(entity, data)
+    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+    if entity.SpawnerType == EntityType.ENTITY_PLAYER and AlphaAPI.hasFlag(entity, ENTITY_FLAGS.POLYMITOSIS_TEAR) and not AlphaAPI.hasFlag(entity, ENTITY_FLAGS.SQUISHY_TEAR) then
+        if entity.FrameCount >= 8 and data.Polymitosis < 3 then
+            local numTears = 2 + data.splitFlags
+            local offset = 60 / (numTears - 1)
+            local start = -30
+            for i = 1, numTears do
+                local tear = player:FireTear(entity.Position, entity.Velocity:Rotated(start + offset * (i - 1)), false, true, true)
+                tear.TearFlags = tear.TearFlags & ~allSplitFlag
+                AlphaAPI.addFlag(tear, ENTITY_FLAGS.POLYMITOSIS_TEAR)
+                AlphaAPI.addFlag(tear, ENTITY_FLAGS.TEAR_IGNORE)
+                tear.CollisionDamage = tear.CollisionDamage * 2 / 3
+                local newData = tear:GetData()
+                newData.Polymitosis = data.Polymitosis + 1
+                newData.splitFlags = data.splitFlags
+                tear:ToTear().Scale = entity:ToTear().Scale / 1.2
+            end
+
+            entity:Remove()
+        end
+    end
+end
+
+function Alphabirth.polyMitosisCache(player, flag)
+    if flag == CacheFlag.CACHE_DAMAGE then
+        player.Damage = player.Damage + 0.5
+    elseif flag == CacheFlag.CACHE_FIREDELAY then
+        player.MaxFireDelay = player.MaxFireDelay - 1
+    end
+end
+
+-------------------
+-- Shooting Star
+-------------------
+function Alphabirth.shootingStarNewTear(tear)
+    if not AlphaAPI.hasFlag(tear, ENTITY_FLAGS.SHOOTINGSTAR_TEAR) and AlphaAPI.getLuckRNG(35, 4) then
+        tear = tear:ToTear()
+        AlphaAPI.addFlag(tear, ENTITY_FLAGS.SHOOTINGSTAR_TEAR)
+        tear:ChangeVariant(TearVariant.BLUE)
+        local tear_sprite = tear:GetSprite()
+        tear_sprite:Load("gfx/animations/effects/animation_tears_shootingstar.anm2", true)
+        AlphaAPI.resetSpriteScale(tear, "RegularTear")
+    end
+end
+
+function Alphabirth.shootingStarTearUpdate(tear, data)
+    if AlphaAPI.hasFlag(tear, ENTITY_FLAGS.SHOOTINGSTAR_TEAR) then
+        tear.SpriteRotation = tear.Velocity:GetAngleDegrees()
+    end
+
+    if data.ShootingStar then
+        local checkdist = math.huge
+        local nearent
+
+        for _,ent in ipairs(AlphaAPI.entities.enemies) do
+            local good = true
+            for _, struck in ipairs(data.Struck) do
+                if AlphaAPI.compareEntities(ent, struck) then
+                    good = false
+                end
+            end
+
+            if good then
+                local dist = ent.Position:Distance(tear.Position)
+                if dist < checkdist then
+                    nearent = ent
+                    checkdist = dist
+                end
+            end
+        end
+
+        if nearent then
+            local direction = (nearent.Position - tear.Position):Normalized()
+            tear.Velocity = (tear.Velocity + direction * 4):Resized(AlphaAPI.GAME_STATE.PLAYERS[1].ShotSpeed * 10)
+        end
+    end
+end
+
+function Alphabirth.shootingStarBounce(entity, damage_amount, damage_flags, damage_source, invincibility_frames)
+    local tear = AlphaAPI.getEntityFromRef(damage_source)
+
+    if tear ~= nil and tear:ToTear() then
+        local totear = tear:ToTear()
+
+        if AlphaAPI.hasFlag(tear, ENTITY_FLAGS.SHOOTINGSTAR_TEAR) and entity:IsActiveEnemy(false) then
+            tear:GetData().ShootingStar = true
+            if not tear:GetData().Struck then
+                tear:GetData().Struck = {}
+            else
+                for _, struck in ipairs(tear:GetData().Struck) do
+                    if AlphaAPI.compareEntities(entity, struck) then
+                        return false
+                    end
+                end
+            end
+
+            tear:GetData().Struck[#tear:GetData().Struck + 1] = entity
+            totear.TearFlags = totear.TearFlags | TearFlags.TEAR_PIERCING
+            tear.Velocity = (tear.Velocity * -1):Resized(AlphaAPI.GAME_STATE.PLAYERS[1].ShotSpeed * 10)
+            totear.FallingSpeed = totear.FallingSpeed - 0.2
+        end
+    end
+end
+
+-------------------
+-- Peanut Butter
+-------------------
+
+local PEANUTBUTTER_BONDS = {}
+local PEANUTBUTTER_COUNTER = 0
+local PEANUTBUTTER_COLOR = Color(205.0/255.0, 133.0/255.0, 63.0/255.0, 1, 0, 0, 0)
+function Alphabirth.peanutButterCache(player, cache_flag)
+    --All these values are susceptible to change. I didn't have numbers to go off
+    if cache_flag == CacheFlag.CACHE_DAMAGE then
+        player.Damage = player.Damage + 0.5
+    end
+    if cache_flag == CacheFlag.CACHE_SHOTSPEED then
+        player.ShotSpeed = player.ShotSpeed - 0.2
+    end
+end
+
+local frozenFlags = EntityFlag.FLAG_NO_SPRITE_UPDATE | EntityFlag.FLAG_FREEZE
+
+local function isPBOk(entity)
+    return entity:IsVulnerableEnemy() and not entity:IsBoss() and not AlphaAPI.hasFlag(entity, ENTITY_FLAGS.PEANUTBUTTER_STICKY) and not AlphaAPI.tableContains(CONFIG.PEANUTBUTTER_BANNEDENTITIES, entity.Type)
+end
+
+function Alphabirth.peanutButterNewTear(tear)
+    if not AlphaAPI.hasFlag(tear, ENTITY_FLAGS.PEANUTBUTTER_TEAR) and AlphaAPI.getLuckRNG(65, 5) then
+        AlphaAPI.addFlag(tear, ENTITY_FLAGS.PEANUTBUTTER_TEAR)
+        tear.Color = Color(205.0/255.0, 133.0/255.0, 63.0/255.0, 1, 0, 0, 0)
+    end
+end
+
+function Alphabirth.peanutButterDamage(entity, damage_amount, damage_flags, damage_source, invincibility_frames)
+    local tear = AlphaAPI.getEntityFromRef(damage_source)
+
+    if AlphaAPI.hasFlag(tear, ENTITY_FLAGS.PEANUTBUTTER_TEAR) and isPBOk(entity) then
+        for _, bond in pairs(PEANUTBUTTER_BONDS) do
+            for _, ent in pairs(bond.ENTITIES) do
+                if AlphaAPI.compareEntities(entity, ent) then
+                    return
+                end
+            end
+        end
+
+        PEANUTBUTTER_BONDS[tostring(PEANUTBUTTER_COUNTER + 1)] = {
+            CONTROLLING = entity,
+            ENTITIES = {entity},
+            TIMER = 60 * 7
+        }
+        entity:GetData().bondID = tostring(PEANUTBUTTER_COUNTER + 1)
+        PEANUTBUTTER_COUNTER = PEANUTBUTTER_COUNTER + 1
+        AlphaAPI.addFlag(entity, ENTITY_FLAGS.PEANUTBUTTER_STICKY)
+        entity:SetColor(PEANUTBUTTER_COLOR, 2, 999, false, true)
+    end
+end
+
+function Alphabirth.peanutButterEntityUpdate(entity, data, sprite)
+    if not (entity:IsVulnerableEnemy() and entity:IsActiveEnemy(false)) then return end
+
+    if AlphaAPI.hasFlag(entity, ENTITY_FLAGS.PEANUTBUTTER_STICKY) then
+        entity:SetColor(PEANUTBUTTER_COLOR, 1, 999, false, true)
+        if entity.FrameCount % 2 == 0 then
+            local creep = Isaac.Spawn(EntityType.ENTITY_EFFECT,
+                EffectVariant.PLAYER_CREEP_WHITE,
+                0,
+                entity.Position,
+                Vector(0, 0),
+                AlphaAPI.GAME_STATE.PLAYERS[1]
+            )
+            creep:GetSprite():Load("gfx/animations/effects/animation_effect_peanutbuttercreep.anm2", true)
+            creep:ToEffect():SetTimeout(10)
+            creep:ToEffect().Scale = creep:ToEffect().Scale * 0.15
+        end
+
+        local inBond = false
+        if data.bondID then
+            for _, ent in pairs(PEANUTBUTTER_BONDS[data.bondID].ENTITIES) do
+                if AlphaAPI.compareEntities(entity, ent) then
+                    inBond = true
+                end
+            end
+        end
+
+        if not inBond then
+            AlphaAPI.clearFlag(entity, ENTITY_FLAGS.PEANUTBUTTER_STICKY)
+            entity:ClearEntityFlags(frozenFlags)
+            data.bondID = nil
+        end
+
+        -- Code for merging of bonds
+        for bondID, bond in pairs(PEANUTBUTTER_BONDS) do
+            if bondID ~= data.bondID then
+                local bond2 = PEANUTBUTTER_BONDS[data.bondID]
+                for _, ent in pairs(bond.ENTITIES) do
+                    if ent.Position:Distance(entity.Position) < ent.Size + entity.Size then
+                        local chosenBond = random(1, 2)
+                        if chosenBond == 1 then
+                            for _, ent2 in pairs(bond.ENTITIES) do
+                                bond2.ENTITIES[#bond2.ENTITIES + 1] = ent2
+                                ent2:GetData().peanutButterOffset = ent2.Position - bond2.CONTROLLING.Position
+                                ent2:GetData().bondID = data.bondID
+                                bond2.TIMER = bond2.TIMER + bond.TIMER
+                            end
+
+                            PEANUTBUTTER_BONDS[bondID] = nil
+                        else
+                            for _, ent2 in pairs(bond2.ENTITIES) do
+                                bond.ENTITIES[#bond.ENTITIES + 1] = ent2
+                                ent2:GetData().peanutButterOffset = ent2.Position - bond.CONTROLLING.Position
+                                ent2:GetData().bondID = bondID
+                                bond.TIMER = bond.TIMER + bond2.TIMER
+                            end
+
+                            PEANUTBUTTER_BONDS[data.bondID] = nil
+                        end
+
+                        break
+                    end
+                end
+            end
+        end
+    else
+        -- Code to detect if enemies are within range of a peanut butter bonded entity and if so add them to the bond
+        for bondID, bond in pairs(PEANUTBUTTER_BONDS) do
+            for _, ent in pairs(bond.ENTITIES) do
+                if ent.Position:Distance(entity.Position) < ent.Size + entity.Size and isPBOk(entity) then
+                    AlphaAPI.addFlag(entity, ENTITY_FLAGS.PEANUTBUTTER_STICKY)
+                    data.peanutButterOffset = entity.Position - bond.CONTROLLING.Position
+                    data.bondID = bondID
+                    bond.ENTITIES[#bond.ENTITIES + 1] = entity
+                    bond.TIMER = bond.TIMER + (60 * 7)
+                    entity:AddEntityFlags(frozenFlags)
+                    break
+                end
+            end
+        end
+    end
+end
+
+function Alphabirth.peanutButter60FPS()
+    for key, bond in pairs(PEANUTBUTTER_BONDS) do
+        if not bond.CONTROLLING:Exists() or bond.CONTROLLING:IsDead() then
+            local controllerFound = false
+            for _, entity in pairs(bond.ENTITIES) do
+                if entity:Exists() and not entity:IsDead() then
+                    controllerFound = true
+                    bond.CONTROLLING = entity
+                    entity:ClearEntityFlags(frozenFlags)
+                    for _, ent2 in pairs(bond.ENTITIES) do
+                        ent2:GetData().peanutButterOffset = ent2.Position - bond.CONTROLLING.Position
+                    end
+                    break
+                end
+            end
+
+            if not controllerFound then
+                bond[key] = nil
+            end
+        end
+
+        for key2, entity in pairs(bond.ENTITIES) do
+            if entity:Exists() and not entity:IsDead() then
+                if not AlphaAPI.compareEntities(bond.CONTROLLING, entity) then
+                    local data = entity:GetData()
+                    entity:AddEntityFlags(frozenFlags)
+                    entity.Velocity = Vector(0, 0)
+                    entity.Position = bond.CONTROLLING.Position + data.peanutButterOffset
+
+                    local switchControllers = random(1, CONFIG.PEANUTBUTTER_CONTROLLER_SWITCH_CHANCE)
+                    if switchControllers == 1 then
+                        bond.CONTROLLING = entity
+                        entity:ClearEntityFlags(frozenFlags)
+                        for _, ent2 in pairs(bond.ENTITIES) do
+                            ent2:GetData().peanutButterOffset = ent2.Position - bond.CONTROLLING.Position
+                        end
+                    end
+                end
+            else
+                if entity:Exists() then
+                    entity:ClearEntityFlags(frozenFlags)
+                end
+
+                bond.ENTITIES[key2] = nil
+            end
+        end
+
+        bond.TIMER = bond.TIMER - 1
+        if bond.TIMER <= 0 then
+            for key2, entity in pairs(bond.ENTITIES) do
+                AlphaAPI.clearFlag(entity, ENTITY_FLAGS.PEANUTBUTTER_STICKY)
+                entity:ClearEntityFlags(frozenFlags)
+            end
+
+            PEANUTBUTTER_BONDS[key] = nil
+        end
+    end
+end
+
+-------------------
+-- Mr Squishy
+-------------------
+function Alphabirth.mrSquishyNewTear(tear)
+    if AlphaAPI.hasFlag(tear, ENTITY_FLAGS.TEAR_IGNORE) and not tear:GetData().bounce then return end
+    if not AlphaAPI.hasFlag(tear, ENTITY_FLAGS.SQUISHY_TEAR) and (AlphaAPI.getLuckRNG(15, 4) or tear:GetData().bounce) then
+        tear = tear:ToTear()
+        tear.TearFlags = BitSet128(0)
+        tear:ChangeVariant(1)
+        if not tear:GetData().bounce then
+            tear:GetData().bounce = 1
+            tear.Velocity = tear.Velocity * 0.6
+        end
+        tear.FallingSpeed = tear.FallingSpeed - (35 / tear:GetData().bounce)
+        tear.FallingAcceleration = tear.FallingAcceleration + (1.8 / tear:GetData().bounce)
+        local sprite = tear:GetSprite()
+        sprite:Load("gfx/animations/effects/animation_tears_mrsquishy.anm2", true)
+        sprite:Play("heart3Move")
+        AlphaAPI.addFlag(tear, ENTITY_FLAGS.SQUISHY_TEAR)
+    end
+end
+
+local function fireTearVolley(position, tear_num)
+    local tears = {}
+    for i = 1, tear_num do
+        tears[i] = AlphaAPI.GAME_STATE.PLAYERS[1]:FireTear(position,
+            Vector(random(-4, 4),
+                random(-4, 4)),
+            false,
+            false,
+            true
+        )
+        AlphaAPI.addFlag(tears[i], ENTITY_FLAGS.TEAR_IGNORE)
+        tears[i]:ChangeVariant(1)
+        tears[i].TearFlags = BitSet128(0)
+        tears[i].Scale = 1
+        tears[i].Height = -30
+        tears[i].FallingSpeed = -4 + random() * -6
+        tears[i].FallingAcceleration = random() + 0.5
+    end
+    tears = nil
+    collectgarbage()
+end
+
+function Alphabirth.mrSquishyTearUpdate(tear, data)
+    tear = tear:ToTear()
+    if AlphaAPI.hasFlag(tear, ENTITY_FLAGS.SQUISHY_TEAR) and tear:IsDead() then
+        if tear:GetData().bounce == 1 then
+            fireTearVolley(tear.Position, 3)
+            local new = AlphaAPI.GAME_STATE.PLAYERS[1]:FireTear(tear.Position,
+                tear.Velocity * 0.3,
+                false,
+                false,
+                true
+            )
+        AlphaAPI.addFlag(new, ENTITY_FLAGS.TEAR_IGNORE)
+            new:GetData().bounce = 2
+        elseif tear:GetData().bounce == 2 then
+            fireTearVolley(tear.Position, 8)
+        end
+        Isaac.Spawn(EntityType.ENTITY_EFFECT,
+            EffectVariant.PLAYER_CREEP_RED,
+            0,
+            tear.Position,
+            Vector(0, 0),
+            AlphaAPI.GAME_STATE.PLAYERS[1]
+        )
+    end
+end
+
+-------------------------------------------------------------------------------
+---- TRINKET LOGIC
+-------------------------------------------------------------------------------
+-------------------
+-- Moonrock
+-------------------
+
+function Alphabirth.moonrockNewTear(e)
+    if AlphaAPI.getLuckRNG(10, 3) then
+        local roll = random(1,2)
+        if roll == 1 then
+            e:ToTear().TearFlags = e:ToTear().TearFlags | TearFlags.TEAR_ORBIT
+        elseif roll == 2 then
+            e:ToTear().TearFlags = e:ToTear().TearFlags | TearFlags.TEAR_WAIT
+        end
+        e:ToTear().TearFlags = e:ToTear().TearFlags | TearFlags.TEAR_CONFUSION
+        e.Color = Color(0.7, 0.7, 0.7, 1, 0, 0, 0)
+    end
+end
+
+-------------------------------------------------------------------------------
+---- POCKET ITEMS LOGIC
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+---- FAMILIAR LOGIC
+-------------------------------------------------------------------------------
+-------------------
+-- The Cosmos
+-------------------
+function Alphabirth.evaluateCosmos(player, flag)
+    if flag == CacheFlag.CACHE_FAMILIARS then
+        local amount_to_spawn = player:GetCollectibleNum(ITEMS.PASSIVE.THE_COSMOS.id) * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
+        player:CheckFamiliar(FAMILIARS.MERCURY.variant, amount_to_spawn, modRNG)
+        player:CheckFamiliar(FAMILIARS.PLUTO.variant, amount_to_spawn, modRNG)
+        player:CheckFamiliar(FAMILIARS.VENUS.variant, amount_to_spawn, modRNG)
+    end
+end
+
+---MERCURY---
+local mercury_burn_chance = 0.05
+local mercury_burn_duration = 60
+function Alphabirth.initializeMercury(familiar)
+    familiar = familiar:ToFamiliar()
+    familiar:AddToOrbit(30)
+    familiar:GetData().orbit_distance = Vector(40, 40)
+end
+
+function Alphabirth.updateMercury(familiar)
+	familiar.OrbitDistance = familiar:GetData().orbit_distance
+    familiar.OrbitAngleOffset = familiar.OrbitAngleOffset + 0.05
+    familiar.Velocity = (familiar:GetOrbitPosition(AlphaAPI.GAME_STATE.PLAYERS[1].Position) - familiar.Position)
+end
+
+---VENUS---
+local venus_charm_chance = 0.05
+local venus_charm_duration = 120
+function Alphabirth.initializeVenus(familiar)
+    familiar = familiar:ToFamiliar()
+    familiar:AddToOrbit(31)
+    familiar:GetData().orbit_distance = Vector(60, 60)
+end
+
+function Alphabirth.updateVenus(familiar)
+    familiar.OrbitDistance = familiar:GetData().orbit_distance
+    familiar.OrbitAngleOffset = familiar.OrbitAngleOffset + 0.035
+    familiar.Velocity = (familiar:GetOrbitPosition(AlphaAPI.GAME_STATE.PLAYERS[1].Position) - familiar.Position)
+end
+
+---PLUTO---
+local pluto_freeze_chance = 0.05
+local pluto_freeze_duration = 90
+function Alphabirth.initializePluto(familiar)
+    familiar = familiar:ToFamiliar()
+    familiar:AddToOrbit(50)
+    familiar:GetData().orbit_distance = Vector(80, 80)
+end
+
+function Alphabirth.updatePluto(familiar)
+	familiar.OrbitDistance = familiar:GetData().orbit_distance
+    familiar.OrbitAngleOffset = familiar.OrbitAngleOffset + 0.02
+    familiar.Velocity = (familiar:GetOrbitPosition(AlphaAPI.GAME_STATE.PLAYERS[1].Position) - familiar.Position)
+end
+
+---DAMAGE---
+function Alphabirth.cosmosDamage(entity, damage_amount, damage_flag, damage_source, invincibility_frames)
+    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+    if damage_source.Entity then
+        if AlphaAPI.matchConfig(damage_source.Entity, FAMILIARS.MERCURY) then
+            if random() < mercury_burn_chance then
+                entity:AddBurn(EntityRef(player), mercury_burn_duration, player.Damage)
+            end
+        elseif AlphaAPI.matchConfig(damage_source.Entity, FAMILIARS.VENUS) then
+            if random() < venus_charm_chance then
+                entity:AddCharmed(venus_charm_duration)
+            end
+        elseif AlphaAPI.matchConfig(damage_source.Entity, FAMILIARS.PLUTO) then
+            if random() < pluto_freeze_chance then
+                entity:AddFreeze(EntityRef(player), pluto_freeze_duration)
+            end
+        end
+    end
+end
+
+
+-------------------
+-- Hushy Fly
+-------------------
+function Alphabirth.evaluateHushyFly(player, flag)
+    if flag == CacheFlag.CACHE_FAMILIARS then
+        local amount_to_spawn = player:GetCollectibleNum(ITEMS.PASSIVE.HUSHY_FLY.id) * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
+        player:CheckFamiliar(FAMILIARS.HUSHY_FLY.variant, amount_to_spawn, modRNG)
+    end
+end
+
+function Alphabirth.initializeHushyFly(fly)
+    fly = fly:ToFamiliar()
+    fly:AddToOrbit(51)
+end
+
+function Alphabirth.updateHushyFly(fly)
+    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+    fly.OrbitDistance = Vector(50,50)
+	fly.Velocity = (fly:GetOrbitPosition(player.Position) - fly.Position) 
+    if player:GetLastActionTriggers() & ActionTriggers.ACTIONTRIGGER_SHOOTING == 0 then
+        fly.OrbitAngleOffset = fly.OrbitAngleOffset + 0.1
+    end
+end
+
+-------------------
+-- Lil Miner
+-------------------
+    function Alphabirth.evaluateLilMiner(player, flag)
+        if flag == CacheFlag.CACHE_FAMILIARS then
+            local amount_to_spawn = player:GetCollectibleNum(ITEMS.PASSIVE.LIL_MINER.id) * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
+            player:CheckFamiliar(FAMILIARS.LIL_MINER.variant, amount_to_spawn, modRNG)
+        end
+    end
+
+    function Alphabirth.initializeLilMiner(miner)
+        miner.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
+        miner.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_GROUND
+        miner:GetData().lilMinerData = {
+            digTime = nil,
+            digging = false,
+            pickupsSpawned = 0,
+            roomIDX = AlphaAPI.GAME_STATE.LEVEL:GetCurrentRoomIndex(),
+            cooldown = 0
+        }
+    end
+
+    local possible_pickups = { -- hacky way to make chests rarer.
+        PickupVariant.PICKUP_COIN,
+        PickupVariant.PICKUP_BOMB,
+        PickupVariant.PICKUP_KEY,
+        PickupVariant.PICKUP_COIN,
+        PickupVariant.PICKUP_BOMB,
+        PickupVariant.PICKUP_KEY,
+        PickupVariant.PICKUP_COIN,
+        PickupVariant.PICKUP_BOMB,
+        PickupVariant.PICKUP_KEY,
+        PickupVariant.PICKUP_COIN,
+        PickupVariant.PICKUP_BOMB,
+        PickupVariant.PICKUP_KEY,
+        PickupVariant.PICKUP_CHEST,
+        PickupVariant.PICKUP_LOCKEDCHEST
+    }
+
+    function Alphabirth.updateLilMiner(miner)
+        local data = miner:GetData()
+        local sprite = miner:GetSprite()
+        local room = AlphaAPI.GAME_STATE.ROOM
+
+        if data.roomIDX ~= AlphaAPI.GAME_STATE.LEVEL:GetCurrentRoomIndex() then
+            data.pickupsSpawned = 0
+            data.roomIDX = AlphaAPI.GAME_STATE.LEVEL:GetCurrentRoomIndex()
+        end
+
+        if room:IsClear() or not data.lilMinerData.digging then
+            if miner.Position:Distance(AlphaAPI.GAME_STATE.PLAYERS[1].Position) > 160 and room:GetAliveEnemiesCount() == 0 then
+                sprite:Play("DigDown")
+                if sprite:IsFinished("DigDown") then
+                    miner.Position = AlphaAPI.GAME_STATE.PLAYERS[1].Position
+                    sprite:Play("DigUp", true)
+                end
+            else
+                if not sprite:IsPlaying("Idle") and not sprite:IsPlaying("DigUp") then
+                    sprite:Play("Idle", true)
+                end
+            end
+        end
+
+        if not room:IsClear() and room:GetAliveEnemiesCount() > 0 then
+            if not data.lilMinerData.digTime and not data.lilMinerData.digging then
+                data.lilMinerData.digTime = random(120, 180)
+            end
+
+            if data.lilMinerData.digTime and (miner.FrameCount % data.lilMinerData.digTime == 0) then
+                sprite:Play("DigDown")
+                data.lilMinerData.digging = true
+                data.lilMinerData.digTime = nil
+            end
+
+            if data.lilMinerData.digging then
+                if sprite:IsFinished("DigDown") then
+                    miner.Position = room:FindFreeTilePosition(room:GetRandomPosition(100), -1)
+                    sprite:Play("DigUp", true)
+
+                    local nearEnts = Isaac.FindInRadius(miner.Position, 45, EntityPartition.ENEMY)
+                    for _, ent in ipairs(nearEnts) do
+                        local away = (ent.Position - miner.Position):Normalized()
+                        ent:AddVelocity(away * 13)
+                        ent:TakeDamage(AlphaAPI.GAME_STATE.PLAYERS[1].Damage * 1.6, 0, EntityRef(miner), 0)
+                    end
+
+                    if random(1, 100) < CONFIG.LITTLEMINER_FINDCHANCE + AlphaAPI.GAME_STATE.PLAYERS[1].Luck and data.lilMinerData.pickupsSpawned < CONFIG.LITTLEMINER_MAXPICKUPSPERROOM then
+                        Isaac.Spawn(
+                            EntityType.ENTITY_PICKUP,
+                            possible_pickups[random(1, #possible_pickups)],
+                            0,
+                            miner.Position,
+                            Vector(random(),random()),
+                            miner
+                        )
+                        data.lilMinerData.pickupsSpawned = data.lilMinerData.pickupsSpawned + 1
+                    end
+                    data.lilMinerData.digging = false
+                end
+            end
+        end
+    end
+
+-------------------
+-- Hive Head
+-------------------
+local HiveHead = {
+	OrbitalLimit = 6, --max fly orbitals at once
+	FlyAwaySpeed = 10, --the speed at which the flies fly away
+	CreepSpawnRate = 100, --adds x to the interval
+	CreepSpawnRadius = 1000, -- adds math.random(x) - (x/2) to the interval (or math.random(x/2) if its too low or negative)
+	OrbitDistance = Vector(50,50),
+	OrbitSpeed = 0.05,
+	OrbitLayer = 817,
+	HoneyColor = Color(1,1,1, 1, 219,167,0),
+}
+
+local function Lerp(first, second, percentage)
+	return (first + (second - first) * percentage)
+end
+
+function Alphabirth.addHiveFlies(ammount)
+	local data = api_mod.data.run
+
+	data.HiveHeadFlies = data.HiveHeadFlies ~= nil
+	and data.HiveHeadFlies < HiveHead.OrbitalLimit
+	and math.min(HiveHead.OrbitalLimit, data.HiveHeadFlies + ammount)
+
+	or data.HiveHeadFlies == nil
+	and math.min(HiveHead.OrbitalLimit, ammount)
+
+	or HiveHead.OrbitalLimit
+
+	--bleh
+	if HiveHead.OrbitalLimit < 0 then
+		HiveHead.OrbitalLimit = 0
+	end
+
+	AlphaAPI.GAME_STATE.PLAYERS[1]:CheckFamiliar(FAMILIARS.HIVE_HEAD.variant, data.HiveHeadFlies, modRNG)
+	return data.HiveHeadFlies
+end
+
+function Alphabirth.removeFlies()
+	local data = api_mod.data.run
+
+	data.HiveHeadFlies = 0
+
+	for k,v in ipairs(AlphaAPI.getRoomEntitiesByType(FAMILIARS.HIVE_HEAD)) do
+		v:GetData().FlyAway = true
+		local fam = v:ToFamiliar()
+		fam.OrbitLayer = 0
+		fam.Variant = -fam.Variant
+	end
+end
+
+function Alphabirth.getNewSpawnRate()
+	return HiveHead.CreepSpawnRate
+	+ math.max(
+		math.random(HiveHead.CreepSpawnRadius/2),
+		math.random(HiveHead.CreepSpawnRadius) - HiveHead.CreepSpawnRadius/2
+	)
+end
+
+
+
+local invisibleColor = Color(1,1,1, 0, 0,0,0)
+
+function Alphabirth.initializeHiveHead(fam)
+	fam:AddToOrbit(HiveHead.OrbitLayer)
+	fam.OrbitDistance = HiveHead.OrbitDistance
+	fam.OrbitSpeed = HiveHead.OrbitSpeed
+--	fam:RecalculateOrbitOffset(HiveHead.OrbitLayer,true)
+	fam:GetData().CreepSpawnRate = Alphabirth.getNewSpawnRate()
+end
+
+function Alphabirth.updateHiveHead(fam)
+	local playerPos = fam.Player.Position
+	local d = fam:GetData()
+
+	if d.FlyAway == nil then
+		fam.OrbitDistance = HiveHead.OrbitDistance
+		fam.OrbitSpeed = HiveHead.OrbitSpeed
+		fam.Velocity = fam:GetOrbitPosition(playerPos) - fam.Position
+
+
+	--[[BLOCKING THE SHOTS]]--
+		-- ah yes i love checking for every entity for every entity ! !!!
+		for k,ent in ipairs(AlphaAPI.getRoomEntitiesByType(EntityType.ENTITY_PROJECTILE)) do
+            if fam.Position:Distance(ent.Position) < 15 then
+                ent:Die()
+            end
+		end
+
+	--[[SPAWNING THE CREEP]]--
+		if fam.FrameCount % d.CreepSpawnRate == 0 then
+			local creep  = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.PLAYER_CREEP_BLACK, 0, fam.Position, VECTOR_ZERO, fam)
+			creep:SetColor(HiveHead.HoneyColor,-1,999,false,true)
+			d.CreepSpawnRate = Alphabirth.getNewSpawnRate()
+		end
+	else
+		local famPos = fam.Position
+		local topLeft = AlphaAPI.GAME_STATE.ROOM:GetTopLeftPos()
+		local bottomRight = AlphaAPI.GAME_STATE.ROOM:GetBottomRightPos()
+		local targetVelocity = ( famPos - playerPos ):Resized(HiveHead.FlyAwaySpeed)
+		fam.Velocity = Lerp(fam.Velocity, targetVelocity, 0.2)
+
+		local famPosX = famPos.X
+		local famPosY = famPos.Y
+
+		--if the orbital is hitting the borders of the room
+		if famPosX < topLeft.X
+		or famPosY < topLeft.Y
+		or famPosX > bottomRight.X
+		or famPosY > bottomRight.Y 	then
+		--start fading out
+			d.StartFade = true
+		end
+
+		if d.StartFade ~= nil then
+			--reduce the orbital's colors until almost invisible and then remove them
+			local s = fam:GetSprite()
+
+			s.Color = Color.Lerp(s.Color, invisibleColor, 0.04)
+
+			if s.Color.A <= 0.2 then
+				fam:Remove()
+			end
+		end
+	end
+end
+
+function Alphabirth:updateHiveHeadMod(fam)
+	return Alphabirth.updateHiveHead(fam)
+end
+
+--[[ debug
+mod:AddCallback(ModCallbacks.MC_EXECUTE_CMD ,function(_,cmd, params)
+	if cmd == "flies" then
+		Alphabirth.addHiveFlies(tonumber(params))
+	end
+end)
+--]]
+
+function Alphabirth.onHiveHeadPickup()
+	Alphabirth.addHiveFlies(1)
+end
+
+function Alphabirth.onHiveHeadRoomClear()
+	Alphabirth.addHiveFlies(1)
+end
+
+
+-------------------------------------------------------------------------------
+---- ENEMY LOGIC
+-------------------------------------------------------------------------------
+-------------------
+-- Meathead
+-------------------
+local vectab = {
+	[-1] = VECTOR_ZERO,
+	[0] = Vector(-1, 0),
+	[1] = Vector(0, -1),
+	[2] = Vector(1, 0),
+	[3] = Vector(0, 1),
+}
+vectab["NoDirection"] = vectab[-1]
+vectab["Side"] = vectab[2]
+
+vectab["Left"] = vectab[0]
+vectab["Up"] = vectab[1]
+vectab["Right"] = vectab[2]
+vectab["Down"] = vectab[3]
+
+local function vecToString(vec) --used for familiar directions!!
+	local x = vec.X
+	local y = vec.Y
+	local absX = math.abs(x)
+	local absY = math.abs(y)
+	if absX > absY then
+		if x > 0 then 		return "Side"
+		elseif x < 0 then	return "Left"
+		end
+	else
+		if y > 0 then 		return "Down"
+		elseif y < 0 then	return "Up"
+		end
+	end
+	return "Down"
+end
+
+function Alphabirth.meatheadUpdate(entity, data)
+    local sprite = entity:GetSprite()
+	if sprite:IsPlaying("Appear") then return end
+	local entitynpc = entity:ToNPC()
+	local d = entitynpc:GetData()
+	local target = entitynpc:GetPlayerTarget()
+
+    entitynpc.Target = target
+
+	local targetpos = target.Position
+	local selfpos = entitynpc.Position
+	local selfvel = entitynpc.Velocity
+	local align = targetpos - selfpos
+	if d.animation ~= nil then
+		sprite:Play(d.animation,false)
+		if sprite:IsEventTriggered("Shoot") then
+			local adjacentPosition = selfpos + d.direction:Resized(24)
+			local speed = d.direction:Resized(5)
+			local shockwave = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SHOCKWAVE, 0, adjacentPosition, speed, entitynpc):ToEffect()
+			local endpos = AlphaAPI.GAME_STATE.ROOM:GetLaserTarget(adjacentPosition, d.direction)
+			local distance = (endpos - adjacentPosition):Length()
+			shockwave:SetTimeout(math.floor(distance/5))
+			shockwave:SetRadii(6,6)
+			shockwave.Parent = entitynpc
+		end
+		if sprite:IsFinished(d.animation) then
+			d.animation = nil
+			d.direction = nil
+		end
+	else
+		entitynpc.Pathfinder:FindGridPath(entitynpc.Target.Position, 1, 0, entitynpc.Pathfinder:HasDirectPath())
+		if selfvel.Y > 0 then
+			entitynpc:AnimWalkFrame("WalkSide", "WalkDown", 2)
+		else
+			entitynpc:AnimWalkFrame("WalkSide", "WalkUp", 2)
+		end
+		if (math.abs(align.X) < 15) or (math.abs(align.Y) < 15) then
+			entitynpc.Pathfinder:Reset()
+			local animdir = vecToString(align)
+			d.direction = vectab[animdir]
+			sprite.FlipX = false
+			if animdir == "Left" then
+				animdir = "Side"
+				sprite.FlipX = true
+			end
+			local animation = "Slam"..animdir
+			sprite:Play(animation,true)
+			d.animation = animation
+		end
+	end
+end
+
+-------------------
+-- Wizeeker
+-------------------
+Alphabirth.FlameSpawnerVariant = 5930 --used to identify the flame in damage callback
+
+function Alphabirth.GetNearAxisPosition(pos, distance)
+	local room = AlphaAPI.GAME_STATE.ROOM
+	local farpos
+	local eligiblesides = {}
+	for dir=0, 3 do
+		local maxpos = room:GetLaserTarget(pos, vectab[dir])
+		local axispos = pos + vectab[dir] * distance
+		if maxpos:DistanceSquared(pos) > axispos:DistanceSquared(pos) then
+			table.insert(eligiblesides, axispos)
+		end
+	end
+	local resultpos = #eligiblesides > 0 and eligiblesides[math.random(#eligiblesides)] or Isaac.GetFreeNearPosition(pos, 100)
+	if resultpos:DistanceSquared(pos) < 10000 then
+		return Isaac.GetFreeNearPosition(resultpos, 80)
+	else
+		return resultpos
+	end
+end
+
+function Alphabirth.wizeekerUpdate(entity)
+	local d = entity:GetData()
+	local s = entity:GetSprite()
+	local vpos = entity.Position
+	local rng = entity:GetDropRNG()
+	local player = entity:ToNPC():GetPlayerTarget()
+	if d.init == nil then
+        entity.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
+		d.init = true
+		d.direction = "Down"
+		d.position = vpos
+		d.state = 0
+		s:Play("AppearDown",true)
+	end
+	entity.Velocity = d.position - vpos
+	--spawn state
+	if d.state == 0 then
+		local anim = "Appear"..d.direction
+		s:Play(anim,false)
+		if s:IsFinished(anim) then
+			d.state = 9
+		end
+	end
+	--vanish state
+	if d.state == 9 then
+		local anim = "Vanish"..d.direction
+		s:Play(anim,false)
+		if s:IsFinished(anim) then
+			d.state = 3
+			d.countdown = 60 + rng:RandomInt(30)
+			d.prevcolclass = entity.EntityCollisionClass
+			entity.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
+			entity.Visible = false
+		end
+	end
+	--invisible, idle state
+	if d.state == 3 then
+		if d.countdown and d.countdown > 0 then
+			d.countdown = d.countdown - 1
+		elseif rng:RandomInt(10) == 0 then
+			local ppos = player.Position
+			local pos = Alphabirth.GetNearAxisPosition(ppos + player.Velocity, 100)
+			if pos then
+				local targetpos = ppos - pos
+				--converting target position to a string
+				local vecstr = vecToString(targetpos)
+				if vecstr == "Side" then vecstr = "Right" end
+				--setting up direction
+				d.direction = vecstr
+				d.targetpos = vectab[d.direction]
+				--setting positions and making the boy visible
+				d.position = pos
+				entity.Position = pos
+				d.state = 4
+				entity.EntityCollisionClass = d.prevcolclass or EntityCollisionClass.ENTCOLL_ENEMIES
+				entity.Visible = true
+			end
+		end
+	end
+	if d.state == 4 then
+		local anim = "Appear"..d.direction
+		s:Play(anim,false)
+		if s:IsFinished(anim) then
+			d.state = 8
+		end
+	end
+	if d.state == 8 then
+		local anim = "Shoot"..d.direction
+		s:Play(anim,false)
+		if s:IsEventTriggered("Shoot") then
+			local flame = Isaac.Spawn(EntityType.ENTITY_EFFECT,EffectVariant.HOT_BOMB_FIRE,1,vpos + vectab[d.direction]:Resized(10) ,d.targetpos:Resized(10), entity):ToEffect()
+			flame.SpawnerVariant = Alphabirth.FlameSpawnerVariant
+			flame.EntityCollisionClass = EntityCollisionClass.ENTCOLL_PLAYERONLY
+			flame.GridCollisionClass = GridCollisionClass.COLLISION_SOLID
+			flame:SetSize(flame.Size,flame.SizeMulti,12)
+			SFX_MANAGER:Play(SOUNDS.CANDLE_BLOW, 0.35, 0, false, 1)
+		end
+		if s:IsFinished(anim) then
+			d.state = 9
+		end
+	end
+end
+
+-------------------
+-- Apparition
+-------------------
+function Alphabirth.apparitionUpdate(entity, data)
+    local sprite = entity:GetSprite()
+    if sprite:IsFinished("Full Appear") or sprite:IsFinished("Death") then
+        if sprite:IsFinished("Death") then
+            local pos = AlphaAPI.GAME_STATE.ROOM:FindFreePickupSpawnPosition(entity.Position, 1, true)
+            ENTITIES.LARGESACK:spawn(pos, VECTOR_ZERO, nil)
+        end
+
+        entity:Remove()
+    end
+end
+
+local largeSackDrops = {
+    PickupVariant.PICKUP_BOMB,
+    PickupVariant.PICKUP_COIN,
+    PickupVariant.PICKUP_HEART,
+    PickupVariant.PICKUP_LIL_BATTERY,
+    PickupVariant.PICKUP_KEY,
+    PickupVariant.PICKUP_LOCKEDCHEST,
+    PickupVariant.PICKUP_ETERNALCHEST,
+    PickupVariant.PICKUP_BOMBCHEST,
+    PickupVariant.PICKUP_GRAB_BAG
+}
+
+function Alphabirth.onLargeSackPickup(player, pickup)
+    for i = 1, random(4, 6) do
+        Isaac.Spawn(EntityType.ENTITY_PICKUP, largeSackDrops[random(1, #largeSackDrops)], 0, pickup.Position, RandomVector() * (random(100, 300) * 0.01), nil)
+    end
+
+    return true
+end
+
+function Alphabirth.apparitionDamage(entity, amount)
+    if amount > entity.HitPoints then
+        entity:GetSprite():Play("Death")
+        SFX_MANAGER:Play(SOUNDS.APPARITION_DEATH, CONFIG.APPARITION_VOLUME, 0, false, 1)
+        return false
+    end
+end
+
+function Alphabirth.apparitionAppear(entity)
+    entity:GetSprite():Play("Full Appear", true)
+    entity:AddEntityFlags(EntityFlag.FLAG_NO_STATUS_EFFECTS)
+end
+
+function Alphabirth.apparitionSpawnCheck()
+    if LOCKS.APPARITION:isUnlocked() then
+        if not api_mod.data.run.apparitionRooms then
+            api_mod.data.run.apparitionRooms = {}
+        end
+
+        local roomIndex = AlphaAPI.GAME_STATE.LEVEL:GetCurrentRoomIndex()
+
+    	local room = AlphaAPI.GAME_STATE.ROOM
+    	if not room:IsClear() and not api_mod.data.run.apparitionRooms[roomIndex] then
+    		local chance = random(1, 30000)
+    		if chance <= 1 + AlphaAPI.GAME_STATE.PLAYERS[1].Luck then
+    			local position = room:GetRandomPosition(0)
+    			local valid_position = room:FindFreePickupSpawnPosition(position, 1, true)
+                api_mod.data.run.apparitionRooms[roomIndex] = true
+    			return ENTITIES.APPARITION:spawn(valid_position, Vector(0, 0), nil)
+    		end
+    	end
+
+    	return false
+    end
+end
+
+-------------------------------------
+local invisible = Color(1,1,1, 0, 0,0,0)
+local function Lerp(first,second,percent)
+	return (first + (second - first)*percent)
+end
+
+function Alphabirth.checkEnemyFlames()
+	for k,v in ipairs(AlphaAPI.entities.effects) do
+		if v.SpawnerVariant == Alphabirth.FlameSpawnerVariant then
+
+			v.Velocity = v.Velocity * 0.96
+
+			if v.FrameCount > 150 then
+				v.EntityCollisionClass = 0
+
+				local s = v:GetSprite()
+				local resultScale = Lerp(s.Scale, VECTOR_ZERO, 0.06)
+				s.Scale = resultScale
+				s.Color = Color.Lerp(s.Color, invisible, 0.06)
+				if resultScale.X < 0.1 then
+					v:Remove()
+				end
+			end
+		end
+	end
+end
+
+-------------------
+-- Planetoid
+-------------------
+function Alphabirth.planetoidAppear(entity, data)
+    data.frameOffset = random(1, 1000)
+    data.direction = -1
+    if random(1, 2) == 1 then data.direction = 1 end
+    entity.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
+    entity.EntityCollisionClass = EntityCollisionClass.ENTCOLL_PLAYEROBJECTS
+end
+
+function Alphabirth.planetoidUpdate(entity, data, sprite)
+    if entity.State ~= NpcState.STATE_APPEAR then
+        if AlphaAPI.GAME_STATE.ROOM:IsClear() and entity.SubType == 0 then
+            sprite:Play("Death")
+            entity.Velocity = Vector(0, 0)
+        end
+
+        if sprite:IsFinished("Death") then
+            entity:Remove()
+        end
+
+        if not sprite:IsPlaying("Death") then
+            local target = entity:GetPlayerTarget().Position
+            local frame = entity.FrameCount + data.frameOffset
+
+            local xvel = math.cos(((frame * data.direction) / 20) + math.pi) * 50
+            local yvel = math.sin(((frame * data.direction) / 20) + math.pi) * 50
+
+            local direction = Vector(target.X - xvel, target.Y - yvel) - entity.Position
+
+            if direction:Length() > CONFIG.PLANETOID_MAXSPEED then
+                direction:Resize(CONFIG.PLANETOID_MAXSPEED)
+            end
+
+            entity.Velocity = direction
+        end
+    end
+end
+
+function Alphabirth.planetoidTakeDamage(entity, amount, flags, source)
+    if entity.SubType ~= 1 then
+        return false
+    end
+end
+
+---------------------------------------
+-- Brimstone Host Logic
+---------------------------------------
+function Alphabirth.onBrimstoneHostUpdate(host, data, host_sprite)
+    local player = host:GetPlayerTarget()
+    local host_sprite = host:GetSprite()
+    if host_sprite:IsEventTriggered("Shoot") then
+        local player_saved_position = data[0]
+        local direction_vector = (player_saved_position - host.Position):Normalized()
+        local direction_angle = direction_vector:GetAngleDegrees()
+        local brimstone_laser = EntityLaser.ShootAngle(1, host.Position, direction_angle, 15, Vector(0,-10), host)
+        brimstone_laser.DepthOffset = 200
+
+        AlphaAPI.callDelayed(function(pos)
+            local projectiles = AlphaAPI.getRoomEntitiesByType(EntityType.ENTITY_PROJECTILE)
+            for _, projectile in ipairs(projectiles) do
+                Isaac.DebugString("Found a projectile!")
+                if projectile.Position:Distance(pos) < 20 then
+                    projectile:Remove()
+                end
+            end
+        end, 2, false, host.Position)
+    elseif host.StateFrame == 20 then -- Attack the position the player was in earlier.
+        data[0] = player.Position
+    end
+end
+
+---------------------------------------
+-- Star Gazer logic
+---------------------------------------
+local laserOffset = Vector(0,2)
+local spriteOffset = Vector(2, -20)
+local starGazerOffset = Vector(2, 8)
+globalStargazerCountdown = 0
+
+function Alphabirth.onLaserUpUpdate(laserUp, data, sprite)
+    if sprite:IsFinished("Start") then
+        sprite:Play("Loop", true)
+    end
+    if sprite:IsFinished("End") then
+        laserUp:Remove()
+    end
+	local parent = data.parent
+	laserUp.Position = parent.Position + laserOffset
+    laserUp.Velocity = parent.Velocity
+end
+
+function Alphabirth.onLaserDownUpdate(laserDown, _, sprite)
+    local sprite = laserDown:GetSprite()
+    if sprite:IsFinished("Start") then
+        sprite:Play("Loop", true)
+    end
+    if sprite:IsFinished("End") then
+        laserDown:Remove()
+    end
+    if not laserDown:IsDead() then
+        local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+        if (player.Position - laserDown.Position):LengthSquared() < 1000 then
+            player:TakeDamage(1, 0, EntityRef(laserDown), 1)
+        end
+    end
+end
+
+
+function Alphabirth.onStarGazerUpdate(starGazer, data, sprite)
+    local player = starGazer:GetPlayerTarget()
+	local ppos = player.Position
+	local vpos = starGazer.Position
+
+	local diff = ppos - vpos
+	local ai = starGazer.Pathfinder
+
+    if not data.initialized then
+        data.initialized = true
+        sprite:Play("Idle", true)
+        data.attackCountdown = 50
+        data.evadeCooldown = 40
+        data.attacking = false
+        data.accel = Vector(0, 0)
+        starGazer.HitPoints = 30
+        starGazer.SpriteOffset = starGazerOffset
+    end
+
+    if not data.attacking then
+        if data.evadeCooldown < 1 then
+            local dir = diff:Normalized()
+            starGazer:AddVelocity(-dir * (random(100, 300) * 0.01))
+            data.evadeCooldown = random(7, 25)
+        end
+
+        if not sprite:IsPlaying("Idle") then
+            sprite:Play("Idle", true)
+        end
+    end
+
+    if globalStargazerCountdown == 0 and data.attackCountdown < 0 and not data.attacking and random(1, 50) == 1 then
+        data.attacking = true
+		globalStargazerCountdown = 50
+        sprite:Play("Attack", true)
+        SFX_MANAGER:Play(SoundEffect.SOUND_SKIN_PULL, 1.5, 0, false, 1)
+    end
+
+    if sprite:IsPlaying("Attack") then
+        if sprite:IsEventTriggered("Shoot") then
+            data.attackPos = ppos
+
+			local laser = Isaac.Spawn(741, 3, 1, starGazer.Position+starGazer.Velocity, starGazer.Velocity, starGazer)
+            data.laserUp = laser
+
+            laser:ClearEntityFlags(EntityFlag.FLAG_APPEAR)
+            laser.GridCollisionClass = GridCollisionClass.COLLISION_NONE
+            laser.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
+            laser:GetData().parent = starGazer
+            laser:GetSprite():Play("Start")
+            laser.SpriteOffset = spriteOffset
+
+            SFX_MANAGER:Play(SoundEffect.SOUND_GHOST_ROAR, 1, 0, false, 1)
+		end
+    end
+
+    if sprite:IsFinished("Attack") then
+        sprite:Play("Idle", true)
+        data.attacking = false
+        data.attackCountdown = 100
+    end
+
+    if data.laserUp then
+        if data.laserUp.FrameCount == 11 then
+			local laser = Isaac.Spawn(741, 3, 2, data.attackPos, VECTOR_ZERO, starGazer)
+            data.laserDown =laser
+
+            laser:ClearEntityFlags(EntityFlag.FLAG_APPEAR)
+            laser.GridCollisionClass = GridCollisionClass.COLLISION_NONE
+            laser.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
+            laser:GetSprite():Play("Start")
+			laser.Velocity = (ppos - data.laserDown.Position):Resized(5 * AlphaAPI.GAME_STATE.PLAYERS[1].MoveSpeed)
+
+        end
+
+
+        if sprite:IsEventTriggered("ShootEnd") then
+            data.laserUp:GetSprite():Play("End")
+            if data.laserDown then
+                data.laserDown:GetSprite():Play("End")
+            end
+        end
+
+    end
+
+    if data.laserDown then
+        data.laserDown.Velocity = Lerp(
+			data.laserDown.Velocity,
+			(ppos - data.laserDown.Position):Resized(5 * AlphaAPI.GAME_STATE.PLAYERS[1].MoveSpeed),
+			0.6
+		)
+    end
+
+
+    if starGazer:IsDead() then
+        if data.laserUp then
+            data.laserUp:GetSprite():Play("End")
+            if data.laserDown then
+                data.laserDown:GetSprite():Play("End")
+            end
+        end
+
+        sprite:Play("Death")
+    end
+
+    data.attackCountdown = data.attackCountdown - 1
+    data.evadeCooldown = data.evadeCooldown - 1
+end
+
 
 local function api_warn()
     if not AlphaAPI then

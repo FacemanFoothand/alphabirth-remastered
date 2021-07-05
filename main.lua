@@ -656,13 +656,6 @@ function Alphabirth.itemSetup()
         ENDOR_HEAD_COSTUME = Isaac.GetCostumeIdByPath("gfx/animations/costumes/players/animation_character_endorhead.anm2")
     }
 
-
-	-------------
-	-- Actives --
-	-------------
-	ITEMS.ACTIVE.DEBUG = api_mod:registerItem("Debug")
-	ITEMS.ACTIVE.DEBUG:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerDebug)
-
 	--------------
 	-- Passives --
 	--------------
@@ -1530,13 +1523,6 @@ local BOTD_BLACKLIST = {
 
 -- Active Item Function Definitions
 do
-	----------------------------------------
-	-- Debug Logic
-	----------------------------------------
-	function Alphabirth.triggerDebug()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		ENTITIES.GLITCH_PICKUP:spawn(player.Position, player.Velocity, player)
-	end
 
 	-------------------------------------------------------------------------------
 	---- PACK 2

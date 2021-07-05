@@ -4431,66 +4431,6 @@ function Alphabirth.entityTakeDamage(entity, damage_amount, damage_flags, damage
 			end
 		end
 
-		if player:HasCollectible(ITEMS.PASSIVE.WHITE_CANDLE.id)
-		and not hasProtection(player, damage_flags, damage_source) then
-			local num_lasers = random(2, 8)
-			for i = 1, num_lasers do
-				local entities = AlphaAPI.entities.all
-				local chance_to_hit = random(1, 2)
-				if chance_to_hit == 1 and #entities then
-					local vulnerable_entities = {}
-					for _, entity in ipairs(entities) do
-						if entity:IsVulnerableEnemy() then
-							vulnerable_entities[#vulnerable_entities + 1] = entity
-						end
-					end
-
-					if #vulnerable_entities then
-						local entity = nil
-						if #vulnerable_entities ~= 1 then
-							entity = vulnerable_entities[random(1, #vulnerable_entities)]
-						else
-							entity = vulnerable_entities[1]
-						end
-
-						local position_to_hit = entity.Position
-						Isaac.Spawn(
-							EntityType.ENTITY_EFFECT,
-							EffectVariant.CRACK_THE_SKY,
-							0,              -- Subtype
-							position_to_hit,
-							Vector(0, 0),   -- Velocity
-							player          -- Spawner
-						)
-					end
-				else
-					Isaac.Spawn(
-						EntityType.ENTITY_EFFECT,
-						EffectVariant.CRACK_THE_SKY,
-						0,              -- Subtype
-						AlphaAPI.GAME_STATE.ROOM:GetRandomPosition(0),
-						Vector(0, 0),   -- Velocity
-						player          -- Spawner
-					)
-				end
-			end
-		end
-
-
-
-		if player:HasCollectible(ITEMS.PASSIVE.FURNACE.id)
-		and not hasProtection(player, damage_flags, damage_source) then
-			for _, direction in ipairs(direction_list) do
-				Isaac.Spawn(
-					EntityType.ENTITY_EFFECT,
-					EffectVariant.RED_CANDLE_FLAME,
-					0,
-					player.Position,
-					direction * (10 * player.ShotSpeed),
-					player
-				)
-			end
-		end
 	else
 
 

@@ -655,11 +655,6 @@ function Alphabirth.itemSetup()
 	-- Passives --
 	--------------
 
-	-- Gives the player more luck the fewer consumables they have
-	ITEMS.PASSIVE.BEGGARS_CUP = api_mod:registerItem("Beggar's Cup", "gfx/animations/costumes/accessories/animation_costume_beggarscup.anm2")
-	ITEMS.PASSIVE.BEGGARS_CUP:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleBeggarsCup)
-	ITEMS.PASSIVE.BEGGARS_CUP:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateBeggarsCup)
-
 	-- Shoots fires in all directions on damage taken
 	ITEMS.PASSIVE.FURNACE = api_mod:registerItem("Furnace", "gfx/animations/costumes/accessories/animation_costume_furnace.anm2")
 
@@ -2128,38 +2123,6 @@ do
 	            player.MoveSpeed = player.MoveSpeed + 0.2
 	        end
 	    end
-	end
-
-	----------------------------------------
-	-- Beggar's Cup Logic
-	----------------------------------------
-	local beggarscup_luck_modifier = 0
-	function Alphabirth.evaluateBeggarsCup(player, cache_flag)
-        if(cache_flag == CacheFlag.CACHE_LUCK) then
-            player.Luck = player.Luck + beggarscup_luck_modifier
-        end
-	end
-
-	function Alphabirth.handleBeggarsCup(player)
-        local coins = player:GetNumCoins()
-        local total = coins / 10
-
-		-- Only run if total has changed
-		if total ~= beggarscup_previous_total then
-
-			beggarscup_previous_total = total
-			local luck_threshold = 5
-            local luck_minimum = 0
-
-			beggarscup_luck_modifier = luck_threshold - total
-
-            if beggarscup_luck_modifier < luck_minimum then
-                beggarscup_luck_modifier = luck_minimum
-            end
-
-			player:AddCacheFlags(CacheFlag.CACHE_LUCK)
-            player:EvaluateItems()
-		end
 	end
 
 	----------------------------------------

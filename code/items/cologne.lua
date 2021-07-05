@@ -23,8 +23,8 @@ function COLOGNE.setup(Alphabirth)
 	COLOGNE.AB_REF = Alphabirth
 	Alphabirth.ITEMS.PASSIVE.COLOGNE = Alphabirth.API_MOD:registerItem(COLOGNE.NAME, COLOGNE.COSTUME)
 	COLOGNE.ITEM_REF = Alphabirth.ITEMS.PASSIVE.COLOGNE
-	COLOGNE.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handle)
-	COLOGNE.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluate)
+	COLOGNE.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, COLOGNE.handle)
+	COLOGNE.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, COLOGNE.evaluate)
 end
 
 function COLOGNE.handle(player)
@@ -41,13 +41,13 @@ function COLOGNE.handle(player)
 end
 
 function COLOGNE.evaluate(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_TEARCOLOR then
-			player.TearColor = Color(
-                                    0.867, 0.627, 0.867,    -- RGB
-									1,                      -- Alpha
-									0, 0, 0                 -- RGB Offset
-                                )
-		end
+	if cache_flag == CacheFlag.CACHE_TEARCOLOR then
+		player.TearColor = Color(
+								0.867, 0.627, 0.867,    -- RGB
+								1,                      -- Alpha
+								0, 0, 0                 -- RGB Offset
+							)
+	end
 end
 
 return COLOGNE

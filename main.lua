@@ -663,11 +663,6 @@ function Alphabirth.itemSetup()
 	ITEMS.ACTIVE.DEBUG = api_mod:registerItem("Debug")
 	ITEMS.ACTIVE.DEBUG:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerDebug)
 
-	-- Fire a green fire and poison nearby enemies
-	ITEMS.ACTIVE.GREEN_CANDLE = api_mod:registerItem("Green Candle")
-	ITEMS.ACTIVE.GREEN_CANDLE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerGreenCandle)
-	ITEMS.ACTIVE.GREEN_CANDLE:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.updateGreenCandle)
-
 	-- Teleport you to the farthest tear away from you
 	ITEMS.ACTIVE.TEARLEPORTER = api_mod:registerItem("Tearleporter")
 	ITEMS.ACTIVE.TEARLEPORTER:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerTearleporter)
@@ -1706,64 +1701,6 @@ do
 	        end
 	    end
 	    return true
-	end
-
-	----------------------------------------
-	-- Green Candle Logic
-	----------------------------------------
-	local holding_green_candle = false
-	local green_candle_poison_range = 120
-	local green_candle_poison_duration = 120
-	function Alphabirth.triggerGreenCandle()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    player:AnimateCollectible(ITEMS.ACTIVE.GREEN_CANDLE.id, "LiftItem", "PlayerPickup")
-	    holding_green_candle = true
-	end
-
-	function Alphabirth.updateGreenCandle()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    if holding_green_candle == true then
-	        local direction = player:GetFireDirection()
-	        local direction_vector
-	        -- Get head direction vector
-	        if direction == 0 then      -- Left
-	            direction_vector = Vector(-1, 0)
-	        elseif direction == 1 then  -- Up
-	            direction_vector = Vector(0, -1)
-	        elseif direction == 2 then  -- Right
-	            direction_vector = Vector(1, 0)
-	        elseif direction == 3 then  -- Down
-	            direction_vector = Vector(0, 1)
-	        end
-
-	        if direction_vector ~= nil then
-	            -- Shoot the flame
-	            firevelocity = (direction_vector * player.ShotSpeed) * 28
-	            ENTITIES.GREEN_CANDLE:spawn(
-	                player.Position,
-	                firevelocity,
-	                player
-				)
-
-	            player:AnimateCollectible(ITEMS.ACTIVE.GREEN_CANDLE.id, "HideItem", "PlayerPickup")
-	            holding_green_candle = false
-	        end
-	    end
-	    -- Poison effect
-	    for i,entity in ipairs(AlphaAPI.entities.all) do
-	    	if entity.Variant == ENTITIES.GREEN_CANDLE.variant and entity.SubType == ENTITIES.GREEN_CANDLE.subtype then
-	    		for _, enemy in ipairs(AlphaAPI.entities.enemies) do
-		            local distance_to_enemy = entity.Position:Distance(enemy.Position)
-		            if distance_to_enemy < green_candle_poison_range then
-		                enemy:AddPoison(
-		                    EntityRef(player),
-		                    green_candle_poison_duration,
-		                    player.Damage
-		                )
-		            end
-			    end
-	    	end
-	    end
 	end
 
 	-------------------------------------------------------------------------------
@@ -7237,17 +7174,6 @@ function Alphabirth.onStarGazerUpdate(starGazer, data, sprite)
     data.attackCountdown = data.attackCountdown - 1
     data.evadeCooldown = data.evadeCooldown - 1
 end
-
-
-local function api_warn()
-    if not AlphaAPI then
-		Isaac.RenderScaledText("AlphaAPI is required for Alphabirth: Mom's Closet to run!", 50, 50, 0.5, 0.5, 255, 255, 255, 1)
-		Isaac.RenderScaledText("You can find it on the workshop + the link is contained ", 50, 60, 0.5, 0.5, 255, 255, 255, 1)
-		Isaac.RenderScaledText("within this mod's main.lua.", 50, 70, 0.5, 0.5, 255, 255, 255, 1)
-	end
-end
-
-mod:AddCallback(ModCallbacks.MC_POST_RENDER, api_warn)
 
 -------------------
 --  API Init

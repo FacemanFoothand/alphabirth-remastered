@@ -38,12 +38,12 @@ function cool_bean.trigger()
 		end
 	end
 
-	Isaac.Spawn(ENTITIES.ICE_FART.id,
-				ENTITIES.ICE_FART.variant,  -- Variant
-				0,                          -- Subtype
+	Isaac.Spawn(cool_bean.AB_REF.ENTITIES.ICE_FART.id,
+				cool_bean.AB_REF.ENTITIES.ICE_FART.variant,  	-- Variant
+				0,                          					-- Subtype
 				player.Position,
-				utils.VECTOR_ZERO,          -- Velocity
-				player)                     -- Spawner
+				utils.VECTOR_ZERO,          					-- Velocity
+				player)                    				 		-- Spawner
 	cool_bean.AB_REF.SFX_MANAGER:Play(SoundEffect.SOUND_FART,1.0,0,false,1.0)
 end
 

@@ -23,7 +23,8 @@ function COLOGNE.setup(Alphabirth)
 	COLOGNE.AB_REF = Alphabirth
 	Alphabirth.ITEMS.PASSIVE.COLOGNE = Alphabirth.API_MOD:registerItem(COLOGNE.NAME, COLOGNE.COSTUME)
 	COLOGNE.ITEM_REF = Alphabirth.ITEMS.PASSIVE.COLOGNE
-	Alphabirth.MOD:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, COLOGNE.entityDamage)
+	COLOGNE.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handle)
+	COLOGNE.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluate)
 end
 
 function COLOGNE.handle(player)

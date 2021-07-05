@@ -561,7 +561,6 @@ function Alphabirth.miscEntityHandling()
     ENTITY_FLAGS = {
 		DOUBLE_DAMAGE = AlphaAPI.createFlag(),
 		KINDNESS = AlphaAPI.createFlag(),
-		MUTANT_TEAR = AlphaAPI.createFlag(),
         VOID = AlphaAPI.createFlag(),
         ABYSS_SHOT = AlphaAPI.createFlag(),
         QUILL_FEATHER_SHOT = AlphaAPI.createFlag(),
@@ -655,8 +654,6 @@ function Alphabirth.itemSetup()
 	--------------
 	-- Passives --
 	--------------
-	-- Has a chance to spawn a bomb when you hit an enemy
-	ITEMS.PASSIVE.MUTANT_FETUS = api_mod:registerItem("Mutant Fetus", "gfx/animations/costumes/accessories/animation_costume_mutantfetus.anm2")
 
     -- Bombs become Bugged Bombs, which have tear flags randomly applied to them.
 	LOCKS.BUGGED_BOMBS = api_mod:createUnlock("alphaBuggedBombs")
@@ -4552,28 +4549,9 @@ function Alphabirth.entityTakeDamage(entity, damage_amount, damage_flags, damage
 			end
 		end
 	else
-		if AlphaAPI.hasFlag(entity, ENTITY_FLAGS.DOUBLE_DAMAGE) then
-			entity.HitPoints = entity.HitPoints - damage_amount
-		end
 
-		if AlphaAPI.hasFlag(damage_source, ENTITY_FLAGS.MUTANT_TEAR)
-		and entity:IsActiveEnemy(false) then
-			AlphaAPI.clearFlag(damage_source, ENTITY_FLAGS.MUTANT_TEAR)
-			local bomb_roll = random(1, 200)
-			if bomb_roll == 1 then
-				Isaac.Spawn(
-					EntityType.ENTITY_BOMBDROP,
-					BombVariant.BOMB_SUPERTROLL,
-					0,
-					entity.Position,
-					Vector(0, 0),
-					player
-				)
-			else
-				local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-				player:FireBomb( entity.Position, Vector(0, 0) )
-			end
-		end
+
+
 	end
 
 	local ply = entity:ToPlayer()
@@ -4598,17 +4576,6 @@ end
 do
 	-- Mutant Fetus Tear Chance
 	function Alphabirth.tearAppear(entity)
-		entity = entity:ToTear()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		if entity.SpawnerType == EntityType.ENTITY_PLAYER then
-			if player:HasCollectible(ITEMS.PASSIVE.MUTANT_FETUS.id) and AlphaAPI.getLuckRNG(7, 3) and entity.Variant ~= TearVariant.CHAOS_CARD then
-				AlphaAPI.addFlag(entity, ENTITY_FLAGS.MUTANT_TEAR)
-				local tear_sprite = entity:GetSprite()
-				tear_sprite:Load("gfx/animations/effects/animation_tears_mutantfetus.anm2", true)
-				tear_sprite:Play("Idle")
-				tear_sprite:LoadGraphics()
-			end
-		end
 
 		local tear = entity:ToTear()
 		if tear.SpawnerType and tear.SpawnerType == EntityType.ENTITY_PLAYER and tear.Variant ~= TearVariant.CHAOS_CARD then

@@ -54,6 +54,10 @@ function SATANS_CONTRACT.entityDamage(entity, damage_amount, damage_flags, damag
 				player:Die()
 			end
 		end
+	else
+		if AlphaAPI.hasFlag(entity, ENTITY_FLAGS.DOUBLE_DAMAGE) then
+			entity.HitPoints = entity.HitPoints - damage_amount
+		end
 	end
 end
 

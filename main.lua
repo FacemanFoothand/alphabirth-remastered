@@ -80,7 +80,6 @@ local stage_number
 local frame
 local room_frame
 local sfx_manager
-local beggarscup_previous_total
 
 -- Miscellaneous variables
 Alphabirth.PLAYER_TYPES.NULL = Isaac.GetPlayerTypeByName("_NULL")
@@ -561,7 +560,6 @@ function Alphabirth.miscEntityHandling()
     ENTITY_FLAGS = {
 		DOUBLE_DAMAGE = AlphaAPI.createFlag(),
 		KINDNESS = AlphaAPI.createFlag(),
-		MUTANT_TEAR = AlphaAPI.createFlag(),
         VOID = AlphaAPI.createFlag(),
         ABYSS_SHOT = AlphaAPI.createFlag(),
         QUILL_FEATHER_SHOT = AlphaAPI.createFlag(),
@@ -653,27 +651,6 @@ function Alphabirth.itemSetup()
 	--------------
 	-- Passives --
 	--------------
-	-- Has a chance to spawn a bomb when you hit an enemy
-	ITEMS.PASSIVE.MUTANT_FETUS = api_mod:registerItem("Mutant Fetus", "gfx/animations/costumes/accessories/animation_costume_mutantfetus.anm2")
-
-    -- Bombs become Bugged Bombs, which have tear flags randomly applied to them.
-	LOCKS.BUGGED_BOMBS = api_mod:createUnlock("alphaBuggedBombs")
-    ITEMS.PASSIVE.BUGGED_BOMBS = api_mod:registerItem("Bugged Bombs")
-    ITEMS.PASSIVE.BUGGED_BOMBS:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.pickupBuggedBombs)
-	ITEMS.PASSIVE.BUGGED_BOMBS:addLock(LOCKS.BUGGED_BOMBS)
-
-	-- Chance to charm nearby enemies
-	ITEMS.PASSIVE.COLOGNE = api_mod:registerItem("Cologne", "gfx/animations/costumes/accessories/animation_costume_cologne.anm2")
-	ITEMS.PASSIVE.COLOGNE:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleCologne)
-	ITEMS.PASSIVE.COLOGNE:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateCologne)
-
-	-- Gives the player more luck the fewer consumables they have
-	ITEMS.PASSIVE.BEGGARS_CUP = api_mod:registerItem("Beggar's Cup", "gfx/animations/costumes/accessories/animation_costume_beggarscup.anm2")
-	ITEMS.PASSIVE.BEGGARS_CUP:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleBeggarsCup)
-	ITEMS.PASSIVE.BEGGARS_CUP:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateBeggarsCup)
-
-	-- Shoots fires in all directions on damage taken
-	ITEMS.PASSIVE.FURNACE = api_mod:registerItem("Furnace", "gfx/animations/costumes/accessories/animation_costume_furnace.anm2")
 
 	-- Pseudobulbar Affect
 	ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT = api_mod:registerItem("Pseudobulbar Affect", "gfx/animations/costumes/accessories/animation_costume_pseudobulbaraffect.anm2")
@@ -1235,8 +1212,6 @@ end
 -- Setup Function for Miscellaneous Callbacks
 function Alphabirth.setupMiscCallbacks()
 	api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.entityTakeDamage)
-    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.bugBombsAppear, EntityType.ENTITY_BOMBDROP)
-    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.bugBombsUpdate, EntityType.ENTITY_BOMBDROP)
 	api_mod:addCallback(AlphaAPI.Callbacks.PLAYER_DIED, Alphabirth.handleOldController)
 	api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_DEATH, Alphabirth.handleGraphicsError)
 
@@ -1317,10 +1292,7 @@ end
 
 function Alphabirth.killHush()
 	local player_type = AlphaAPI.GAME_STATE.PLAYERS[1]:GetPlayerType()
-	if player_type == character_null and not LOCKS.BUGGED_BOMBS:isUnlocked() then
-		AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/achievement/achievement_buggedbombs.png")
-		LOCKS.BUGGED_BOMBS:setUnlocked(true)
-	end
+
 	if player_type == endor_type and not LOCKS.ENDOR_HAT:isUnlocked() then
 		AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/Achievement/achievement_endorshat.png")
 		LOCKS.ENDOR_HAT:setUnlocked(true)
@@ -1989,36 +1961,6 @@ end
 -- Passive Item Function Definitions
 do
 	----------------------------------------
-	-- Cologne Logic
-	----------------------------------------
-	-- Change tear color for Cologne
-	function Alphabirth.evaluateCologne(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_TEARCOLOR then
-			player.TearColor = Color(
-                                    0.867, 0.627, 0.867,    -- RGB
-									1,                      -- Alpha
-									0, 0, 0                 -- RGB Offset
-                                )
-		end
-	end
-
-	-- Charm nearby enemies
-	local cologne_charm_duration = 100
-	local cologne_charm_chance = 100
-	function Alphabirth.handleCologne(player)
-	    local max_charm_distance = 120 * math.max( player.SpriteScale.X, player.SpriteScale.Y )
-        for _, entity in ipairs(AlphaAPI.entities.all) do
-            if player.Position:Distance(entity.Position) < max_charm_distance
-            and entity:IsVulnerableEnemy() then
-                local charm_roll = random(1, cologne_charm_chance)
-                if charm_roll == 1 then
-                    entity:AddCharmed(EntityRef(player), cologne_charm_duration)
-                end
-            end
-        end
-	end
-
-	----------------------------------------
 	-- Pseudobulbar Affect Logic
 	----------------------------------------
 	function Alphabirth.handlePseudobulbarAffect(player)
@@ -2040,11 +1982,6 @@ do
         end
 	end
 
-    -- Bugged Bombs Pickup Logic
-    function Alphabirth.pickupBuggedBombs(player)
-        player:AddBombs(5)
-    end
-
 	----------------------------------------
 	-- Chastity Logic
 	----------------------------------------
@@ -2060,38 +1997,6 @@ do
 	            player.MoveSpeed = player.MoveSpeed + 0.2
 	        end
 	    end
-	end
-
-	----------------------------------------
-	-- Beggar's Cup Logic
-	----------------------------------------
-	local beggarscup_luck_modifier = 0
-	function Alphabirth.evaluateBeggarsCup(player, cache_flag)
-        if(cache_flag == CacheFlag.CACHE_LUCK) then
-            player.Luck = player.Luck + beggarscup_luck_modifier
-        end
-	end
-
-	function Alphabirth.handleBeggarsCup(player)
-        local coins = player:GetNumCoins()
-        local total = coins / 10
-
-		-- Only run if total has changed
-		if total ~= beggarscup_previous_total then
-
-			beggarscup_previous_total = total
-			local luck_threshold = 5
-            local luck_minimum = 0
-
-			beggarscup_luck_modifier = luck_threshold - total
-
-            if beggarscup_luck_modifier < luck_minimum then
-                beggarscup_luck_modifier = luck_minimum
-            end
-
-			player:AddCacheFlags(CacheFlag.CACHE_LUCK)
-            player:EvaluateItems()
-		end
 	end
 
 	----------------------------------------
@@ -4367,89 +4272,10 @@ function Alphabirth.entityTakeDamage(entity, damage_amount, damage_flags, damage
 			end
 		end
 
-		if player:HasCollectible(ITEMS.PASSIVE.WHITE_CANDLE.id)
-		and not hasProtection(player, damage_flags, damage_source) then
-			local num_lasers = random(2, 8)
-			for i = 1, num_lasers do
-				local entities = AlphaAPI.entities.all
-				local chance_to_hit = random(1, 2)
-				if chance_to_hit == 1 and #entities then
-					local vulnerable_entities = {}
-					for _, entity in ipairs(entities) do
-						if entity:IsVulnerableEnemy() then
-							vulnerable_entities[#vulnerable_entities + 1] = entity
-						end
-					end
-
-					if #vulnerable_entities then
-						local entity = nil
-						if #vulnerable_entities ~= 1 then
-							entity = vulnerable_entities[random(1, #vulnerable_entities)]
-						else
-							entity = vulnerable_entities[1]
-						end
-
-						local position_to_hit = entity.Position
-						Isaac.Spawn(
-							EntityType.ENTITY_EFFECT,
-							EffectVariant.CRACK_THE_SKY,
-							0,              -- Subtype
-							position_to_hit,
-							Vector(0, 0),   -- Velocity
-							player          -- Spawner
-						)
-					end
-				else
-					Isaac.Spawn(
-						EntityType.ENTITY_EFFECT,
-						EffectVariant.CRACK_THE_SKY,
-						0,              -- Subtype
-						AlphaAPI.GAME_STATE.ROOM:GetRandomPosition(0),
-						Vector(0, 0),   -- Velocity
-						player          -- Spawner
-					)
-				end
-			end
-		end
-
-
-
-		if player:HasCollectible(ITEMS.PASSIVE.FURNACE.id)
-		and not hasProtection(player, damage_flags, damage_source) then
-			for _, direction in ipairs(direction_list) do
-				Isaac.Spawn(
-					EntityType.ENTITY_EFFECT,
-					EffectVariant.RED_CANDLE_FLAME,
-					0,
-					player.Position,
-					direction * (10 * player.ShotSpeed),
-					player
-				)
-			end
-		end
 	else
-		if AlphaAPI.hasFlag(entity, ENTITY_FLAGS.DOUBLE_DAMAGE) then
-			entity.HitPoints = entity.HitPoints - damage_amount
-		end
 
-		if AlphaAPI.hasFlag(damage_source, ENTITY_FLAGS.MUTANT_TEAR)
-		and entity:IsActiveEnemy(false) then
-			AlphaAPI.clearFlag(damage_source, ENTITY_FLAGS.MUTANT_TEAR)
-			local bomb_roll = random(1, 200)
-			if bomb_roll == 1 then
-				Isaac.Spawn(
-					EntityType.ENTITY_BOMBDROP,
-					BombVariant.BOMB_SUPERTROLL,
-					0,
-					entity.Position,
-					Vector(0, 0),
-					player
-				)
-			else
-				local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-				player:FireBomb( entity.Position, Vector(0, 0) )
-			end
-		end
+
+
 	end
 
 	local ply = entity:ToPlayer()
@@ -4474,17 +4300,6 @@ end
 do
 	-- Mutant Fetus Tear Chance
 	function Alphabirth.tearAppear(entity)
-		entity = entity:ToTear()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		if entity.SpawnerType == EntityType.ENTITY_PLAYER then
-			if player:HasCollectible(ITEMS.PASSIVE.MUTANT_FETUS.id) and AlphaAPI.getLuckRNG(7, 3) and entity.Variant ~= TearVariant.CHAOS_CARD then
-				AlphaAPI.addFlag(entity, ENTITY_FLAGS.MUTANT_TEAR)
-				local tear_sprite = entity:GetSprite()
-				tear_sprite:Load("gfx/animations/effects/animation_tears_mutantfetus.anm2", true)
-				tear_sprite:Play("Idle")
-				tear_sprite:LoadGraphics()
-			end
-		end
 
 		local tear = entity:ToTear()
 		if tear.SpawnerType and tear.SpawnerType == EntityType.ENTITY_PLAYER and tear.Variant ~= TearVariant.CHAOS_CARD then
@@ -4549,38 +4364,6 @@ do
 			end
 		end
 	end
-
-    local bombFlags = {
-        "TEAR_BURN",
-        "TEAR_SAD_BOMB",
-        "TEAR_GLITTER_BOMB",
-        "TEAR_BUTT_BOMB",
-        "TEAR_STICKY",
-        "TEAR_SPECTRAL",
-        "TEAR_HOMING",
-        "TEAR_POISON"
-    }
-
-    function Alphabirth.bugBombsAppear(entity, data)
-        local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-        if player:HasCollectible(ITEMS.PASSIVE.BUGGED_BOMBS.id) and entity.Variant ~= BombVariant.BOMB_SUPERTROLL and entity.Variant ~= BombVariant.BOMB_TROLL and entity.SpawnerType == EntityType.ENTITY_PLAYER then
-            local bomb_sprite = entity:GetSprite()
-            if bomb_sprite:GetFilename() ~= "gfx/animations/effects/animation_effect_buggedbombs.anm2" then
-                bomb_sprite:Load("gfx/animations/effects/animation_effect_buggedbombs.anm2", true)
-                bomb_sprite:Play("Idle")
-            end
-        end
-    end
-
-    function Alphabirth.bugBombsUpdate(entity, data)
-        local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-        if player:HasCollectible(ITEMS.PASSIVE.BUGGED_BOMBS.id) and entity.Variant ~= BombVariant.BOMB_SUPERTROLL and entity.Variant ~= BombVariant.BOMB_TROLL and entity.SpawnerType == EntityType.ENTITY_PLAYER then
-            local bomb = entity:ToBomb()
-            if entity.FrameCount % 15 == 0 then
-                bomb.Flags = bomb.Flags | TearFlags[bombFlags[random(1, #bombFlags)]]
-            end
-        end
-    end
 
     local glitch_pickup_animations = {"Battery", "Heart", "Bomb", "Coin", "Key"}
 

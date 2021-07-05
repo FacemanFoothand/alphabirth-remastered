@@ -663,10 +663,6 @@ function Alphabirth.itemSetup()
 	ITEMS.ACTIVE.DEBUG = api_mod:registerItem("Debug")
 	ITEMS.ACTIVE.DEBUG:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerDebug)
 
-	-- Teleport you to the farthest tear away from you
-	ITEMS.ACTIVE.TEARLEPORTER = api_mod:registerItem("Tearleporter")
-	ITEMS.ACTIVE.TEARLEPORTER:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerTearleporter)
-
 	-- 28% chance for 3 blue flies, 28% chance for 3 blue spiders,
 	-- 41% chance for a random pickup, 3% chance for a trinket
 	ITEMS.ACTIVE.TRASH_BAG = api_mod:registerItem("Trash Bag")
@@ -1636,30 +1632,6 @@ do
 	            player)
 	    end
 	    return true
-	end
-
-	----------------------------------------
-	-- Tearleporter Logic
-	----------------------------------------
-	function Alphabirth.triggerTearleporter()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    local furthest_tear
-	    for _, entity in ipairs(AlphaAPI.entities.all) do
-	        if entity.Type == EntityType.ENTITY_TEAR then
-	            furthest_tear = furthest_tear or entity
-
-	            local distance_to_this_tear = player.Position:Distance(entity.Position)
-	            local distance_to_furthest_tear = player.Position:Distance(furthest_tear.Position)
-	            if distance_to_furthest_tear < distance_to_this_tear then
-	                furthest_tear = entity
-	            end
-	        end
-	    end
-
-	    if furthest_tear then
-	        player.Position = furthest_tear.Position
-	        player:AnimateTeleport(false)
-	    end
 	end
 
 	----------------------------------------

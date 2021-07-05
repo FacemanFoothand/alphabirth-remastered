@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------
 -- Item: Green Candle
 -- Originally from Pack 1
--- Fire a monstro's lung-esque volley of tears
+-- Fire a green fire and poison nearby enemies
 ----------------------------------------------------------------------------
 
 local utils = include("code/utils")
@@ -53,7 +53,7 @@ function GREEN_CANDLE.update()
 
 	-- Poison effect
 	for i,entity in ipairs(AlphaAPI.entities.all) do
-		if entity.Variant == GREEN_CANDLE.AB_REF.ENTITIES.GREEN_CANDLE.variant and entity.SubType == GREEN_CANDLE.AB_REF.ENTITIES.GREEN_CANDLE.subtype then
+		if utils.isOfType(entity, GREEN_CANDLE.AB_REF.ENTITIES.GREEN_CANDLE) then
 			for _, enemy in ipairs(AlphaAPI.entities.enemies) do
 				local distance_to_enemy = entity.Position:Distance(enemy.Position)
 				if distance_to_enemy < GREEN_CANDLE.POISON_RANGE then

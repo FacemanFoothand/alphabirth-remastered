@@ -17,6 +17,13 @@ function utils.random(min, max) -- Re-implements math.random()
     return utils.RNG:RandomFloat() -- float [0,1)
 end
 
+function utils.isOfType(entity, eType)
+	if entity.Variant == eType.variant and entity.SubType == eType.subtype then
+		return true
+	end
+	return false
+end
+
 function utils.getVectorFromDirection(direction)
     if direction == Direction.NO_DIRECTION then
         return utils.VECTOR_ZERO

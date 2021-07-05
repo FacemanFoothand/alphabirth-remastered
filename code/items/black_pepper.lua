@@ -18,8 +18,8 @@ local black_pepper = {
 
 function black_pepper.setup(Alphabirth)
 	black_pepper.AB_REF = Alphabirth
-	Alphabirth.ITEMS.PASSIVE.BLACK_PEPPER = Alphabirth.API_MOD:registerItem(black_pepper.NAME)
-	black_pepper.ITEM_REF = Alphabirth.ITEMS.PASSIVE.BLACK_PEPPER
+	Alphabirth.ITEMS.ACTIVE.BLACK_PEPPER = Alphabirth.API_MOD:registerItem(black_pepper.NAME)
+	black_pepper.ITEM_REF = Alphabirth.ITEMS.ACTIVE.BLACK_PEPPER
 	black_pepper.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_USE, black_pepper.trigger)
 	black_pepper.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, black_pepper.update)
 end

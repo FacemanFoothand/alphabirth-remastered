@@ -30,12 +30,15 @@ function chastity.postNewRoom()
 
 	if room:GetType() == RoomType.ROOM_DEVIL then
 		runData.seenDevil = true
-		for _, player in ipairs(utils.hasCollectible(temperance.ITEM_REF.id)) do
-			player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-			player:AddCacheFlags(CacheFlag.CACHE_SHOTSPEED)
-			player:AddCacheFlags(CacheFlag.CACHE_RANGE)
-			player:AddCacheFlags(CacheFlag.CACHE_SPEED)
-			player:EvaluateItems()
+		local plist = utils.hasCollectible(chastity.ITEM_REF.id)
+		if plist then
+			for _, player in ipairs(plist) do
+				player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
+				player:AddCacheFlags(CacheFlag.CACHE_SHOTSPEED)
+				player:AddCacheFlags(CacheFlag.CACHE_RANGE)
+				player:AddCacheFlags(CacheFlag.CACHE_SPEED)
+				player:EvaluateItems()
+			end
 		end
 	end
 end

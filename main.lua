@@ -162,11 +162,7 @@ local function start()
 	    if player:GetPlayerType() == character_null then
 	        player:AddNullCostume(COSTUMES.NULL)
 	    end
-	    -- White Candle Logic
-	    local level = AlphaAPI.GAME_STATE.LEVEL
-	    if player:HasCollectible(ITEMS.PASSIVE.WHITE_CANDLE.id) and room:IsFirstVisit() and level:GetCurrentRoomIndex() ~= level:GetStartingRoomIndex() then
-	        level:AddAngelRoomChance(0.1)
-		end
+
 
 		if game.Challenge == CHALLENGES.IT_FOLLOWS and level:GetCurrentRoomIndex() ~= level:GetStartingRoomIndex() then
 			AlphaAPI.callDelayed(function()
@@ -178,13 +174,13 @@ local function start()
 	end
 
     function Alphabirth.floorChanged()
-        api_mod.data.run.seenTreasure = false
-		api_mod.data.run.miniatureMeteorBonus = 0
-		api_mod.data.run.apparitionRooms = {}
+        Alphabirth.API_MOD.data.run.seenTreasure = false
+		Alphabirth.API_MOD.data.run.miniatureMeteorBonus = 0
+		Alphabirth.API_MOD.data.run.apparitionRooms = {}
     end
 
-	mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Alphabirth.postNewRoom)
-    mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Alphabirth.floorChanged)
+	Alphabirth.MOD:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Alphabirth.postNewRoom)
+    Alphabirth.MOD:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, Alphabirth.floorChanged)
 
 	----------------------------------------
 	-- Callbacks
@@ -679,11 +675,6 @@ function Alphabirth.itemSetup()
 	ITEMS.ACTIVE.COOL_BEAN = api_mod:registerItem("Cool Bean")
 	ITEMS.ACTIVE.COOL_BEAN:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerCoolBean)
 
-	-- Fire a monstro's lung-esque volley of tears
-	ITEMS.ACTIVE.BLACK_PEPPER = api_mod:registerItem("Black Pepper")
-	ITEMS.ACTIVE.BLACK_PEPPER:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerBlackPepper)
-	ITEMS.ACTIVE.BLACK_PEPPER:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.updateBlackPepper)
-
 	-- Fire a green fire and poison nearby enemies
 	ITEMS.ACTIVE.GREEN_CANDLE = api_mod:registerItem("Green Candle")
 	ITEMS.ACTIVE.GREEN_CANDLE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerGreenCandle)
@@ -733,9 +724,6 @@ function Alphabirth.itemSetup()
 
 	-- Shoots fires in all directions on damage taken
 	ITEMS.PASSIVE.FURNACE = api_mod:registerItem("Furnace", "gfx/animations/costumes/accessories/animation_costume_furnace.anm2")
-
-	-- Increase Angel Room/Soul heart chance. Chance to activate Holy Light on damage taken
-	ITEMS.PASSIVE.WHITE_CANDLE = api_mod:registerItem("White Candle", "gfx/animations/costumes/accessories/animation_costume_whitecandle.anm2")
 
 	-- Pseudobulbar Affect
 	ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT = api_mod:registerItem("Pseudobulbar Affect", "gfx/animations/costumes/accessories/animation_costume_pseudobulbaraffect.anm2")
@@ -1791,67 +1779,6 @@ do
 	        end
 	    end
 	    return true
-	end
-
-	----------------------------------------
-	-- Black Pepper Logic
-	----------------------------------------
-	local holding_black_pepper = false
-	function Alphabirth.triggerBlackPepper()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    player:AnimateCollectible(ITEMS.ACTIVE.BLACK_PEPPER.id, "LiftItem", "PlayerPickup")
-	    holding_black_pepper = true
-	end
-
-	function Alphabirth.updateBlackPepper()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    if holding_black_pepper == true then
-	        local direction = player:GetFireDirection()
-	        local direction_vector
-	        -- Get head direction vector
-	        if direction == 0 then      -- Left
-	            direction_vector = Vector(-1, 0)
-	        elseif direction == 1 then  -- Up
-	            direction_vector = Vector(0, 1)
-	        elseif direction == 2 then  -- Right
-	            direction_vector = Vector(1, 0)
-	        elseif direction == 3 then  -- Down
-	            direction_vector = Vector(0, -1)
-	        end
-
-	        if direction_vector ~= nil then
-	            for tears = 1, 15 do
-	                -- Get random angle per tear
-	                local angle = 15
-	                local random_angle = math.rad(random(-math.floor(angle), math.floor(angle)))
-
-	                -- Convert angle to a vector per tear
-	                local angular_vector = Vector(0, 0)
-	                angular_vector.X = math.cos(random_angle) * direction_vector.X -
-	                        math.sin(random_angle) * direction_vector.Y
-	                angular_vector.Y = math.sin(random_angle) * direction_vector.X -
-	                        math.cos(random_angle) * direction_vector.Y
-
-	                -- Get random shot speed per tear
-	                local randomMag = random(5, 15)
-	                shot_speed = Vector(angular_vector.X * randomMag, angular_vector.Y * randomMag)
-
-	                -- Fire Tear
-	                tear = player:FireTear(
-	                    player.Position,    -- position
-	                    shot_speed,         -- velocity
-	                    false,              -- From API: CanBeEye?
-	                    false,              -- From API: NoTractorBeam
-	                    false               -- From API: CanTriggerStreakEnd
-	                )
-	                tear:ChangeVariant(26)
-	                tear.TearFlags = tear.TearFlags | TearFlags.TEAR_BOOGER
-	            end
-
-	            player:AnimateCollectible(ITEMS.ACTIVE.BLACK_PEPPER.id, "HideItem", "PlayerPickup")
-	            holding_black_pepper = false
-	        end
-	    end
 	end
 
 	----------------------------------------
@@ -7402,5 +7329,5 @@ local START_FUNC = start
 
 if AlphaAPI then START_FUNC()
 else if not __alphaInit then
-    __alphaInit={} end __alphaInit
+__alphaInit={} end __alphaInit
 [#__alphaInit+1]=START_FUNC end

@@ -663,18 +663,6 @@ function Alphabirth.itemSetup()
 	ITEMS.ACTIVE.DEBUG = api_mod:registerItem("Debug")
 	ITEMS.ACTIVE.DEBUG:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerDebug)
 
-	-- Has a chance to either fill all red hearts or remove a red heart container
-	ITEMS.ACTIVE.LIFELINE = api_mod:registerItem("Lifeline")
-	ITEMS.ACTIVE.LIFELINE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerLifeLine)
-
-	-- Stops all tears in their tracks
-	ITEMS.ACTIVE.ISAAC_APPLE = api_mod:registerItem("Isaac's Apple")
-	ITEMS.ACTIVE.ISAAC_APPLE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerIsaacsApple)
-
-	-- Freezes nearby enemies
-	ITEMS.ACTIVE.COOL_BEAN = api_mod:registerItem("Cool Bean")
-	ITEMS.ACTIVE.COOL_BEAN:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerCoolBean)
-
 	-- Fire a green fire and poison nearby enemies
 	ITEMS.ACTIVE.GREEN_CANDLE = api_mod:registerItem("Green Candle")
 	ITEMS.ACTIVE.GREEN_CANDLE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerGreenCandle)
@@ -1568,26 +1556,6 @@ do
 		ENTITIES.GLITCH_PICKUP:spawn(player.Position, player.Velocity, player)
 	end
 
-	----------------------------------------
-	-- Lifeline Logic
-	----------------------------------------
-	function Alphabirth.triggerLifeLine()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    local health_roll = random(1, 5)
-	    local animate = false
-	    if health_roll == 1 then
-	        -- Only take effect if the player has two or more red heart containers
-	        if player:GetMaxHearts() >= 4 then
-	            player:AddMaxHearts(-2, false) -- Remove one full red heart container
-	            player:AnimateSad()
-	        end
-	    else
-	        player:SetFullHearts() -- Fill all red heart containers
-	        animate = true
-	    end
-	    return animate
-	end
-
 	---------------------------------------
 	-- Trash Bag Logic
 	---------------------------------------
@@ -1697,47 +1665,6 @@ do
 	        player.Position = furthest_tear.Position
 	        player:AnimateTeleport(false)
 	    end
-	end
-
-	----------------------------------------
-	-- Cool Bean Logic
-	----------------------------------------
-	local cool_bean_range = 160
-	local cool_bean_freeze_duration = 150
-	function Alphabirth.triggerCoolBean()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    for _, entity in ipairs(AlphaAPI.entities.all) do
-	        if entity:IsActiveEnemy() then
-	            local distance_to_enemy = player.Position:Distance(entity.Position)
-	            if distance_to_enemy < cool_bean_range then
-	                entity:AddFreeze(
-	                    EntityRef(player),
-	                    cool_bean_freeze_duration
-	                )
-	            end
-	        end
-	    end
-
-	    Isaac.Spawn(ENTITIES.ICE_FART.id,
-	                ENTITIES.ICE_FART.variant,  -- Variant
-	                0,                          -- Subtype
-	                player.Position,
-	                Vector(0, 0),               -- Velocity
-	                player)                     -- Spawner
-	    sfx_manager:Play(SoundEffect.SOUND_FART,1.0,0,false,1.0)
-	    return true
-	end
-
-	----------------------------------------
-	-- Isaac's Apple Logic
-	----------------------------------------
-	function Alphabirth.triggerIsaacsApple()
-		for _, entity in ipairs(AlphaAPI.entities.all) do
-			if entity.Type == EntityType.ENTITY_TEAR or entity.Type == EntityType.ENTITY_PROJECTILE then
-				entity.Velocity = Vector(0, 0)
-			end
-		end
-	    return true
 	end
 
 	----------------------------------------

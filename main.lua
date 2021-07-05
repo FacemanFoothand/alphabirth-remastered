@@ -664,11 +664,6 @@ function Alphabirth.itemSetup()
     ITEMS.PASSIVE.BUGGED_BOMBS:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.pickupBuggedBombs)
 	ITEMS.PASSIVE.BUGGED_BOMBS:addLock(LOCKS.BUGGED_BOMBS)
 
-	-- Chance to charm nearby enemies
-	ITEMS.PASSIVE.COLOGNE = api_mod:registerItem("Cologne", "gfx/animations/costumes/accessories/animation_costume_cologne.anm2")
-	ITEMS.PASSIVE.COLOGNE:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleCologne)
-	ITEMS.PASSIVE.COLOGNE:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateCologne)
-
 	-- Gives the player more luck the fewer consumables they have
 	ITEMS.PASSIVE.BEGGARS_CUP = api_mod:registerItem("Beggar's Cup", "gfx/animations/costumes/accessories/animation_costume_beggarscup.anm2")
 	ITEMS.PASSIVE.BEGGARS_CUP:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleBeggarsCup)
@@ -2110,36 +2105,6 @@ end
 
 -- Passive Item Function Definitions
 do
-	----------------------------------------
-	-- Cologne Logic
-	----------------------------------------
-	-- Change tear color for Cologne
-	function Alphabirth.evaluateCologne(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_TEARCOLOR then
-			player.TearColor = Color(
-                                    0.867, 0.627, 0.867,    -- RGB
-									1,                      -- Alpha
-									0, 0, 0                 -- RGB Offset
-                                )
-		end
-	end
-
-	-- Charm nearby enemies
-	local cologne_charm_duration = 100
-	local cologne_charm_chance = 100
-	function Alphabirth.handleCologne(player)
-	    local max_charm_distance = 120 * math.max( player.SpriteScale.X, player.SpriteScale.Y )
-        for _, entity in ipairs(AlphaAPI.entities.all) do
-            if player.Position:Distance(entity.Position) < max_charm_distance
-            and entity:IsVulnerableEnemy() then
-                local charm_roll = random(1, cologne_charm_chance)
-                if charm_roll == 1 then
-                    entity:AddCharmed(EntityRef(player), cologne_charm_duration)
-                end
-            end
-        end
-	end
-
 	----------------------------------------
 	-- Pseudobulbar Affect Logic
 	----------------------------------------

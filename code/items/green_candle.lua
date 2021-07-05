@@ -20,6 +20,7 @@ local GREEN_CANDLE = {
 
 function GREEN_CANDLE.setup(Alphabirth)
 	GREEN_CANDLE.AB_REF = Alphabirth
+	Alphabirth.ENTITIES.GREEN_CANDLE = Alphabirth.API_MOD:getEntityConfig("Green Candle", 20)
 	Alphabirth.ITEMS.ACTIVE.GREEN_CANDLE = Alphabirth.API_MOD:registerItem(GREEN_CANDLE.NAME)
 	GREEN_CANDLE.ITEM_REF = Alphabirth.ITEMS.ACTIVE.GREEN_CANDLE
 	GREEN_CANDLE.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_USE, GREEN_CANDLE.trigger)

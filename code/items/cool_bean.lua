@@ -5,7 +5,6 @@
 ----------------------------------------------------------------------------
 
 local utils = include("code/utils")
-local random = utils.random
 
 local cool_bean = {
 	ENABLED = true,
@@ -19,6 +18,7 @@ local cool_bean = {
 
 function cool_bean.setup(Alphabirth)
 	cool_bean.AB_REF = Alphabirth
+	Alphabirth.ENTITIES.ICE_FART = Alphabirth.API_MOD:getEntityConfig("Ice Fart")
 	Alphabirth.ITEMS.ACTIVE.COOL_BEAN = Alphabirth.API_MOD:registerItem(cool_bean.NAME)
 	cool_bean.ITEM_REF = Alphabirth.ITEMS.ACTIVE.COOL_BEAN
 	cool_bean.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_USE, cool_bean.trigger)

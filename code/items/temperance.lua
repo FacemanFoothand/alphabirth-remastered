@@ -30,11 +30,14 @@ function temperance.postNewRoom()
 
 	if runData.seenTreasure == false and room:GetType() == RoomType.ROOM_TREASURE then
 		runData.seenTreasure = true
-		for _, player in ipairs(utils.hasCollectible(temperance.ITEM_REF.id)) do
-			player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-			player:AddCacheFlags(CacheFlag.CACHE_SPEED)
-			player:AddCacheFlags(CacheFlag.CACHE_RANGE)
-			player:EvaluateItems()
+		local plist = utils.hasCollectible(temperance.ITEM_REF.id)
+		if plist then
+			for _, player in ipairs(plist) do
+				player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
+				player:AddCacheFlags(CacheFlag.CACHE_SPEED)
+				player:AddCacheFlags(CacheFlag.CACHE_RANGE)
+				player:EvaluateItems()
+			end
 		end
 	end
 end

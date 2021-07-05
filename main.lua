@@ -80,7 +80,6 @@ local stage_number
 local frame
 local room_frame
 local sfx_manager
-local beggarscup_previous_total
 
 -- Miscellaneous variables
 Alphabirth.PLAYER_TYPES.NULL = Isaac.GetPlayerTypeByName("_NULL")
@@ -654,9 +653,6 @@ function Alphabirth.itemSetup()
 	--------------
 	-- Passives --
 	--------------
-
-	-- Shoots fires in all directions on damage taken
-	ITEMS.PASSIVE.FURNACE = api_mod:registerItem("Furnace", "gfx/animations/costumes/accessories/animation_costume_furnace.anm2")
 
 	-- Pseudobulbar Affect
 	ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT = api_mod:registerItem("Pseudobulbar Affect", "gfx/animations/costumes/accessories/animation_costume_pseudobulbaraffect.anm2")

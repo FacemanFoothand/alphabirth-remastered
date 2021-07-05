@@ -7,6 +7,17 @@ utils.VECTOR_ZERO = Vector(0,0)
 utils.RNG = RNG()
 utils.RNG:SetSeed(Random(), 1)
 
+utils.direction_list = {
+	Vector(-1, 0),  -- West
+	Vector(0, 1),   -- North
+	Vector(1, 0),   -- East
+	Vector(0, -1),  -- South
+	Vector(1, 1),   -- North East
+	Vector(1, -1),  -- South East
+	Vector(-1, 1),  -- North West
+	Vector(-1, -1)  -- South West
+}
+
 -- Funcs
 function utils.random(min, max) -- Re-implements math.random()
     if min ~= nil and max ~= nil then -- Min and max passed, integer [min,max]

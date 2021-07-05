@@ -601,16 +601,12 @@ function Alphabirth.transformationSetup()
         ITEMS.PASSIVE.GLOOM_SKULL,
         ITEMS.ACTIVE.CHALICE_OF_BLOOD,
         ITEMS.ACTIVE.BLASPHEMOUS,
+		ITEMS.PASSIVE.SATANS_CONTRACT,
         CollectibleType.COLLECTIBLE_PENTAGRAM,
         CollectibleType.COLLECTIBLE_CONTRACT_FROM_BELOW,
         CollectibleType.COLLECTIBLE_PACT,
         CollectibleType.COLLECTIBLE_MARK
     }
-
-    local SATANS_CONTRACT_ID = Isaac.GetItemIdByName("Satan's Contract")
-    if SATANS_CONTRACT_ID > 0 then
-        damned_pool[#damned_pool + 1] = SATANS_CONTRACT_ID
-    end
 
     local cyborg_transformation = api_mod:registerTransformation("Cyborg", cyborg_pool)
     api_mod:addCallback(AlphaAPI.Callbacks.TRANSFORMATION_TRIGGER, Alphabirth.cyborgTrigger, cyborg_transformation)
@@ -659,10 +655,6 @@ function Alphabirth.itemSetup()
 	--------------
 	-- Passives --
 	--------------
-	-- Doubles the player's damage and damage taken
-	ITEMS.PASSIVE.SATANS_CONTRACT = api_mod:registerItem("Satan's Contract", "gfx/animations/costumes/accessories/animation_costume_contract.anm2")
-	ITEMS.PASSIVE.SATANS_CONTRACT:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateSatansContract)
-
 	-- Has a chance to spawn a bomb when you hit an enemy
 	ITEMS.PASSIVE.MUTANT_FETUS = api_mod:registerItem("Mutant Fetus", "gfx/animations/costumes/accessories/animation_costume_mutantfetus.anm2")
 
@@ -2394,23 +2386,6 @@ do
 				end
 			end
 		end
-	end
-
-	----------------------------------------
-	-- Satan's Contract Logic
-	----------------------------------------
-	function Alphabirth.evaluateSatansContract(player, cache_flag)
-        if cache_flag == CacheFlag.CACHE_DAMAGE then
-            player.Damage = player.Damage * 2
-        elseif cache_flag == CacheFlag.CACHE_FLYING then
-            player.CanFly = true
-		elseif cache_flag == CacheFlag.CACHE_TEARCOLOR then
-			player.TearColor = Color(
-            	0.698, 0.113, 0.113,    -- RGB
-				1,                      -- Alpha
-            	0, 0, 0                 -- RGB Offset
-           )
-        end
 	end
 
 	-- Brown Eye Logic
@@ -4550,21 +4525,6 @@ function Alphabirth.entityTakeDamage(entity, damage_amount, damage_flags, damage
 				)
 			end
 		end
-
-	    if player:HasCollectible(ITEMS.PASSIVE.SATANS_CONTRACT.id)
-		and not hasProtection(player, damage_flags, damage_source) then
-	        for i = 1, damage_amount do
-	            if player:GetSoulHearts() > 0 then
-	                player:AddSoulHearts(-1)
-	            else
-	                player:AddHearts(-1)
-	            end
-	        end
-
-	        if player:GetHearts() == 0 and player:GetSoulHearts() == 0 then
-	            player:Die()
-	        end
-	    end
 
 		if player:HasCollectible(ITEMS.PASSIVE.WHITE_CANDLE.id)
 		and not hasProtection(player, damage_flags, damage_source) then

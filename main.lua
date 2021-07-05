@@ -655,12 +655,6 @@ function Alphabirth.itemSetup()
 	-- Passives --
 	--------------
 
-    -- Bombs become Bugged Bombs, which have tear flags randomly applied to them.
-	LOCKS.BUGGED_BOMBS = api_mod:createUnlock("alphaBuggedBombs")
-    ITEMS.PASSIVE.BUGGED_BOMBS = api_mod:registerItem("Bugged Bombs")
-    ITEMS.PASSIVE.BUGGED_BOMBS:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.pickupBuggedBombs)
-	ITEMS.PASSIVE.BUGGED_BOMBS:addLock(LOCKS.BUGGED_BOMBS)
-
 	-- Gives the player more luck the fewer consumables they have
 	ITEMS.PASSIVE.BEGGARS_CUP = api_mod:registerItem("Beggar's Cup", "gfx/animations/costumes/accessories/animation_costume_beggarscup.anm2")
 	ITEMS.PASSIVE.BEGGARS_CUP:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleBeggarsCup)
@@ -1240,8 +1234,6 @@ end
 -- Setup Function for Miscellaneous Callbacks
 function Alphabirth.setupMiscCallbacks()
 	api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.entityTakeDamage)
-    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.bugBombsAppear, EntityType.ENTITY_BOMBDROP)
-    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.bugBombsUpdate, EntityType.ENTITY_BOMBDROP)
 	api_mod:addCallback(AlphaAPI.Callbacks.PLAYER_DIED, Alphabirth.handleOldController)
 	api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_DEATH, Alphabirth.handleGraphicsError)
 
@@ -1322,10 +1314,7 @@ end
 
 function Alphabirth.killHush()
 	local player_type = AlphaAPI.GAME_STATE.PLAYERS[1]:GetPlayerType()
-	if player_type == character_null and not LOCKS.BUGGED_BOMBS:isUnlocked() then
-		AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/achievement/achievement_buggedbombs.png")
-		LOCKS.BUGGED_BOMBS:setUnlocked(true)
-	end
+
 	if player_type == endor_type and not LOCKS.ENDOR_HAT:isUnlocked() then
 		AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/Achievement/achievement_endorshat.png")
 		LOCKS.ENDOR_HAT:setUnlocked(true)
@@ -2123,11 +2112,6 @@ do
 			data.pseudoCharge = 0
         end
 	end
-
-    -- Bugged Bombs Pickup Logic
-    function Alphabirth.pickupBuggedBombs(player)
-        player:AddBombs(5)
-    end
 
 	----------------------------------------
 	-- Chastity Logic
@@ -4640,38 +4624,6 @@ do
 			end
 		end
 	end
-
-    local bombFlags = {
-        "TEAR_BURN",
-        "TEAR_SAD_BOMB",
-        "TEAR_GLITTER_BOMB",
-        "TEAR_BUTT_BOMB",
-        "TEAR_STICKY",
-        "TEAR_SPECTRAL",
-        "TEAR_HOMING",
-        "TEAR_POISON"
-    }
-
-    function Alphabirth.bugBombsAppear(entity, data)
-        local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-        if player:HasCollectible(ITEMS.PASSIVE.BUGGED_BOMBS.id) and entity.Variant ~= BombVariant.BOMB_SUPERTROLL and entity.Variant ~= BombVariant.BOMB_TROLL and entity.SpawnerType == EntityType.ENTITY_PLAYER then
-            local bomb_sprite = entity:GetSprite()
-            if bomb_sprite:GetFilename() ~= "gfx/animations/effects/animation_effect_buggedbombs.anm2" then
-                bomb_sprite:Load("gfx/animations/effects/animation_effect_buggedbombs.anm2", true)
-                bomb_sprite:Play("Idle")
-            end
-        end
-    end
-
-    function Alphabirth.bugBombsUpdate(entity, data)
-        local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-        if player:HasCollectible(ITEMS.PASSIVE.BUGGED_BOMBS.id) and entity.Variant ~= BombVariant.BOMB_SUPERTROLL and entity.Variant ~= BombVariant.BOMB_TROLL and entity.SpawnerType == EntityType.ENTITY_PLAYER then
-            local bomb = entity:ToBomb()
-            if entity.FrameCount % 15 == 0 then
-                bomb.Flags = bomb.Flags | TearFlags[bombFlags[random(1, #bombFlags)]]
-            end
-        end
-    end
 
     local glitch_pickup_animations = {"Battery", "Heart", "Bomb", "Coin", "Key"}
 

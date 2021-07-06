@@ -147,7 +147,7 @@ function Item:AddCallback(id, func, param)
                 elseif Item.EntityCallbacks[id] or Item.DirectPlayerCallbacks[id] or Item.SecondArgPlayerCallbacks[id] then
                     local args = {...}
                     local player
-                    if Item.SecondArgPlayerCallbacks then
+                    if Item.SecondArgPlayerCallbacks[id] then
                         player = args[2] and args[2]:ToPlayer()
                     else
                         player = args[1] and args[1]:ToPlayer()

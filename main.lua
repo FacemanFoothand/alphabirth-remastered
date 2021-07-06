@@ -20,6 +20,7 @@ local Alphabirth = {
 	MOD = mod
 }
 
+g.mod = mod
 include("code.save_handler")
 include("code.global_objects")
 
@@ -345,7 +346,7 @@ local function start()
 	                    ITEMS.ACTIVE.TEARLEPORTER.id,
 	                    ITEMS.ACTIVE.DELIRIUMS_BRAIN.id,
 	                    ITEMS.ACTIVE.TRASH_BAG.id,
-	                    ITEMS.PASSIVE.ADDICTED.id,
+	                    -- ITEMS.PASSIVE.ADDICTED.id,
 	                    ITEMS.PASSIVE.SATANS_CONTRACT.id,
 	                    ITEMS.PASSIVE.STONED_BUDDY.id,
 	                    ITEMS.PASSIVE.MUTANT_FETUS.id,
@@ -408,7 +409,7 @@ local function start()
 	                    ITEMS.ACTIVE.BIONIC_ARM.id,
 	                    ITEMS.ACTIVE.BLACKLIGHT.id,
 	                    ITEMS.ACTIVE.BLOOD_DRIVE.id,
-	                    ITEMS.ACTIVE.CHALICE_OF_BLOOD.id,
+	                    -- ITEMS.ACTIVE.CHALICE_OF_BLOOD.id,
 	                    ITEMS.ACTIVE.STONE_NUGGET.id,
 						ITEMS.ACTIVE.BOOK_OF_THE_DEAD.id,
 						ITEMS.ACTIVE.BLASPHEMOUS.id,
@@ -676,7 +677,7 @@ function Alphabirth.transformationSetup()
 
     local damned_pool = {
         ITEMS.PASSIVE.GLOOM_SKULL,
-        ITEMS.ACTIVE.CHALICE_OF_BLOOD,
+        -- ITEMS.ACTIVE.CHALICE_OF_BLOOD,
         ITEMS.ACTIVE.BLASPHEMOUS,
         CollectibleType.COLLECTIBLE_PENTAGRAM,
         CollectibleType.COLLECTIBLE_CONTRACT_FROM_BELOW,
@@ -776,8 +777,6 @@ function Alphabirth.itemSetup()
 	--------------
 	-- Passives --
 	--------------
-	-- Has a chance to swallow a random pill when damage is taken
-	ITEMS.PASSIVE.ADDICTED = api_mod:registerItem("Addicted", "gfx/animations/costumes/accessories/animation_costume_addicted.anm2")
 
 	-- Doubles the player's damage and damage taken
 	ITEMS.PASSIVE.SATANS_CONTRACT = api_mod:registerItem("Satan's Contract", "gfx/animations/costumes/accessories/animation_costume_contract.anm2")
@@ -4998,6 +4997,10 @@ local function hasProtection(player, damage_flags, damage_source)
 	or (player:HasCollectible(ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id) and hasTalismanProtection(damage_flags))
 end
 
+function g.hasProtection(player, damage_flags, damage_source)
+	return hasProtection(player, damage_flags, damage_source)
+end
+
 local direction_list = {
 	Vector(-1, 0),  -- West
 	Vector(0, 1),   -- North
@@ -5007,52 +5010,6 @@ local direction_list = {
 	Vector(1, -1),  -- South East
 	Vector(-1, 1),  -- North West
 	Vector(-1, -1)  -- South West
-}
-
-local addictionValidEffects = {
-    PillEffect.PILLEFFECT_48HOUR_ENERGY,
-    PillEffect.PILLEFFECT_ADDICTED,
-    PillEffect.PILLEFFECT_AMNESIA,
-    PillEffect.PILLEFFECT_BAD_GAS,
-    PillEffect.PILLEFFECT_BALLS_OF_STEEL,
-    PillEffect.PILLEFFECT_BOMBS_ARE_KEYS,
-    PillEffect.PILLEFFECT_EXPLOSIVE_DIARRHEA,
-    PillEffect.PILLEFFECT_FRIENDS_TILL_THE_END,
-    PillEffect.PILLEFFECT_FULL_HEALTH,
-    PillEffect.PILLEFFECT_GULP,
-    PillEffect.PILLEFFECT_HEALTH_UP,
-    PillEffect.PILLEFFECT_HORF,
-    PillEffect.PILLEFFECT_I_FOUND_PILLS,
-    PillEffect.PILLEFFECT_IM_DROWSY,
-    PillEffect.PILLEFFECT_IM_EXCITED,
-    PillEffect.PILLEFFECT_INFESTED_EXCLAMATION,
-    PillEffect.PILLEFFECT_INFESTED_QUESTION,
-    PillEffect.PILLEFFECT_LARGER,
-    PillEffect.PILLEFFECT_LEMON_PARTY,
-    PillEffect.PILLEFFECT_LUCK_DOWN,
-    PillEffect.PILLEFFECT_LUCK_UP,
-    PillEffect.PILLEFFECT_PRETTY_FLY,
-    PillEffect.PILLEFFECT_RANGE_DOWN,
-    PillEffect.PILLEFFECT_RANGE_UP,
-    PillEffect.PILLEFFECT_SPEED_DOWN,
-    PillEffect.PILLEFFECT_SPEED_UP,
-    PillEffect.PILLEFFECT_TEARS_DOWN,
-    PillEffect.PILLEFFECT_TEARS_UP,
-    PillEffect.PILLEFFECT_TELEPILLS,
-    PillEffect.PILLEFFECT_PARALYSIS,
-    PillEffect.PILLEFFECT_SEE_FOREVER,
-    PillEffect.PILLEFFECT_PHEROMONES,
-    PillEffect.PILLEFFECT_WIZARD,
-    PillEffect.PILLEFFECT_PERCS,
-    PillEffect.PILLEFFECT_RELAX,
-    PillEffect.PILLEFFECT_QUESTIONMARK,
-    PillEffect.PILLEFFECT_SMALLER,
-    PillEffect.PILLEFFECT_POWER,
-    PillEffect.PILLEFFECT_RETRO_VISION,
-    PillEffect.PILLEFFECT_X_LAX,
-    PillEffect.PILLEFFECT_SOMETHINGS_WRONG,
-    PillEffect.PILLEFFECT_SUNSHINE,
-    PillEffect.PILLEFFECT_VURP
 }
 
 -- Take Damage Handling
@@ -5149,15 +5106,6 @@ function Alphabirth.entityTakeDamage(entity, damage_amount, damage_flags, damage
 						player          -- Spawner
 					)
 				end
-			end
-		end
-
-		if player:HasCollectible(ITEMS.PASSIVE.ADDICTED.id)
-		and not hasProtection(player, damage_flags, damage_source) then
-			local pill_chance = random(1, 6)
-			if pill_chance == 1 then
-                local chosen_pill = addictionValidEffects[random(1, #addictionValidEffects)]
-				player:UsePill(chosen_pill, PillColor.PILL_BLUE_BLUE)
 			end
 		end
 

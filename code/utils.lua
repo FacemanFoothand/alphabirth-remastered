@@ -205,7 +205,7 @@ function utils.mixTables(tbl1, tbl2) -- Updates first table with the values in t
     for k, v in pairs(tbl2) do
         if not mixedIndices[k] then
             if tbl1[k] and type(tbl1[k]) == "table" and type(v) == "table" then
-                tbl1[k] = lib.Mix(tbl1[k], v)
+                tbl1[k] = utils.mixTables(tbl1[k], v)
             else
                 tbl1[k] = v
             end

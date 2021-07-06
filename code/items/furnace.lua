@@ -26,7 +26,7 @@ function FURNACE.entityDamage(entity, damage_amount, damage_flags, damage_source
 	if entity.Type == EntityType.ENTITY_PLAYER then
 		local player = entity:ToPlayer()
 
-		if player:HasCollectible(ITEMS.PASSIVE.FURNACE.id)
+		if player:HasCollectible(FURNACE.ITEM_REF.ITEMS.PASSIVE.FURNACE.id)
 		and not FURNACE.AB_REF.hasProtection(player, damage_flags, damage_source) then
 			for _, direction in ipairs(utils.direction_list) do
 				Isaac.Spawn(

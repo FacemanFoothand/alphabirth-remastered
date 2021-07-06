@@ -35,7 +35,7 @@ function MUTANT_FETUS.tearAppear(entity)
 		if plist then
 			for _, player in ipairs(plist) do
 				if GetPtrHash(tear.Parent) == GetPtrHash(player) and AlphaAPI.getLuckRNG(7, 3) and entity.Variant ~= TearVariant.CHAOS_CARD then
-					AlphaAPI.addFlag(tear, ENTITY_FLAGS.MUTANT_TEAR)
+					AlphaAPI.addFlag(tear, MUTANT_FETUS.AB_REF.ENTITY_FLAGS.MUTANT_TEAR)
 					local tear_sprite = entity:GetSprite()
 					tear_sprite:Load("gfx/animations/effects/animation_tears_mutantfetus.anm2", true)
 					tear_sprite:Play("Idle")

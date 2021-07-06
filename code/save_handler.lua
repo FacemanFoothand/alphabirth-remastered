@@ -22,7 +22,7 @@ g.defaultPlayerSaveData = {
     }
 }
 
-g.saveData = {}
+g.saveData = nil
 
 local saveDataLoaded = false
 
@@ -37,6 +37,13 @@ local function LoadSaveData()
         g.saveData = utils.deepCopy(g.defaultSaveData, g.saveData)
     end
 end
+
+setmetatable(g, {__index = function(tbl, k)
+    if k == "saveData" then
+        LoadSaveData()
+        return g.saveData
+    end
+end})
 
 local function SaveSaveData()
     Isaac.SaveModData(g.mod, json.encode(g.saveData))
@@ -99,3 +106,7 @@ mod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
         SaveSaveData()
     end
 end)
+
+if Isaac.GetPlayer() then -- luamod
+    LoadSaveData()
+end

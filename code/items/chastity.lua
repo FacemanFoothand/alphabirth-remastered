@@ -10,6 +10,12 @@ local utils = include("code.utils")
 
 local chastity = Item("Chastity")
 
+utils.mixTables(g.defaultSaveData, {
+	run = {
+		seenDevil = false
+	}
+})
+
 g.mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function(player)
 	local room = g.room
 

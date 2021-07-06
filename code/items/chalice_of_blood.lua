@@ -17,6 +17,16 @@ chaliceOfBlood.SoulLimit = 15
 chaliceOfBlood.ChaliceRange = 140
 chaliceOfBlood.PlayerCreepTimer = 15
 
+utils.mixTables(g.defaultPlayerSaveData, {
+    chaliceSouls = 0,
+    hadChaliceBuff = false,
+    level = {
+        room = {
+            chaliceBuff = false
+        }
+    }
+})
+
 local function updateChaliceSprite(player, save)
     local id
     if save.chaliceSouls <= 5 then
@@ -91,7 +101,7 @@ chaliceOfBlood.Chalice:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(
             gotSoul = true
 
             g.sfx:Play(SoundEffect.SOUND_SUMMONSOUND, 0.5, 0, false, 0.8)
-            Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF02, 0, entity.Position, Vector.Zero, nil)
+            Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF02, 0, enemy.Position, Vector.Zero, nil)
         end
     end
 

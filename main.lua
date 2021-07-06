@@ -132,12 +132,17 @@ local function start()
 
 	itemLoader.loadAll(Alphabirth)
 	Alphabirth.itemSetup()
+	print("AA")
 	Alphabirth.entitySetup()
 	Alphabirth.setupMiscCallbacks()
+	print("AA")
+
 	Alphabirth.transformationSetup()
 	Alphabirth.curseSetup()
 	Alphabirth.miscTablesSetup()
 	Alphabirth.miscEntityHandling()
+	print("AA")
+
 	Alphabirth.activeItemRenderSetup()
 
 	SOUNDS = {
@@ -694,15 +699,6 @@ function Alphabirth.itemSetup()
 	ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT = api_mod:registerItem("Pseudobulbar Affect", "gfx/animations/costumes/accessories/animation_costume_pseudobulbaraffect.anm2")
 	ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handlePseudobulbarAffect)
 
-
-	-- Immunity to lasers plus healing from lasers
-	ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION = api_mod:registerItem("Talisman of Absorption", "gfx/animations/costumes/accessories/animation_costume_talismanofabsorption.anm2")
-
-	-- Spawns a bum in every treasure room and stats up for less consumables
-	ITEMS.PASSIVE.CHARITY = api_mod:registerItem("Charity", "gfx/animations/costumes/accessories/animation_costume_charity.anm2")
-	ITEMS.PASSIVE.CHARITY:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleCharity)
-	ITEMS.PASSIVE.CHARITY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateCharity)
-
 	-- Immunity to fire, spikes, and bombs. 20% chance to dodge all damage
 	ITEMS.PASSIVE.DILIGENCE = api_mod:registerItem("Diligence", "gfx/animations/costumes/accessories/animation_costume_diligence.anm2")
 
@@ -711,17 +707,9 @@ function Alphabirth.itemSetup()
 	ITEMS.PASSIVE.PATIENCE:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handlePatience)
 	ITEMS.PASSIVE.PATIENCE:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluatePatience)
 
-	-- Stats up if you haven't gone to the treasure room on the floor
-	ITEMS.PASSIVE.TEMPERANCE = api_mod:registerItem("Temperance", "gfx/animations/costumes/accessories/animation_costume_temperance.anm2")
-	ITEMS.PASSIVE.TEMPERANCE:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateTemperance)
-
 	-- Marks a random enemy in the room that takes increased damage
 	ITEMS.PASSIVE.HUMILITY = api_mod:registerItem("Humility", "gfx/animations/costumes/accessories/animation_costume_humility.anm2")
 	ITEMS.PASSIVE.HUMILITY:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleHumility)
-
-	-- Stats up if you haven't gone to the DEVIL room this run
-	ITEMS.PASSIVE.CHASTITY = api_mod:registerItem("Chastity", "gfx/animations/costumes/accessories/animation_costume_chastity.anm2", {CacheFlag.CACHE_DAMAGE, CacheFlag.CACHE_RANGE, CacheFlag.CACHE_SHOTSPEED, CacheFlag.CACHE_SPEED})
-	ITEMS.PASSIVE.CHASTITY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateChastity)
 
 	-- Randomly charms enemies. Chance to spawn hearts on killing enemies
 	ITEMS.PASSIVE.KINDNESS = api_mod:registerItem("Kindness", "gfx/animations/costumes/accessories/animation_costume_kindness.anm2")
@@ -989,7 +977,6 @@ function Alphabirth.itemSetup()
     -- TRINKETS
     ITEMS.TRINKET.MOONROCK = api_mod:registerTrinket("Moonrock")
     ITEMS.TRINKET.MOONROCK:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.moonrockNewTear, EntityType.ENTITY_TEAR)
-
 end
 
 -- Setup Function for Entities
@@ -1242,8 +1229,6 @@ end
 -- Setup Function for Miscellaneous Callbacks
 function Alphabirth.setupMiscCallbacks()
 	api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.entityTakeDamage)
-    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.bugBombsAppear, EntityType.ENTITY_BOMBDROP)
-    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.bugBombsUpdate, EntityType.ENTITY_BOMBDROP)
 	api_mod:addCallback(AlphaAPI.Callbacks.PLAYER_DIED, Alphabirth.handleOldController)
 	api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_DEATH, Alphabirth.handleGraphicsError)
 
@@ -2097,36 +2082,6 @@ end
 -- Passive Item Function Definitions
 do
 	----------------------------------------
-	-- Cologne Logic
-	----------------------------------------
-	-- Change tear color for Cologne
-	function Alphabirth.evaluateCologne(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_TEARCOLOR then
-			player.TearColor = Color(
-                                    0.867, 0.627, 0.867,    -- RGB
-									1,                      -- Alpha
-									0, 0, 0                 -- RGB Offset
-                                )
-		end
-	end
-
-	-- Charm nearby enemies
-	local cologne_charm_duration = 100
-	local cologne_charm_chance = 100
-	function Alphabirth.handleCologne(player)
-	    local max_charm_distance = 120 * math.max( player.SpriteScale.X, player.SpriteScale.Y )
-        for _, entity in ipairs(AlphaAPI.entities.all) do
-            if player.Position:Distance(entity.Position) < max_charm_distance
-            and entity:IsVulnerableEnemy() then
-                local charm_roll = random(1, cologne_charm_chance)
-                if charm_roll == 1 then
-                    entity:AddCharmed(EntityRef(player), cologne_charm_duration)
-                end
-            end
-        end
-	end
-
-	----------------------------------------
 	-- Pseudobulbar Affect Logic
 	----------------------------------------
 	function Alphabirth.handlePseudobulbarAffect(player)
@@ -2140,142 +2095,12 @@ do
 			data.pseudoCharge = data.pseudoCharge + 1
             if (data.pseudoCharge % (player.MaxFireDelay) == 0) then
 				data.pseudoCharge = 0
-				shot_velocity = player:GetTearMovementInheritance(direction) * (4 * player.ShotSpeed)
+				local shot_velocity = player:GetTearMovementInheritance(direction) * (4 * player.ShotSpeed)
                 player:FireTear(player.Position, shot_velocity, false, false, false)
             end
 		else
 			data.pseudoCharge = 0
         end
-	end
-
-    -- Bugged Bombs Pickup Logic
-    function Alphabirth.pickupBuggedBombs(player)
-        player:AddBombs(5)
-    end
-
-	----------------------------------------
-	-- Charity Logic
-	----------------------------------------
-	local charity_damage_modifier = 0
-	local charity_speed_modifier = 0
-	local charity_tear_height_modifier = 0
-	local charity_previous_total = 0
-	function Alphabirth.evaluateCharity(player, cache_flag)
-        if(cache_flag == CacheFlag.CACHE_DAMAGE) then
-            player.Damage = player.Damage + charity_damage_modifier
-        elseif(cache_flag == CacheFlag.CACHE_SPEED) then
-            player.MoveSpeed = player.MoveSpeed + charity_speed_modifier
-        elseif(cache_flag == CacheFlag.CACHE_RANGE) then
-            player.TearHeight = player.TearHeight - charity_tear_height_modifier
-        end
-	end
-
-	function Alphabirth.handleCharity(player)
-        local keys = player:GetNumKeys()
-        local coins = player:GetNumCoins()
-        local bombs = player:GetNumBombs()
-        local total = (keys + coins + bombs) / 2
-
-		-- Only run if total has changed
-		if total ~= charity_previous_total then
-
-			charity_previous_total = total
-
-			-- Values are made to be a little higher than magic mushroom.
-			local damage_threshhold = 1.5
-			local speed_threshhold = 0.1
-			local tear_height_threshhold = 7.5
-
-			local damage_minimum = -1.5
-			local speed_minimum = -0.1
-			local tear_height_minimum = -7.5
-
-			-- Values are made so that at 20 of each consumable you hit 0 stat boosts.
-			charity_damage_modifier = damage_threshhold - total * 0.15
-			charity_speed_modifier = speed_threshhold - total * 0.05
-			charity_tear_height_modifier = tear_height_threshhold - total * 0.75
-
-			if charity_damage_modifier < damage_minimum then
-				charity_damage_modifier = damage_minimum
-			end
-
-			if charity_speed_modifier < speed_minimum then
-				charity_speed_modifier = speed_minimum
-			end
-
-			if charity_tear_height_modifier < tear_height_minimum then
-				charity_tear_height_modifier = tear_height_minimum
-			end
-
-			player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-			player:AddCacheFlags(CacheFlag.CACHE_SPEED)
-			player:AddCacheFlags(CacheFlag.CACHE_RANGE)
-            player:EvaluateItems()
-		end
-	end
-
-	----------------------------------------
-	-- Temperance Logic
-	----------------------------------------
-	function Alphabirth.evaluateTemperance(player, cache_flag)
-	    if not api_mod.data.run.seenTreasure then
-	        if(cache_flag == CacheFlag.CACHE_DAMAGE) then
-	            player.Damage = player.Damage + 2
-	        elseif(cache_flag == CacheFlag.CACHE_SPEED) then
-	            player.MoveSpeed = player.MoveSpeed + 0.15
-	        elseif(cache_flag == CacheFlag.CACHE_RANGE) then
-	            player.TearHeight = player.TearHeight - 8.5
-	        end
-	    end
-	end
-
-	----------------------------------------
-	-- Chastity Logic
-	----------------------------------------
-	function Alphabirth.evaluateChastity(player, cache_flag)
-	    if not api_mod.data.run.seenDevil then
-	        if(cache_flag == CacheFlag.CACHE_DAMAGE) then
-	            player.Damage = (player.Damage + 1.5) * 1.5
-	        elseif(cache_flag == CacheFlag.CACHE_SHOTSPEED) then
-	            player.ShotSpeed = player.ShotSpeed + 0.4
-	        elseif(cache_flag == CacheFlag.CACHE_RANGE) then
-	            player.TearHeight = player.TearHeight - 5
-	        elseif (cache_flag == CacheFlag.CACHE_SPEED)then
-	            player.MoveSpeed = player.MoveSpeed + 0.2
-	        end
-	    end
-	end
-
-	----------------------------------------
-	-- Beggar's Cup Logic
-	----------------------------------------
-	local beggarscup_luck_modifier = 0
-	function Alphabirth.evaluateBeggarsCup(player, cache_flag)
-        if(cache_flag == CacheFlag.CACHE_LUCK) then
-            player.Luck = player.Luck + beggarscup_luck_modifier
-        end
-	end
-
-	function Alphabirth.handleBeggarsCup(player)
-        local coins = player:GetNumCoins()
-        local total = coins / 10
-
-		-- Only run if total has changed
-		if total ~= beggarscup_previous_total then
-
-			beggarscup_previous_total = total
-			local luck_threshold = 5
-            local luck_minimum = 0
-
-			beggarscup_luck_modifier = luck_threshold - total
-
-            if beggarscup_luck_modifier < luck_minimum then
-                beggarscup_luck_modifier = luck_minimum
-            end
-
-			player:AddCacheFlags(CacheFlag.CACHE_LUCK)
-            player:EvaluateItems()
-		end
 	end
 
 	----------------------------------------
@@ -2448,23 +2273,6 @@ do
 				end
 			end
 		end
-	end
-
-	----------------------------------------
-	-- Satan's Contract Logic
-	----------------------------------------
-	function Alphabirth.evaluateSatansContract(player, cache_flag)
-        if cache_flag == CacheFlag.CACHE_DAMAGE then
-            player.Damage = player.Damage * 2
-        elseif cache_flag == CacheFlag.CACHE_FLYING then
-            player.CanFly = true
-		elseif cache_flag == CacheFlag.CACHE_TEARCOLOR then
-			player.TearColor = Color(
-            	0.698, 0.113, 0.113,    -- RGB
-				1,                      -- Alpha
-            	0, 0, 0                 -- RGB Offset
-           )
-        end
 	end
 
 	-- Brown Eye Logic
@@ -3235,13 +3043,18 @@ end
 
 local function handleBlacklight()
 	local timesTillMax = 20
-	if api_mod.data.run.blacklightUses > 0 and api_mod.data.run.darkenCooldown == 0 then
-		AlphaAPI.GAME_STATE.GAME:Darken(3 - (api_mod.data.run.blacklightUses/((timesTillMax)/2)), 200)
-		api_mod.data.run.darkenCooldown = 195
+	if api_mod.data.run.blacklightUses ~= nil then
+			
+		if api_mod.data.run.blacklightUses > 0 and api_mod.data.run.darkenCooldown == 0 then
+			AlphaAPI.GAME_STATE.GAME:Darken(3 - (api_mod.data.run.blacklightUses/((timesTillMax)/2)), 200)
+			api_mod.data.run.darkenCooldown = 195
+		end
+		if api_mod.data.run.darkenCooldown > 0 then
+			api_mod.data.run.darkenCooldown = api_mod.data.run.darkenCooldown - 1
+		end
+
 	end
-	if api_mod.data.run.darkenCooldown > 0 then
-		api_mod.data.run.darkenCooldown = api_mod.data.run.darkenCooldown - 1
-	end
+
 end
 
 local function handlePossessedShot()
@@ -4376,7 +4189,7 @@ function Alphabirth:modUpdate()
         player:EvaluateItems()
     end
 
-    if api_mod.data.run.bloodDriveTimesUsed > 0 then
+    if api_mod.data.run.bloodDriveTimesUsed and api_mod.data.run.bloodDriveTimesUsed > 0 then
         Alphabirth.handleBloodDrive()
     end
     handlePossessedShot()

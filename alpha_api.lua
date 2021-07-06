@@ -546,6 +546,7 @@ do
 		AlphaAPI.GAME_STATE.LEVEL = AlphaAPI.GAME_STATE.GAME:GetLevel()
 		LocalAPI.gridLog = {}
 		LocalAPI.evaluateEntities()
+		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
 		if LocalAPI.data.run.temp_stats and #LocalAPI.data.run.temp_stats > 0 then
 			for _, stat_data in ipairs(LocalAPI.data.run.temp_stats) do
 				player:AddCacheFlags(stat_data.flag)

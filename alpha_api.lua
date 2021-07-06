@@ -261,7 +261,7 @@ else
 			end
 	
 			if costume == -1 then
-				error("COSTUME ID IS -1. You probably entered the wrong costume path!", 2)
+				costume = nil
 			end
 	
 			inst:_init(self, item_id, name, costume, flags)
@@ -283,7 +283,7 @@ else
 			end
 	
 			if costume == -1 then
-				error("COSTUME ID IS -1. You probably entered the wrong costume path!", 2)
+				costume = nil
 			end
 	
 			inst:_init(self, item_id, name, costume, flags, true)

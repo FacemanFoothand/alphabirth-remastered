@@ -5,7 +5,7 @@
 local itemLoader = {}
 itemLoader.loadedItems = {}
 local files = {
-    "code/items/mirror",
+    "code.items.based",
 }
 
 function itemLoader.loadAll(Alphabirth)

@@ -1,6 +1,8 @@
 <items gfxroot="gfx/items/" version="1">
   <!-- Pack 1 -->
   <active description="This is much easier!" gfx="collectible_debug.png" maxcharges="0" name="Debug" />
+    <active description="This is much easier!" gfx="collectible_debug.png" maxcharges="0" name="Debuggy" />
+
   <active description="Sure hope nobody pulls the plug!" gfx="collectible_lifeline.png" maxcharges="6" name="Lifeline" />
   <active description="Gravity up!" gfx="collectible_isaacsapple.png" maxcharges="1" name="Isaac's Apple" />
   <active description="Chilled to the bean." gfx="collectible_coolbean.png" maxcharges="2" name="Cool Bean" />

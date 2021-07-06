@@ -15,7 +15,9 @@ end
 
 local mod = RegisterMod("Alphabirth: Remastered", 1) -- Mod variable for callbacks only!
 local api_mod -- The AlphaAPI ModObject created for this mod
-local Alphabirth = {}
+local Alphabirth = {
+	MOD = mod
+}
 
 ----------------------------------------
 -- CONFIG
@@ -116,6 +118,8 @@ local dynamicActiveItems = {}
 local itemSprites = {}
 local birthControl_pool
 
+local itemLoader = require("code.item_loader")
+
 -------------------
 --  API Start
 -------------------
@@ -123,7 +127,9 @@ local function start()
 	sfx_manager = SFXManager()
 	SFX_MANAGER = sfx_manager
     api_mod = AlphaAPI.registerMod(mod) -- Register the mod with the AlphaAPI
+	Alphabirth.API_MOD = api_mod
 
+	itemLoader.loadAll(Alphabirth)
 	Alphabirth.itemSetup()
 	Alphabirth.entitySetup()
 	Alphabirth.setupMiscCallbacks()

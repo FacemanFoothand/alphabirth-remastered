@@ -13,11 +13,15 @@ end
 -- (sorry for the formatting. -DeadInfinity / meowlala)
 
 
+local g = require("code.globals")
 local mod = RegisterMod("Alphabirth: Remastered", 1) -- Mod variable for callbacks only!
 local api_mod -- The AlphaAPI ModObject created for this mod
 local Alphabirth = {
 	MOD = mod
 }
+
+include("code.save_handler")
+include("code.global_objects")
 
 ----------------------------------------
 -- CONFIG
@@ -118,7 +122,7 @@ local dynamicActiveItems = {}
 local itemSprites = {}
 local birthControl_pool
 
-local itemLoader = require("code.item_loader")
+local itemLoader = include("code.item_loader")
 
 -------------------
 --  API Start

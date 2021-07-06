@@ -1,4 +1,4 @@
-local g = include("code.globals")
+local g = require("code.globals")
 local utils = include("code.utils")
 local mod = g.mod
 

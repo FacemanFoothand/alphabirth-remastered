@@ -1,27 +1,18 @@
 ----------------------------------------------------------------------------
--- Item: Debug
+-- Item: Debuggy
 -- Originally from Pack 1
 -- Debug Item
 ----------------------------------------------------------------------------
 
-local utils = include("code/utils")
+local g = require("code.globals")
+local Item = include("code.item")
+local utils = include("code.utils")
 
-local DEBUG = {
-	ENABLED = true,
-	NAME = "Debuggy",
-	TYPE = "Active",
-	AB_REF = nil,
-	ITEM_REF = nil
-}
+local debuggy = Item("Debuggy")
+debuggy.enabled = true
 
-function DEBUG.setup(Alphabirth)
-	DEBUG.AB_REF = Alphabirth
-	DEBUG.ITEM_REF = Alphabirth.API_MOD:registerItem(DEBUG.NAME)
-	DEBUG.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_USE, DEBUG.trigger)
-end
+debuggy:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
+    print(player)
+end)
 
-function DEBUG.trigger()
-	AlphaAPI.log("HELLO?")
-end
-
-return DEBUG
+return debuggy

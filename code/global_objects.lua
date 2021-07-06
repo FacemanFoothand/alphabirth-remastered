@@ -5,11 +5,11 @@ g.sfx = SFXManager()
 g.music = MusicManager()
 g.itemConfig = Isaac.GetItemConfig()
 local function refreshGlobalObjects()
-	g.room = game:GetRoom()
-	g.level = game:GetLevel()
+	g.room = g.game:GetRoom()
+	g.level = g.game:GetLevel()
 
     local players = {}
-	for i = 1, game:GetNumPlayers() do
+	for i = 1, g.game:GetNumPlayers() do
 		players[i] = Isaac.GetPlayer(i - 1)
 	end
 

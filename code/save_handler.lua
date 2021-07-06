@@ -39,7 +39,7 @@ local function LoadSaveData()
 end
 
 local function SaveSaveData()
-    Isaac.SaveModData(r.mod, json.encode(saveData))
+    Isaac.SaveModData(g.mod, json.encode(g.saveData))
 end
 
 function g.getPlayerSave(player)
@@ -60,7 +60,7 @@ end)
 
 mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, function(_, shouldSave)
 	if shouldSave then
-		r.SaveSaveData()
+		SaveSaveData()
 	end
 end)
 
@@ -96,6 +96,6 @@ end)
 mod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
     if saveOnUpdate then
         saveOnUpdate = nil
-        r.SaveSaveData()
+        SaveSaveData()
     end
 end)

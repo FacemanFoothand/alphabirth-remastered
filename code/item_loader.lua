@@ -11,8 +11,7 @@ local files = {
 function itemLoader.loadAll(Alphabirth)
     for _, file in ipairs(files) do
         local mod = include(file)
-        if mod.ENABLED then
-            mod.setup(Alphabirth)
+        if mod.enabled then
             itemLoader.loadedItems[#itemLoader.loadedItems + 1] = mod
         end
     end

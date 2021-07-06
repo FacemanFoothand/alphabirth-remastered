@@ -165,7 +165,7 @@ function classInit(tbl, ...)
     local inst = {}
     setmetatable(inst, tbl)
     tbl.__index = tbl
-    tbl.__call = ClassInit
+    tbl.__call = classInit
 
     if inst.Init then
         inst:Init(...)

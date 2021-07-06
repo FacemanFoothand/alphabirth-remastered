@@ -159,4 +159,88 @@ function utils.hasCollectible(itemID)
 	return playersThatHaveIt
 end
 
+utils.class = {}
+local classInit
+function classInit(tbl, ...)
+    local inst = {}
+    setmetatable(inst, tbl)
+    tbl.__index = tbl
+    tbl.__call = ClassInit
+
+    if inst.Init then
+        inst:Init(...)
+    end
+
+    if inst.PostInit then
+        inst:PostInit(...)
+    end
+
+    return inst
+end
+
+function utils.class:Init(Type)
+    self.Type = Type
+end
+
+setmetatable(utils.class, {
+    __call = classInit
+})
+
+function utils.getUniquePlayerIdentifier(player) -- CollectibleRNG seed is a number that is consistent across player type changing, save and continue, and new players being added.
+    local data = player:GetData()
+    if not data.uniqueIdentifier then
+        data.uniqueIdentifier = tostring(player:GetCollectibleRNG(1):GetSeed())
+    end
+
+    return data.uniqueIdentifier
+end
+
+function utils.mixTables(tbl1, tbl2) -- Updates first table with the values in the second table, merging sub-tables of the same name together
+    local mixedIndices = {}
+    for i, v in ipairs(tbl2) do
+        mixedIndices[i] = true
+        tbl1[#tbl1 + 1] = v
+    end
+
+    for k, v in pairs(tbl2) do
+        if not mixedIndices[k] then
+            if tbl1[k] and type(tbl1[k]) == "table" and type(v) == "table" then
+                tbl1[k] = lib.Mix(tbl1[k], v)
+            else
+                tbl1[k] = v
+            end
+        end
+    end
+
+    return tbl1
+end
+
+function utils.deepCopy(tbl, mergeInto) -- Deep copies a table. Can alternatively only deep copy values that are incompatible or missing.
+    local outTable = mergeInto or {}
+    for k, v in pairs(tbl) do
+        if not outTable[k] or type(outTable[k]) ~= type(v) then
+            if type(v) == "table" then
+                outTable[k] = utils.deepCopy(v)
+            else
+                outTable[k] = v
+            end
+        end
+    end
+
+    return outTable
+end
+
+function utils.lerp(first,second,percent)
+	return (first + (second - first)*percent)
+end
+
+function utils.getAngleDifference(a1, a2)
+    local sub = a1 - a2
+    return (sub + 180) % 360 - 180
+end
+
+function utils.lerpAngleDegrees(aStart, aEnd, percent)
+    return aStart + utils.getAngleDifference(aEnd, aStart) * percent
+end
+
 return utils

@@ -714,8 +714,6 @@ function Alphabirth.itemSetup()
 		NULL  = Isaac.GetCostumeIdByPath("gfx/animations/costumes/accessories/animation_costume_null.anm2"),
 		WAXED = Isaac.GetCostumeIdByPath("gfx/animations/costumes/accessories/animation_transformation_waxed.anm2"),
         -- Pack 2
-		CHALICE_OF_BLOOD_COSTUME = Isaac.GetCostumeIdByPath("gfx/animations/costumes/accessories/animation_costume_chaliceofblood.anm2"),
-
         CYBORG_COSTUME = Isaac.GetCostumeIdByPath("gfx/animations/costumes/accessories/animation_transformation_cyborg.anm2"),
         DAMNED_COSTUME = Isaac.GetCostumeIdByPath("gfx/animations/costumes/accessories/animation_transformation_damned.anm2"),
 
@@ -899,11 +897,6 @@ function Alphabirth.itemSetup()
 
     ITEMS.ACTIVE.BLASPHEMOUS = api_mod:registerItem("Blasphemous")
     ITEMS.ACTIVE.BLASPHEMOUS:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerBlasphemous)
-
-    ITEMS.ACTIVE.CHALICE_OF_BLOOD = api_mod:registerItem("Chalice of Blood")
-    ITEMS.ACTIVE.CHALICE_OF_BLOOD:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleChaliceOfBlood)
-    ITEMS.ACTIVE.CHALICE_OF_BLOOD:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerChaliceOfBlood)
-    ITEMS.ACTIVE.CHALICE_OF_BLOOD:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyChaliceOfBloodCache)
 
     ITEMS.ACTIVE.BOOK_OF_THE_DEAD = api_mod:registerItem("Book of the Dead")
     ITEMS.ACTIVE.BOOK_OF_THE_DEAD:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleBookOfTheDead)
@@ -1196,7 +1189,6 @@ function Alphabirth.entitySetup()
 
 
     -- EFFECTS
-    ENTITIES.CHALICE_OF_BLOOD = api_mod:getEntityConfig("Chalice of Blood", 0)
     ENTITIES.BOOK_OF_THE_DEAD_BONES = api_mod:getEntityConfig("BookOfTheDeadEffect", 0)
 
     -- TEARS
@@ -1360,16 +1352,11 @@ end
 function Alphabirth.activeItemRenderSetup()
 	dynamicActiveItems = {
 
-	cauldron = {
+		cauldron = {
 			item = ITEMS.ACTIVE.CAULDRON.id,
 			sprite = "gfx/animations/animation_collectible_cauldron.anm2",
 			functionality = Alphabirth.cauldronUpdate
-			},
-	chalice = {
-			item = ITEMS.ACTIVE.CHALICE_OF_BLOOD.id,
-			sprite = "gfx/animations/animation_collectible_chaliceofblood.anm2",
-			functionality = Alphabirth.chaliceOfBloodUpdate
-			},
+		},
 	}
 
 	for k,v in pairs(dynamicActiveItems) do
@@ -2301,115 +2288,6 @@ do
 			player:AddMaxHearts(-2)
 			AlphaAPI.GAME_STATE.GAME:Darken(1, 8)
 			player:AnimateSad()
-		end
-	end
-
-	---------------------------------------
-	-- Chalice of Blood Logic
-	---------------------------------------
-	local chalice
-	local soul_limit = 15
-	function Alphabirth.applyChaliceOfBloodCache(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_DAMAGE then
-			player.Damage = player.Damage * api_mod.data.run.CHALICE_STATS.DAMAGE
-		elseif cache_flag == CacheFlag.CACHE_SHOTSPEED then
-			player.ShotSpeed = player.ShotSpeed + api_mod.data.run.CHALICE_STATS.SHOTSPEED
-		end
-	end
-
-	function Alphabirth.triggerChaliceOfBlood()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		local room = AlphaAPI.GAME_STATE.ROOM
-
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
-			return
-		end
-
-		if api_mod.data.run.chaliceSouls < soul_limit then
-
-			if chalice ~= nil then
-			chalice:Remove()
-			end
-
-			chalice = ENTITIES.CHALICE_OF_BLOOD:spawn(
-				player.Position,
-				Vector(0,0),
-				player
-			)
-		else
-			api_mod.data.run.CHALICE_STATS.DAMAGE = 2
-			api_mod.data.run.CHALICE_STATS.SHOTSPEED = 0.4
-			player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-			player:AddCacheFlags(CacheFlag.CACHE_SHOTSPEED)
-			player:AddNullCostume(COSTUMES.CHALICE_OF_BLOOD_COSTUME)
-			player:EvaluateItems()
-			playSound(SoundEffect.SOUND_VAMP_GULP, 1, 0, false, 1)
-			api_mod.data.run.chaliceSouls = 0
-		end
-		return true
-	end
-
-	function Alphabirth.handleChaliceOfBlood()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		local room = AlphaAPI.GAME_STATE.ROOM
-
-		-- Remove Chalice if room is clear
-		if room:GetFrameCount() == 1 then
-			player:TryRemoveNullCostume(COSTUMES.CHALICE_OF_BLOOD_COSTUME)
-			api_mod.data.run.CHALICE_STATS.DAMAGE = 1
-			api_mod.data.run.CHALICE_STATS.SHOTSPEED = 0
-			player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-			player:AddCacheFlags(CacheFlag.CACHE_SHOTSPEED)
-			player:EvaluateItems()
-		end
-
-		if room:IsClear() and chalice ~= nil then
-			Isaac.Spawn(
-				EntityType.ENTITY_EFFECT,
-				EffectVariant.POOF01,
-				0,            -- Entity Subtype
-				chalice.Position,
-				Vector(0, 0), -- Velocity
-				nil
-			)
-			chalice:Remove()
-			chalice = nil
-		end
-
-		if chalice ~= nil then
-			for _, entity in ipairs(AlphaAPI.entities.all) do
-				if entity.Type == EntityType.ENTITY_PLAYER and entity.Position:Distance(chalice.Position) <= 140 and AlphaAPI.GAME_STATE.GAME:GetFrameCount() % 15 == 0 then
-					Isaac.Spawn(EntityType.ENTITY_EFFECT,EffectVariant.PLAYER_CREEP_RED,0,player.Position,Vector(0, 0),player)
-				end
-
-				local entity_is_close = entity.Position:Distance(chalice.Position) <= 140
-				if entity:IsDead() and entity:ToNPC() and entity_is_close and not entity:IsBoss() then
-					playSound(SoundEffect.SOUND_SUMMONSOUND, 0.5, 0, false, 0.8)
-					Isaac.Spawn(
-						EntityType.ENTITY_EFFECT,
-						EffectVariant.POOF02,
-						0,            -- Entity Subtype
-						entity.Position,
-						Vector(0, 0), -- Velocity
-						nil
-					)
-					api_mod.data.run.chaliceSouls = api_mod.data.run.chaliceSouls + 1
-				end
-			end
-		end
-
-		if api_mod.data.run.chaliceSouls >= soul_limit and chalice ~= nil then
-			playSound(SoundEffect.SOUND_SUMMONSOUND, 0.5, 0, false, 0.9)
-			Isaac.Spawn(
-				EntityType.ENTITY_EFFECT,
-				EffectVariant.POOF01,
-				0,            -- Entity Subtype
-				chalice.Position,
-				Vector(0, 0), -- Velocity
-				nil
-			)
-			chalice:Remove()
-			chalice = nil
 		end
 	end
 
@@ -3820,7 +3698,7 @@ do
 		end
 	end
 
-	
+
 end
 
 local function handleBlacklight()
@@ -4656,23 +4534,8 @@ function Alphabirth.collectibleUpdate(entity)
                 sprite:ReplaceSpritesheet(1,"gfx/items/collectibles/collectible_cauldron3.png")
                 sprite:LoadGraphics()
             end
-        elseif entity.SubType == ITEMS.ACTIVE.CHALICE_OF_BLOOD.id then
-            local sprite = entity:GetSprite()
-            if api_mod.data.run.chaliceSouls <= 5 and sprite:GetFilename() ~= "gfx/items/collectibles/collectible_chaliceofblood.png" then
-                sprite:ReplaceSpritesheet(1,"gfx/items/collectibles/collectible_chaliceofblood.png")
-                sprite:LoadGraphics()
-            elseif api_mod.data.run.chaliceSouls <= 10 and sprite:GetFilename() ~= "gfx/items/collectibles/collectible_chaliceofblood2.png" then
-                sprite:ReplaceSpritesheet(1,"gfx/items/collectibles/collectible_chaliceofblood2.png")
-                sprite:LoadGraphics()
-            elseif api_mod.data.run.chaliceSouls < 15 and sprite:GetFilename() ~= "gfx/items/collectibles/collectible_chaliceofblood3.png" then
-                sprite:ReplaceSpritesheet(1,"gfx/items/collectibles/collectible_chaliceofblood3.png")
-                sprite:LoadGraphics()
-            elseif sprite:GetFilename() ~= "gfx/items/collectibles/collectible_chaliceofblood4.png" then
-                sprite:ReplaceSpritesheet(1,"gfx/items/collectibles/collectible_chaliceofblood4.png")
-                sprite:LoadGraphics()
-            end
         end
-    elseif entity.SubType == ITEMS.ACTIVE.CAULDRON.id or entity.SubType == ITEMS.ACTIVE.CHALICE_OF_BLOOD.id then
+    elseif entity.SubType == ITEMS.ACTIVE.CAULDRON.id then
         local sprite = entity:GetSprite()
         if sprite:GetFilename() ~= "gfx/items/collectibles/questionmark.png" then
             sprite:ReplaceSpritesheet(1,"gfx/items/collectibles/questionmark.png")
@@ -4785,11 +4648,6 @@ function Alphabirth:runStarted(fromsave)
     api_mod.data.run.BOTD_ents = {}
     api_mod.data.run.blacklightUses = 0
     api_mod.data.run.darkenCooldown = 0
-    api_mod.data.run.chaliceSouls = 0
-    api_mod.data.run.CHALICE_STATS = {
-        DAMAGE = 1,
-        SHOTSPEED = 0
-    }
     api_mod.data.run.bloodDriveTimesUsed = 0
     api_mod.data.run.cauldron_points = 0
     api_mod.data.run.active_charge = nil
@@ -5010,31 +4868,14 @@ function Alphabirth.cauldronUpdate(sprite)
 	end
 end
 
-function Alphabirth.chaliceOfBloodUpdate(sprite)
-	if api_mod.data.run.chaliceSouls <= 5 then
-		sprite:Play("State1",false)
-	elseif api_mod.data.run.chaliceSouls <= 10 then
-		sprite:Play("State2",false)
-	elseif api_mod.data.run.chaliceSouls < 15 then
-		sprite:Play("State3",false)
-	else
-		sprite:Play("State4",false)
-	end
-end
 
 function Alphabirth.activeItemRenderSetup()
 	dynamicActiveItems = {
-
-	cauldron = {
+		cauldron = {
 			item = ITEMS.ACTIVE.CAULDRON.id,
 			sprite = "gfx/animations/animation_collectible_cauldron.anm2",
 			functionality = Alphabirth.cauldronUpdate
-			},
-	chalice = {
-			item = ITEMS.ACTIVE.CHALICE_OF_BLOOD.id,
-			sprite = "gfx/animations/animation_collectible_chaliceofblood.anm2",
-			functionality = Alphabirth.chaliceOfBloodUpdate
-			},
+		},
 	}
 
 	for k,v in pairs(dynamicActiveItems) do
@@ -5394,30 +5235,30 @@ do
 						weight = 1
 					}
 				end
-	
+
 				if player:HasCollectible(ITEMS.PASSIVE.CRACKED_ROCK.id) then
 					potential_tear_effects[#potential_tear_effects + 1] = {
 						name = "CrackedRock",
 						weight = 1
 					}
 				end
-	
+
 				if player:HasCollectible(ITEMS.PASSIVE.ABYSS.id) then
 					potential_tear_effects[#potential_tear_effects + 1] = {
 						name = "Abyss",
 						weight = 1
 					}
 				end
-	
+
 				local tear_effect
 				if #potential_tear_effects > 0 then
 					tear_effect = AlphaAPI.getWeightedRNG(potential_tear_effects)
 				end
-	
+
 				if tear_effect then
 					effect_granted = true
 				end
-	
+
 				if tear_effect == "QuillFeather" then
 					tear.Color = Color(0,0,0,1,0,0,0)
 					AlphaAPI.addFlag(tear, ENTITY_FLAGS.QUILL_FEATHER_SHOT)
@@ -5429,7 +5270,7 @@ do
 						sprite:Load("gfx/animations/effects/animation_tears_crackedrock.anm2", true)
 						sprite:Play("Stone3Move", true)
 					end
-	
+
 					AlphaAPI.addFlag(tear, ENTITY_FLAGS.CRACKED_ROCK_SHOT)
 				elseif tear_effect == "Abyss" then
 					abyss_sprite = tear:GetSprite()
@@ -5438,8 +5279,8 @@ do
 					AlphaAPI.addFlag(tear, ENTITY_FLAGS.ABYSS_SHOT)
 				end
 			end
-	
-	
+
+
 			if player:HasCollectible(ITEMS.PASSIVE.HEMOPHILIA.id) and entity.Variant ~= TearVariant.BLOOD and not effect_granted then
 				tear:ChangeVariant(TearVariant.BLOOD)
 			end
@@ -6862,7 +6703,7 @@ end
 function Alphabirth.updateHushyFly(fly)
     local player = AlphaAPI.GAME_STATE.PLAYERS[1]
     fly.OrbitDistance = Vector(50,50)
-	fly.Velocity = (fly:GetOrbitPosition(player.Position) - fly.Position) 
+	fly.Velocity = (fly:GetOrbitPosition(player.Position) - fly.Position)
     if player:GetLastActionTriggers() & ActionTriggers.ACTIONTRIGGER_SHOOTING == 0 then
         fly.OrbitAngleOffset = fly.OrbitAngleOffset + 0.1
     end

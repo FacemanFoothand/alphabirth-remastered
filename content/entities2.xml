@@ -58,7 +58,7 @@
         <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
     </entity>
 
-    <entity anm2path="effects/animation_effect_chaliceofblood.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="99" collisionRadius="9" friction="0" id="3" name="Chalice of Blood" numGridCollisionPoints="10" shadowSize="10" stageHP="0" variant="242">
+    <entity anm2path="effects/animation_effect_chaliceofblood.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="99" collisionRadius="9" friction="0" id="1000" name="Chalice of Blood" numGridCollisionPoints="10" shadowSize="10" stageHP="0" variant="242">
         <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
     </entity>
 

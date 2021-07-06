@@ -1,65 +1,64 @@
 <costumes anm2root="gfx/animations/costumes/">
-    
+
     <!-- Pack 1 -->
-    <costume anm2path="accessories/animation_costume_oldcontroller.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_graphicserror.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_mutantfetus.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_cologne.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_addicted.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_whitecandle.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_pseudobulbaraffect.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_divinewrath.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_furnace.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_beggarscup.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_talismanofabsorption.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_diligence.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_charity.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_patience.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_temperance.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_humility.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_chastity.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_kindness.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_contract.anm2" priority = "97" isFlying = "true" type="none" />
+    <costume id="1" anm2path="accessories/animation_costume_oldcontroller.anm2" priority = "96" type="passive" />
+    <costume id="2" anm2path="accessories/animation_costume_graphicserror.anm2" priority = "96" type="passive" />
+    <costume id="3" anm2path="accessories/animation_costume_mutantfetus.anm2" priority = "96" type="passive" />
+    <costume id="4" anm2path="accessories/animation_costume_cologne.anm2" priority = "96" type="passive" />
+    <costume id="5" anm2path="accessories/animation_costume_addicted.anm2" priority = "96" type="passive" />
+    <costume id="6" anm2path="accessories/animation_costume_whitecandle.anm2" priority = "96" type="passive" />
+    <costume id="7" anm2path="accessories/animation_costume_pseudobulbaraffect.anm2" priority = "96" type="passive" />
+    <costume id="8" anm2path="accessories/animation_costume_divinewrath.anm2" priority = "96" type="passive" />
+    <costume id="9" anm2path="accessories/animation_costume_furnace.anm2" priority = "96" type="passive" />
+    <costume id="10" anm2path="accessories/animation_costume_beggarscup.anm2" priority = "96" type="passive" />
+    <costume id="11" anm2path="accessories/animation_costume_talismanofabsorption.anm2" priority = "96" type="passive" />
+    <costume id="12" anm2path="accessories/animation_costume_diligence.anm2" priority = "96" type="passive" />
+    <costume id="13" anm2path="accessories/animation_costume_charity.anm2" priority = "96" type="passive" />
+    <costume id="14" anm2path="accessories/animation_costume_patience.anm2" priority = "96" type="passive" />
+    <costume id="15" anm2path="accessories/animation_costume_temperance.anm2" priority = "96" type="passive" />
+    <costume id="16" anm2path="accessories/animation_costume_humility.anm2" priority = "96" type="passive" />
+    <costume id="17" anm2path="accessories/animation_costume_chastity.anm2" priority = "96" type="passive" />
+    <costume id="18" anm2path="accessories/animation_costume_kindness.anm2" priority = "96" type="passive" />
+    <costume id="19" anm2path="accessories/animation_costume_contract.anm2" priority = "97" isFlying = "true" type="passive" />
     <costume anm2path="accessories/animation_transformation_waxed.anm2" priority = "98" type="none" />
     <costume anm2path="accessories/animation_costume_null.anm2" priority = "99" isFlying = "true" type="none" />
 
     <!-- Pack 2 -->
-    <costume anm2path="accessories/animation_costume_crackedrock.anm2" priority="98" type="none" />
-    <costume anm2path="accessories/animation_costume_gloomskull.anm2" hasSkinAlt="true" priority="98" type="none" />
-    <costume anm2path="accessories/animation_costume_aimbot.anm2" priority="98" type="none" />
+    <costume id="20" anm2path="accessories/animation_costume_crackedrock.anm2" priority="98" type="passive" />
+    <costume id="21" anm2path="accessories/animation_costume_gloomskull.anm2" hasSkinAlt="true" priority="98" type="passive" />
+    <costume id="22" anm2path="accessories/animation_costume_aimbot.anm2" priority="98" type="passive" />
 
     <costume anm2path="accessories/animation_transformation_cyborg.anm2" priority="199" type="none" />
     <costume anm2path="accessories/animation_transformation_damned.anm2" isFlying="true" priority="199" type="none" />
 
-    <costume anm2path="accessories/animation_costume_hemophilia.anm2" priority="98" type="none" />
-    <costume anm2path="accessories/animation_costume_birthcontrol.anm2" priority="98" type="none" />
-    <costume anm2path="accessories/animation_costume_hemophilia.anm2" priority="98" type="none" />
-    <costume anm2path="accessories/animation_costume_judasfez.anm2" priority="98" type="none" />
-    <costume anm2path="accessories/animation_costume_hotcoals.anm2" priority="98" type="none" />
-    <costume anm2path="accessories/animation_costume_techalpha.anm2" priority="98" type="none" />
-    <costume anm2path="accessories/animation_costume_quillfeather.anm2" priority="98" type="none" />
-    <costume anm2path="accessories/animation_costume_abyss.anm2" priority="98" type="none" />
-    <costume anm2path="accessories/animation_costume_hoarder.anm2" priority="98" type="none" />
-    <costume anm2path="accessories/animation_costume_possessedshot.anm2" priority="98" type="none" />
-    <costume anm2path="accessories/animation_costume_owltotem.anm2" priority="98" type="none" />
-    <costume anm2path="accessories/animation_costume_endors_hat.anm2" priority="98" type="none" />
+    <costume id="23" anm2path="accessories/animation_costume_hemophilia.anm2" priority="98" type="passive" />
+    <costume id="24" anm2path="accessories/animation_costume_birthcontrol.anm2" priority="98" type="passive" />
+    <costume id="25" anm2path="accessories/animation_costume_judasfez.anm2" priority="98" type="passive" />
+    <costume id="26" anm2path="accessories/animation_costume_hotcoals.anm2" priority="98" type="passive" />
+    <costume id="27" anm2path="accessories/animation_costume_techalpha.anm2" priority="98" type="passive" />
+    <costume id="28" anm2path="accessories/animation_costume_quillfeather.anm2" priority="98" type="passive" />
+    <costume id="29" anm2path="accessories/animation_costume_abyss.anm2" priority="98" type="passive" />
+    <costume id="30" anm2path="accessories/animation_costume_hoarder.anm2" priority="98" type="passive" />
+    <costume id="31" anm2path="accessories/animation_costume_possessedshot.anm2" priority="98" type="passive" />
+    <costume id="32" anm2path="accessories/animation_costume_owltotem.anm2" priority="98" type="passive" />
+    <costume id="33" anm2path="accessories/animation_costume_endors_hat.anm2" priority="98" type="passive" />
     <costume anm2path="accessories/animation_costume_chaliceofblood.anm2" priority="99" type="none" />
 
     <costume anm2path="players/animation_character_endorbody.anm2" priority="200" isFlying="true" type="none" />
     <costume anm2path="players/animation_character_endorhead.anm2" priority="200" type="none" />
 
     <!-- Pack 3 -->
-    <costume anm2path="accessories/animation_costume_miniaturemeteor.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_entropy.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_palette.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_crystallized.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_rocketshoes.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_infection.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_leakybombs.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_polymitosis.anm2" priority = "97" type="none" />
-    <costume anm2path="accessories/animation_costume_shootingstar.anm2" priority = "97" type="none" />
-    <costume anm2path="accessories/animation_costume_peanutbutter.anm2" priority = "96" type="none" />
-    <costume anm2path="accessories/animation_costume_faithfulambivalence.anm2" priority = "97" type="none" />
-    <costume anm2path="accessories/animation_costume_hivehead.anm2" priority = "97" type="none" />
-    <costume anm2path="accessories/animation_costume_mrsquishy.anm2" priority = "97" type="none" />
+    <costume id="34" anm2path="accessories/animation_costume_miniaturemeteor.anm2" priority = "96" type="passive" />
+    <costume id="35" anm2path="accessories/animation_costume_entropy.anm2" priority = "96" type="passive" />
+    <costume id="36" anm2path="accessories/animation_costume_palette.anm2" priority = "96" type="passive" />
+    <costume id="37" anm2path="accessories/animation_costume_crystallized.anm2" priority = "96" type="passive" />
+    <costume id="38" anm2path="accessories/animation_costume_rocketshoes.anm2" priority = "96" type="passive" />
+    <costume id="39" anm2path="accessories/animation_costume_infection.anm2" priority = "96" type="passive" />
+    <costume id="40" anm2path="accessories/animation_costume_leakybombs.anm2" priority = "96" type="passive" />
+    <costume id="41" anm2path="accessories/animation_costume_polymitosis.anm2" priority = "97" type="passive" />
+    <costume id="42" anm2path="accessories/animation_costume_shootingstar.anm2" priority = "97" type="passive" />
+    <costume id="43" anm2path="accessories/animation_costume_peanutbutter.anm2" priority = "96" type="passive" />
+    <costume id="44" anm2path="accessories/animation_costume_faithfulambivalence.anm2" priority = "97" type="passive" />
+    <costume id="45" anm2path="accessories/animation_costume_hivehead.anm2" priority = "97" type="passive" />
+    <costume id="46" anm2path="accessories/animation_costume_mrsquishy.anm2" priority = "97" type="passive" />
 </costumes>

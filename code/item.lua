@@ -26,9 +26,9 @@ function Item:Init(name, isTrinket, ...)
         self.IDList = {self.ID}
         for _, extraName in ipairs(extraNames) do
             if not self.IsTrinket then
-                self.IDList[#self.IDList + 1] = Isaac.GetItemIdByName(name)
+                self.IDList[#self.IDList + 1] = Isaac.GetItemIdByName(extraName)
             else
-                self.IDList[#self.IDList + 1] = Isaac.GetTrinketIdByName(name)
+                self.IDList[#self.IDList + 1] = Isaac.GetTrinketIdByName(extraName)
             end
         end
     end
@@ -50,6 +50,8 @@ function Item:PlayerCount(player, ignoreModifiers)
         for _, id in ipairs(self.IDList) do
             count = count + countItem(player, id, self.IsTrinket, ignoreModifiers)
         end
+
+        return count
     else
         return countItem(player, self.ID, self.IsTrinket, ignoreModifiers)
     end
@@ -137,10 +139,18 @@ function Item:AddCallback(id, func, param)
 
         local params = param
         if type(param) ~= "table" then
-            params = {param}
+            if param == nil then
+                params = {false}
+            else
+                params = {param}
+            end
         end
 
         for _, param in ipairs(params) do
+            if param == false then
+                param = nil
+            end
+
             mod:AddCallback(id, function(_, ...)
                 if Item.DirectCallbacks[id] then
                     return func(...)

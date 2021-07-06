@@ -35,6 +35,7 @@ local function LoadSaveData()
         end
 
         g.saveData = utils.deepCopy(g.defaultSaveData, g.saveData)
+        saveDataLoaded = true
     end
 end
 

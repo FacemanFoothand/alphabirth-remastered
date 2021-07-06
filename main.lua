@@ -1,8 +1,4 @@
-if AlphaAPI then
-	print("API Already loaded!")
-else
-	require("alpha_api.lua")
-end
+include("alpha_api.lua")
 
 --------------------------------------------------
 ----------- Alphabirth: Remastered -------------

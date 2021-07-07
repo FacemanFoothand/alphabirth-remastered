@@ -38,7 +38,7 @@ end
 
 local function countItem(player, id, isTrinket, ignoreModifiers)
     if not isTrinket then
-        return player:GetCollectibleCount(id, ignoreModifiers)
+        return player:GetCollectibleNum(id, ignoreModifiers)
     else
         return player:GetTrinketMultiplier(id)
     end

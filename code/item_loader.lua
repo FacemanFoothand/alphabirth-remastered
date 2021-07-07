@@ -6,7 +6,7 @@ local itemLoader = {}
 itemLoader.loadedItems = {}
 local files = {
     "code.items.based",
-	-- "code.items.addicted",
+	"code.items.addicted",
 	-- "code.items.chalice_of_blood",
 }
 

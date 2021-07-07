@@ -132,16 +132,12 @@ local function start()
 
 	itemLoader.loadAll(Alphabirth)
 	Alphabirth.itemSetup()
-	print("AA")
 	Alphabirth.entitySetup()
 	Alphabirth.setupMiscCallbacks()
-	print("AA")
-
 	Alphabirth.transformationSetup()
 	Alphabirth.curseSetup()
 	Alphabirth.miscTablesSetup()
 	Alphabirth.miscEntityHandling()
-	print("AA")
 
 	Alphabirth.activeItemRenderSetup()
 
@@ -4332,7 +4328,7 @@ local function hasProtection(player, damage_flags, damage_source)
 	return
 	(AlphaAPI.hasTransformation(TRANSFORMATIONS.WAXED) and hasWaxedProtection(damage_flags, damage_source))
 	or (player:HasCollectible(ITEMS.PASSIVE.DILIGENCE.id) and hasDiligenceProtection(damage_flags, damage_source))
-	or (player:HasCollectible(ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id) and hasTalismanProtection(damage_flags))
+	-- or (player:HasCollectible(ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id) and hasTalismanProtection(damage_flags))
 end
 
 function g.hasProtection(player, damage_flags, damage_source)
@@ -4354,10 +4350,10 @@ local direction_list = {
 function Alphabirth.entityTakeDamage(entity, damage_amount, damage_flags, damage_source, invincibility_frames)
 	if entity.Type == EntityType.ENTITY_PLAYER then
 		local player = entity:ToPlayer()
-		if player:HasCollectible(ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id) and hasTalismanProtection(damage_flags) then
-			player:AddHearts(2)
-			return false
-		end
+		--if player:HasCollectible(ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id) and hasTalismanProtection(damage_flags) then
+		--	player:AddHearts(2)
+		--	return false
+		--end
 
 		if player:HasCollectible(ITEMS.PASSIVE.DILIGENCE.id) then
 			local ignore_damage = random(1, 5)
@@ -4387,22 +4383,6 @@ function Alphabirth.entityTakeDamage(entity, damage_amount, damage_flags, damage
 			end
 		end
 
-	    if player:HasCollectible(ITEMS.PASSIVE.SATANS_CONTRACT.id)
-		and not hasProtection(player, damage_flags, damage_source) then
-	        for i = 1, damage_amount do
-	            if player:GetSoulHearts() > 0 then
-	                player:AddSoulHearts(-1)
-	            else
-	                player:AddHearts(-1)
-	            end
-	        end
-
-	        if player:GetHearts() == 0 and player:GetSoulHearts() == 0 then
-	            player:Die()
-	        end
-	    end
-
-		
 	else
 
 		if AlphaAPI.hasFlag(damage_source, ENTITY_FLAGS.MUTANT_TEAR)

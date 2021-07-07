@@ -56,15 +56,14 @@ local utils = include("code.utils")
 local random = utils.random
 
 local addicted = Item("Addicted")
-addicted.enabled = true
 
 addicted:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, damage_amount, damage_flags, damage_source, invincibility_frames)
 	if entity.Type == EntityType.ENTITY_PLAYER then
 		local player = entity:ToPlayer()
-		if player:HasCollectible(addicted.ID)
-		and not g.hasProtection(player, damage_flags, damage_source) then
+		if not g.hasProtection(player, damage_flags, damage_source) then
 			local pill_chance = random(1, 6)
 			if pill_chance == 1 then
+				print("I AM ME")
 				local chosen_pill = validEffects[random(1, #validEffects)]
 				player:UsePill(chosen_pill, PillColor.PILL_BLUE_BLUE)
 			end

@@ -4,7 +4,7 @@
 -- Has a chance to swallow a random pill when damage is taken
 ----------------------------------------------------------------------------
 
-local validEffects = {
+local valid_effects = {
 	PillEffect.PILLEFFECT_48HOUR_ENERGY,
 	PillEffect.PILLEFFECT_ADDICTED,
 	PillEffect.PILLEFFECT_AMNESIA,
@@ -50,10 +50,9 @@ local validEffects = {
 	PillEffect.PILLEFFECT_VURP
 }
 
-local g = require("code.globals")
-local Item = include("code.item")
-local utils = include("code.utils")
-local random = utils.random
+local g = require("ab_src.modules.globals")
+local Item = include("ab_src.api.item")
+local utils = include("ab_src.modules.utils")
 
 local addicted = Item("Addicted")
 
@@ -61,10 +60,9 @@ addicted:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, damage_am
 	if entity.Type == EntityType.ENTITY_PLAYER then
 		local player = entity:ToPlayer()
 		if not g.hasProtection(player, damage_flags, damage_source) then
-			local pill_chance = random(1, 6)
+			local pill_chance = utils.random(1, 6)
 			if pill_chance == 1 then
-				print("I AM ME")
-				local chosen_pill = validEffects[random(1, #validEffects)]
+				local chosen_pill = valid_effects[utils.random(1, #valid_effects)]
 				player:UsePill(chosen_pill, PillColor.PILL_BLUE_BLUE)
 			end
 		end

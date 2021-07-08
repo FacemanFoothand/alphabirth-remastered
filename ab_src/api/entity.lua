@@ -1,5 +1,5 @@
-local g = require("code.globals")
-local utils = include("code.utils")
+local g = require("ab_src.modules.globals")
+local utils = include("ab_src.modules.utils")
 local mod = g.mod
 
 local EntityConfig = utils.class("EntityConfig")

@@ -4,9 +4,9 @@
 -- Stats up if you haven't gone to the DEVIL room this run
 ----------------------------------------------------------------------------
 
-local g = require("code.globals")
-local Item = include("code.item")
-local utils = include("code.utils")
+local g = require("ab_src.modules.globals")
+local Item = include("ab_src.api.item")
+local utils = include("ab_src.modules.utils")
 
 local chastity = Item("Chastity")
 

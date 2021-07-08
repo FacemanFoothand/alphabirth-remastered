@@ -4,12 +4,11 @@
 -- Debug Item
 ----------------------------------------------------------------------------
 
-local g = require("code.globals")
-local Item = include("code.item")
-local utils = include("code.utils")
+local g = require("ab_src.modules.globals")
+local Item = include("ab_src.api.item")
+local utils = include("ab_src.modules.utils")
 
 local debuggy = Item("Debuggy")
-debuggy.enabled = true
 
 debuggy:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
     print(player)

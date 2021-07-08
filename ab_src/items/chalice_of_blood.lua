@@ -5,10 +5,10 @@
 -- When full, the next use of the item will grant a costume and large stat boost instead of spawning the chalice
 ----------------------------------------------------------------------------
 
-local g = require("code.globals")
-local Item = include("code.item")
-local EntityConfig = include("code.entity")
-local utils = include("code.utils")
+local EntityConfig = include("ab_src.api.entity")
+local g = require("ab_src.modules.globals")
+local Item = include("ab_src.api.item")
+local utils = include("ab_src.modules.utils")
 
 local chaliceOfBlood = Item("Chalice of Blood", false, " Chalice of Blood ", "  Chalice of Blood  ", "   Chalice of Blood   ")
 chaliceOfBlood.NullCostume = Isaac.GetCostumeIdByPath("gfx/animations/costumes/accessories/animation_costume_chaliceofblood.anm2")

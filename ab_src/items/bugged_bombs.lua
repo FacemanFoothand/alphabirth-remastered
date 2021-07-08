@@ -4,7 +4,7 @@
 -- Bombs become Bugged Bombs, which have tear flags randomly applied to them.
 ----------------------------------------------------------------------------
 
-local BOMB_FLAGS = {
+local BombFlags = {
 	"TEAR_BURN",
 	"TEAR_SAD_BOMB",
 	"TEAR_GLITTER_BOMB",
@@ -36,7 +36,7 @@ end)
 bugged_bombs:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, function(player, bomb, bomb_variant)
 	if bomb_variant ~= BombVariant.BOMB_SUPERTROLL and bomb.Variant ~= BombVariant.BOMB_TROLL then
 		if bomb.FrameCount % 15 == 0 then
-			bomb.Flags = bomb.Flags | TearFlags[BOMB_FLAGS[utils.random(1, #BOMB_FLAGS)]]
+			bomb.Flags = bomb.Flags | TearFlags[BombFlags[utils.random(1, #BombFlags)]]
 		end
 	end
 end)

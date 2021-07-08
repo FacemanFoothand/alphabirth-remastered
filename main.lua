@@ -8,8 +8,7 @@ include("alpha_api.lua")
 -- You can find it here: http://steamcommunity.com/sharedfiles/filedetails/?id=908404046
 -- (sorry for the formatting. -DeadInfinity / meowlala)
 
-
-local g = require("code.globals")
+local g = require("ab_src.modules.globals")
 local mod = RegisterMod("Alphabirth: Remastered", 1) -- Mod variable for callbacks only!
 local api_mod -- The AlphaAPI ModObject created for this mod
 local Alphabirth = {
@@ -17,8 +16,8 @@ local Alphabirth = {
 }
 
 g.mod = mod
-include("code.save_handler")
-include("code.global_objects")
+include("ab_src.modules.save_handler")
+include("ab_src.modules.global_objects")
 
 ----------------------------------------
 -- CONFIG
@@ -119,7 +118,7 @@ local dynamicActiveItems = {}
 local itemSprites = {}
 local birthControl_pool
 
-local itemLoader = include("code.item_loader")
+local itemLoader = include("ab_src.modules.item_loader")
 
 -------------------
 --  API Start

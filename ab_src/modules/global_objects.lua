@@ -1,4 +1,4 @@
-local g = require("code.globals")
+local g = require("ab_src.modules.globals")
 
 g.game = Game()
 g.sfx = SFXManager()

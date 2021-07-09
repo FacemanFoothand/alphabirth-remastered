@@ -4,26 +4,16 @@
 -- Debug Item
 ----------------------------------------------------------------------------
 
-local utils = include("code/utils")
+local g = require("ab_src.modules.globals")
+local Item = include("ab_src.api.item")
+local Entity = include("ab_src.api.entity")
+local utils = include("ab_src.modules.utils")
 
-local DEBUG = {
-	ENABLED = true,
-	NAME = "Debug",
-	TYPE = "Active",
-	AB_REF = nil,
-	ITEM_REF = nil
-}
+local debug = Item("Debug")
+local glitched_pickup = Entity("Glitched Pickups")
 
-function DEBUG.setup(Alphabirth)
-	DEBUG.AB_REF = Alphabirth
-	Alphabirth.ITEMS.ACTIVE.DEBUG = Alphabirth.API_MOD:registerItem(DEBUG.NAME)
-	DEBUG.ITEM_REF = Alphabirth.ITEMS.ACTIVE.DEBUG
-	DEBUG.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_USE, DEBUG.trigger)
-end
+debug:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
+	glitched_pickup:Spawn(player.Position, player.Velocity, player)
+end)
 
-function DEBUG.trigger()
-	local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	DEBUG.AB_REF.ENTITIES.GLITCH_PICKUP:spawn(player.Position, player.Velocity, player)
-end
-
-return DEBUG
+return debug

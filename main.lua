@@ -166,7 +166,7 @@ local function start()
 	{
 		-- ITEMS.ACTIVE.GREEN_CANDLE.id,
 		-- ITEMS.PASSIVE.WHITE_CANDLE.id,
-		ITEMS.PASSIVE.CANDLE_KIT.id,
+		-- ITEMS.PASSIVE.CANDLE_KIT.id,
 		CollectibleType.COLLECTIBLE_RED_CANDLE,
 		CollectibleType.COLLECTIBLE_CANDLE,
 		CollectibleType.COLLECTIBLE_BLACK_CANDLE
@@ -310,15 +310,15 @@ local function start()
 	                    -- ITEMS.PASSIVE.WHITE_CANDLE.id,
 						ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT.id,
 						-- ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id,
-						ITEMS.PASSIVE.DIVINE_WRATH.id,
-						ITEMS.PASSIVE.DILIGENCE.id,
+						-- ITEMS.PASSIVE.DIVINE_WRATH.id,
+						-- ITEMS.PASSIVE.DILIGENCE.id,
 						-- ITEMS.PASSIVE.CHARITY.id,
 						ITEMS.PASSIVE.PATIENCE.id,
 						-- ITEMS.PASSIVE.TEMPERANCE.id,
 						-- ITEMS.PASSIVE.CHASTITY.id,
 						ITEMS.PASSIVE.HUMILITY.id,
 						ITEMS.PASSIVE.KINDNESS.id,
-						ITEMS.PASSIVE.CANDLE_KIT.id,
+						-- ITEMS.PASSIVE.CANDLE_KIT.id,
 						ITEMS.TRINKET.EMPEROR_CROWN.id,
 						ITEMS.TRINKET.BROWN_EYE.id,
 						ITEMS.PASSIVE.OLD_CONTROLLER.id,
@@ -694,9 +694,6 @@ function Alphabirth.itemSetup()
 	ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT = api_mod:registerItem("Pseudobulbar Affect", "gfx/animations/costumes/accessories/animation_costume_pseudobulbaraffect.anm2")
 	ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handlePseudobulbarAffect)
 
-	-- Immunity to fire, spikes, and bombs. 20% chance to dodge all damage
-	ITEMS.PASSIVE.DILIGENCE = api_mod:registerItem("Diligence", "gfx/animations/costumes/accessories/animation_costume_diligence.anm2")
-
 	-- Damage up the longer you're in a room
 	ITEMS.PASSIVE.PATIENCE = api_mod:registerItem("Patience", "gfx/animations/costumes/accessories/animation_costume_patience.anm2")
 	ITEMS.PASSIVE.PATIENCE:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handlePatience)
@@ -710,18 +707,9 @@ function Alphabirth.itemSetup()
 	ITEMS.PASSIVE.KINDNESS = api_mod:registerItem("Kindness", "gfx/animations/costumes/accessories/animation_costume_kindness.anm2")
 	ITEMS.PASSIVE.KINDNESS:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleKindness)
 
-	-- Ludovico-esque hush laser.
-	ITEMS.PASSIVE.DIVINE_WRATH = api_mod:registerItem("Divine Wrath", "gfx/animations/costumes/accessories/animation_costume_divinewrath.anm2")
-	ITEMS.PASSIVE.DIVINE_WRATH:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.pickupDivineWrath, true)
-	ITEMS.PASSIVE.DIVINE_WRATH:addCallback(AlphaAPI.Callbacks.ITEM_REMOVE, Alphabirth.removeDivineWrath, true)
-
 	-- Spawns a familiar that persues the nearest enemy, pushing them away and blocking tears
 	ITEMS.PASSIVE.STONED_BUDDY = api_mod:registerItem("Stoned Buddy")
     ITEMS.PASSIVE.STONED_BUDDY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateStonedBuddy)
-
-	-- Grants two Candle orbitals that burn nearby enemies and deal contact damage.
-	ITEMS.PASSIVE.CANDLE_KIT = api_mod:registerItem("Candle Kit")
-    ITEMS.PASSIVE.CANDLE_KIT:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateCandleKit)
 
 	LOCKS.OLD_CONTROLLER = api_mod:createUnlock("alphaOldController")
 	ITEMS.PASSIVE.OLD_CONTROLLER = api_mod:registerItem("Old Controller", "gfx/animations/costumes/accessories/animation_costume_oldcontroller.anm2")
@@ -747,9 +735,6 @@ function Alphabirth.itemSetup()
 	--------------
 	--  PACK 2  --
 	--------------
-
-    ITEMS.ACTIVE.MIRROR = api_mod:registerItem("Mirror")
-    ITEMS.ACTIVE.MIRROR:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerMirror)
 
     ITEMS.ACTIVE.CAULDRON = api_mod:registerItem("Cauldron")
     ITEMS.ACTIVE.CAULDRON:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerCauldron)
@@ -1024,14 +1009,6 @@ function Alphabirth.entitySetup()
 	ENTITIES.STONED_BUDDY = api_mod:getEntityConfig("Stoned Buddy")
 	ENTITIES.STONED_BUDDY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateStonedBuddy)
 	ENTITIES.STONED_BUDDY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initStonedBuddy)
-
-	ENTITIES.DIVINE_WRATH = api_mod:getEntityConfig("Divine Wrath")
-	ENTITIES.DIVINE_WRATH:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateDivineWrath)
-	ENTITIES.DIVINE_WRATH:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initDivineWrath)
-
-	ENTITIES.CANDLE_KIT = api_mod:getEntityConfig("Candle Kit")
-	ENTITIES.CANDLE_KIT:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateCandleKit)
-    ENTITIES.CANDLE_KIT:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initCandleKit)
 
     -- Familiars
     ENTITIES.BLOODERFLY = api_mod:getEntityConfig("Blooderfly", 0)
@@ -1696,54 +1673,6 @@ do
 	end
 
 	----------------------------------------
-	-- Mirror Logic
-	----------------------------------------
-	function Alphabirth.triggerMirror()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		local room = AlphaAPI.GAME_STATE.ROOM
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
-			return
-		end
-
-		-- Get room entities.
-		local ents = AlphaAPI.entities.enemies
-
-		-- Get number of entities, and generate a random number between 1 and the number of entities.
-		local num_ents = #ents
-
-		local rand_key = random(num_ents)
-
-		-- Make sure the entity is an enemy, not a fire, and not a portal.
-		-- Switch Isaac's position with the entity's position.
-		-- Animate the teleportation.
-		-- Further randomize the selection.
-		if room:GetAliveEnemiesCount() > 0 then
-			for rand_key, entity in pairs(ents) do
-				if entity.Type ~= 306 and -- Portals
-						entity.Type ~= 304 and -- The Thing
-						entity.Type ~= EntityType.ENTITY_RAGE_CREEP and
-						entity.Type ~= EntityType.ENTITY_BLIND_CREEP and
-						entity.Type ~= EntityType.ENTITY_WALL_CREEP and
-						entity.Velocity:Length() > 0.1 then
-					local player_pos = player.Position
-					local entity_pos = entity.Position
-
-					player.Position = entity_pos
-					entity.Position = player_pos
-
-					player:AnimateTeleport()
-
-					rand_key = random(1, num_ents)
-				end
-			end
-		else
-			local teleport_pos = room:FindFreePickupSpawnPosition(room:GetDoorSlotPosition(random(DoorSlot.LEFT0, DoorSlot.DOWN0)), 1, true)
-			player.Position = teleport_pos
-			player:AnimateTeleport()
-		end
-	end
-
-	----------------------------------------
 	-- Bionic Arm Logic
 	----------------------------------------
 
@@ -2329,21 +2258,6 @@ do
             needs_to_tp_emperor_crown = true
 			AlphaAPI.log("HELLO?")
         end
-	end
-
-	-----------------------------
-	-- Familiar Spawning Logic --
-	-----------------------------
-	function Alphabirth.pickupDivineWrath(player)
-		ENTITIES.DIVINE_WRATH:spawn(player.Position, Vector(0,0), player)
-	end
-
-	function Alphabirth.removeDivineWrath()
-		for _, entity in ipairs(AlphaAPI.entities.friendly) do
-			if AlphaAPI.matchConfig(entity, ENTITIES.DIVINE_WRATH) then
-				entity:Remove()
-			end
-		end
 	end
 
 	-------------------------------------------------------------------------------
@@ -4326,7 +4240,7 @@ end
 local function hasProtection(player, damage_flags, damage_source)
 	return
 	(AlphaAPI.hasTransformation(TRANSFORMATIONS.WAXED) and hasWaxedProtection(damage_flags, damage_source))
-	or (player:HasCollectible(ITEMS.PASSIVE.DILIGENCE.id) and hasDiligenceProtection(damage_flags, damage_source))
+	-- or (player:HasCollectible(ITEMS.PASSIVE.DILIGENCE.id) and hasDiligenceProtection(damage_flags, damage_source))
 	-- or (player:HasCollectible(ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id) and hasTalismanProtection(damage_flags))
 end
 
@@ -4353,17 +4267,6 @@ function Alphabirth.entityTakeDamage(entity, damage_amount, damage_flags, damage
 		--	player:AddHearts(2)
 		--	return false
 		--end
-
-		if player:HasCollectible(ITEMS.PASSIVE.DILIGENCE.id) then
-			local ignore_damage = random(1, 5)
-			if ignore_damage == 1 then
-				return false
-			end
-
-			if hasDiligenceProtection(damage_flags, damage_source) then
-				return false
-			end
-		end
 
 		if AlphaAPI.hasTransformation(TRANSFORMATIONS.WAXED) then
 			if hasWaxedProtection(damage_flags, damage_source) then
@@ -4561,66 +4464,6 @@ do
 			end
 		end
 
-	----------------------------------------
-	-- Divine Wrath Logic
-	----------------------------------------
-	local divine_wrath_previous_pos = nil
-	function Alphabirth.updateDivineWrath(familiar)
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    local grid_position = AlphaAPI.GAME_STATE.ROOM:GetGridIndex(familiar.Position)
-	    local grid_entity = AlphaAPI.GAME_STATE.ROOM:GetGridEntity(grid_position)
-
-	    player.FireDelay = 1
-
-	    -- Grid entities it touches get hurt every sixth of a second / Excludes secret doors.
-	    if grid_entity then
-	        local is_door = grid_entity.Desc.Type == GridEntityType.GRID_DOOR
-	        local is_wall = grid_entity.Desc.Type == GridEntityType.GRID_WALL
-
-	        if not is_door and not is_wall then
-	            grid_entity:Destroy(true)
-	        end
-	    end
-
-	    if not AlphaAPI.GAME_STATE.ROOM:IsPositionInRoom(familiar.Position, 0) then
-	        familiar.Position = divine_wrath_previous_pos
-	    end
-
-	    familiar.CollisionDamage = player.Damage * 1.5
-
-	    -- Destroy fireplaces.
-	    for _, entity in ipairs(AlphaAPI.entities.all) do
-	        if entity.Type == EntityType.ENTITY_FIREPLACE then
-	            if familiar.Position:Distance(entity.Position) < 20 then
-	                entity:TakeDamage(familiar.CollisionDamage, 0, EntityRef(player), 0)
-	            end
-	        elseif entity.Type == EntityType.ENTITY_PICKUP and entity.Variant == 51 then
-	            if familiar.Position:Distance(entity.Position) < 20 then
-	                entity:ToPickup():TryOpenChest()
-	            end
-	        elseif entity.Type == EntityType.ENTITY_SLOT then
-	            if familiar.Position:Distance(entity.Position) < 20 then
-	                --Isaac.DebugString("Slot")
-	                entity:TakeDamage(familiar.CollisionDamage, DamageFlag.DAMAGE_EXPLOSION, EntityRef(player), 0)
-	            end
-	        end
-	    end
-
-	    local aim_direction = player:GetAimDirection()
-	    aim_direction = aim_direction * (player.ShotSpeed)
-	    if aim_direction:Length() == 0.0 then
-	        -- familiar.Velocity = Vector(0, 0)
-	    else
-	        familiar:AddVelocity(aim_direction)
-	    end
-
-	    divine_wrath_previous_pos = familiar.Position
-	end
-
-	function Alphabirth.initDivineWrath(familiar)
-	    familiar.GridCollisionClass = GridCollisionClass.COLLISION_NONE
-	end
-
 	function Alphabirth.onBombDipDie(entity)
 		Isaac.Explode(entity.Position, entity, 1.0)
 	end
@@ -4690,33 +4533,6 @@ do
         end
     end
 
-	----------------------------------------
-	-- Candle Kit Logic
-	----------------------------------------
-	function Alphabirth.updateCandleKit(candleEnt)
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-        candleEnt.OrbitDistance = EntityFamiliar.GetOrbitDistance(candleEnt.OrbitLayer)
-        local target_position = candleEnt:GetOrbitPosition(player.Position)
-        candleEnt.Velocity = target_position - candleEnt.Position
-        candleEnt.CollisionDamage = player.Damage * 0.8
-        for i, e in ipairs(AlphaAPI.entities.enemies) do
-            if  e.Position:Distance(candleEnt.Position) < 55 and random(60) == 1 then
-                e:AddBurn(EntityRef(candleEnt), 120, 1.0)
-            end
-        end
-	end
-
-    function Alphabirth.initCandleKit(familiar)
-        familiar.OrbitLayer = 4
-        familiar:RecalculateOrbitOffset(familiar.OrbitLayer, true)
-    end
-
-    function Alphabirth.evaluateCandleKit(player, flag)
-        if flag == CacheFlag.CACHE_FAMILIARS then
-            local amount_to_spawn = (player:GetCollectibleNum(ITEMS.PASSIVE.CANDLE_KIT.id) * 2) * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
-            player:CheckFamiliar(ENTITIES.CANDLE_KIT.variant, amount_to_spawn, rng)
-        end
-    end
 end
 
 -------------------------------------------------------------------------------

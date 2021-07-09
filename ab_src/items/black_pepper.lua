@@ -33,7 +33,7 @@ black_pepper:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, p
 				local random_angle = math.rad(utils.random(-math.floor(angle), math.floor(angle)))
 
 				-- Convert angle to a vector per tear
-				local angular_vector = utils.VECTOR_ZERO
+				local angular_vector = Vector.Zero
 				angular_vector.X = math.cos(random_angle) * direction_vector.X -
 						math.sin(random_angle) * direction_vector.Y
 				angular_vector.Y = math.sin(random_angle) * direction_vector.X -

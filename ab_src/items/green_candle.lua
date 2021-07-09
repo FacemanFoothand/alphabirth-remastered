@@ -4,69 +4,58 @@
 -- Fire a green fire and poison nearby enemies
 ----------------------------------------------------------------------------
 
-local utils = include("code/utils")
+local g = require("ab_src.modules.globals")
+local Item = include("ab_src.api.item")
+local EntityConfig = include("ab_src.api.entity")
+local utils = include("ab_src.modules.utils")
 
-local GREEN_CANDLE = {
-	ENABLED = true,
-	NAME = "Green Candle",
-	TYPE = "Active",
-	AB_REF = nil,
-	ITEM_REF = nil,
+local green_candle = Item("Green Candle")
+local flame_entity = EntityConfig("Green Candle", 20)
+green_candle.poison_range = 120
+green_candle.poison_duration = 120
 
-	HOLDING_GREEN_CANDLE = false,
-	POISON_RANGE = 120,
-	POSION_DURATION = 120,
-}
+utils.mixTables(g.defaultPlayerSaveData, {
+	holding_green_candle = false
+})
 
-function GREEN_CANDLE.setup(Alphabirth)
-	GREEN_CANDLE.AB_REF = Alphabirth
-	Alphabirth.ENTITIES.GREEN_CANDLE = Alphabirth.API_MOD:getEntityConfig("Green Candle", 20)
-	Alphabirth.ITEMS.ACTIVE.GREEN_CANDLE = Alphabirth.API_MOD:registerItem(GREEN_CANDLE.NAME)
-	GREEN_CANDLE.ITEM_REF = Alphabirth.ITEMS.ACTIVE.GREEN_CANDLE
-	GREEN_CANDLE.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_USE, GREEN_CANDLE.trigger)
-	GREEN_CANDLE.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, GREEN_CANDLE.update)
-end
+green_candle:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
+	local save = g.getPlayerSave(player)
+	player:AnimateCollectible(green_candle.ID, "LiftItem", "PlayerPickup")
+	save.holding_green_candle = true
+end)
 
-function GREEN_CANDLE.trigger()
-	local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	player:AnimateCollectible(GREEN_CANDLE.ITEM_REF.id, "LiftItem", "PlayerPickup")
-	GREEN_CANDLE.HOLDING_GREEN_CANDLE = true
-end
-
-function GREEN_CANDLE.update()
-	local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	if GREEN_CANDLE.HOLDING_GREEN_CANDLE then
+green_candle:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, player_type)
+	local save = g.getPlayerSave(player)
+	if save.holding_green_candle then
 		local direction = player:GetFireDirection()
 		local direction_vector = utils.getVectorFromDirection(direction)
 
 		if direction_vector ~= utils.VECTOR_ZERO then
 			local firevelocity = (direction_vector * player.ShotSpeed) * 28
-			GREEN_CANDLE.AB_REF.ENTITIES.GREEN_CANDLE:spawn(
+			flame_entity:Spawn(
 				player.Position,
 				firevelocity,
 				player
 			)
 
-			player:AnimateCollectible(GREEN_CANDLE.ITEM_REF.id, "HideItem", "PlayerPickup")
-			GREEN_CANDLE.HOLDING_GREEN_CANDLE = false
+			player:AnimateCollectible(green_candle.ID, "HideItem", "PlayerPickup")
+			save.holding_green_candle = false
 		end
 	end
+end)
 
-	-- Poison effect
-	for i,entity in ipairs(AlphaAPI.entities.all) do
-		if utils.isOfType(entity, GREEN_CANDLE.AB_REF.ENTITIES.GREEN_CANDLE) then
-			for _, enemy in ipairs(AlphaAPI.entities.enemies) do
-				local distance_to_enemy = entity.Position:Distance(enemy.Position)
-				if distance_to_enemy < GREEN_CANDLE.POISON_RANGE then
-					enemy:AddPoison(
-						EntityRef(player),
-						GREEN_CANDLE.POSION_DURATION,
-						player.Damage
-					)
-				end
-			end
+flame_entity:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function (entity, effect, effect_variant)
+	for _, target in ipairs(Isaac:GetRoomEntities()) do
+		local distance_to_enemy = entity.Position:Distance(target.Position)
+		if target:IsVulnerableEnemy() and distance_to_enemy < green_candle.poison_range then
+			local player = (entity.SpawnerEntity):ToPlayer()
+			target:AddPoison(
+				EntityRef(player),
+				green_candle.poison_duration,
+				player.Damage
+			)
 		end
 	end
-end
+end)
 
-return GREEN_CANDLE
+return green_candle

@@ -4,47 +4,33 @@
 -- Freezes nearby enemies
 ----------------------------------------------------------------------------
 
-local utils = include("code/utils")
+local g = require("ab_src.modules.globals")
+local Item = include("ab_src.api.item")
+local EntityConfig = include("ab_src.api.entity")
+local utils = include("ab_src.modules.utils")
 
-local cool_bean = {
-	ENABLED = true,
-	NAME = "Cool Bean",
-	TYPE = "Active",
-	COOL_BEAN_RANGE = 160,
-	COOL_BEAN_FREEZE_DURATION = 150,
-	AB_REF = nil,
-	ITEM_REF = nil
-}
+local cool_bean = Item("Cool Bean")
+local ice_fart = EntityConfig("Ice Fart")
+cool_bean.freeze_range = 160
+cool_bean.freeze_duration = 150
 
-function cool_bean.setup(Alphabirth)
-	cool_bean.AB_REF = Alphabirth
-	Alphabirth.ENTITIES.ICE_FART = Alphabirth.API_MOD:getEntityConfig("Ice Fart")
-	Alphabirth.ITEMS.ACTIVE.COOL_BEAN = Alphabirth.API_MOD:registerItem(cool_bean.NAME)
-	cool_bean.ITEM_REF = Alphabirth.ITEMS.ACTIVE.COOL_BEAN
-	cool_bean.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_USE, cool_bean.trigger)
-end
-
-function cool_bean.trigger()
-	local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	for _, entity in ipairs(AlphaAPI.entities.all) do
+cool_bean:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
+	for _, entity in ipairs(Isaac.GetRoomEntities()) do
 		if entity:IsActiveEnemy() then
 			local distance_to_enemy = player.Position:Distance(entity.Position)
-			if distance_to_enemy < cool_bean.COOL_BEAN_RANGE then
-				entity:AddFreeze(
-					EntityRef(player),
-					cool_bean.COOL_BEAN_FREEZE_DURATION
-				)
+			if distance_to_enemy < cool_bean.freeze_range then
+				entity:AddFreeze(EntityRef(player), cool_bean.freeze_duration)
 			end
 		end
 	end
 
-	Isaac.Spawn(cool_bean.AB_REF.ENTITIES.ICE_FART.id,
-				cool_bean.AB_REF.ENTITIES.ICE_FART.variant,  	-- Variant
+	Isaac.Spawn(ice_fart.ID,
+				ice_fart.Variant,  	-- Variant
 				0,                          					-- Subtype
 				player.Position,
 				utils.VECTOR_ZERO,          					-- Velocity
 				player)                    				 		-- Spawner
-	cool_bean.AB_REF.SFX_MANAGER:Play(SoundEffect.SOUND_FART,1.0,0,false,1.0)
-end
+	g.sfx:Play(SoundEffect.SOUND_FART,1.0,0,false,1.0)
+end)
 
 return cool_bean

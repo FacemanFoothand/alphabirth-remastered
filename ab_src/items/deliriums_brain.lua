@@ -4,26 +4,14 @@
 -- Reverse trajectory of all tears and damages enemies
 ----------------------------------------------------------------------------
 
-local utils = include("code/utils")
+local g = require("ab_src.modules.globals")
+local Item = include("ab_src.api.item")
+local utils = include("ab_src.modules.utils")
 
-local DELIRIUMS_BRAIN = {
-	ENABLED = true,
-	NAME = "Delirium's Brain",
-	TYPE = "Active",
-	AB_REF = nil,
-	ITEM_REF = nil
-}
+local deliriums_brain = Item("Delirium's Brain")
 
-function DELIRIUMS_BRAIN.setup(Alphabirth)
-	DELIRIUMS_BRAIN.AB_REF = Alphabirth
-	Alphabirth.ITEMS.ACTIVE.DELIRIUMS_BRAIN = Alphabirth.API_MOD:registerItem(DELIRIUMS_BRAIN.NAME)
-	DELIRIUMS_BRAIN.ITEM_REF = Alphabirth.ITEMS.ACTIVE.DELIRIUMS_BRAIN
-	DELIRIUMS_BRAIN.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_USE, DELIRIUMS_BRAIN.trigger)
-end
-
-function DELIRIUMS_BRAIN.trigger()
-	local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	for _, entity in ipairs(AlphaAPI.entities.all) do
+deliriums_brain:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
+	for _, entity in ipairs(Isaac.GetRoomEntities()) do
 		if entity.Type == EntityType.ENTITY_TEAR or entity.Type == EntityType.ENTITY_PROJECTILE then
 			local tear_position = entity.Position
 			local reverse_tear_velocity = Vector(-entity.Velocity.X, -entity.Velocity.Y)
@@ -56,6 +44,6 @@ function DELIRIUMS_BRAIN.trigger()
 			entity:Die()
 		end
 	end
-end
+end)
 
-return DELIRIUMS_BRAIN
+return deliriums_brain

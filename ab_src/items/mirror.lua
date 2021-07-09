@@ -1,24 +1,18 @@
---
+----------------------------------------------------------------------------
 -- Item: Mirror
---
+-- Originally from Pack 2
+-- Swaps Isaac's location with a random enemy in the room.
+----------------------------------------------------------------------------
 
-local utils = include("code/utils")
-local random = utils.random
+local g = require("ab_src.modules.globals")
+local Item = include("ab_src.api.item")
+local utils = include("ab_src.modules.utils")
 
-local item = {
-    ENABLED = true,
-    NAME = "Mirror", -- Metadata, can be useful for stuff in the mod
-    TYPE = "Active"
-}
+local mirror = Item("Mirror")
 
-function item.setup(Alphabirth)
-    Alphabirth.ITEMS.ACTIVE.MIRROR = Alphabirth.API_MOD:registerItem(item.NAME)
-    Alphabirth.ITEMS.ACTIVE.MIRROR:addCallback(AlphaAPI.Callbacks.ITEM_USE, item.triggerMirror)
-end
+mirror:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
+    local room = g.room
 
-function item.triggerMirror()
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    local room = AlphaAPI.GAME_STATE.ROOM
     if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
         return
     end
@@ -29,7 +23,7 @@ function item.triggerMirror()
     -- Get number of entities, and generate a random number between 1 and the number of entities.
     local num_ents = #ents
 
-    local rand_key = random(num_ents)
+    local rand_key = utils.random(num_ents)
 
     -- Make sure the entity is an enemy, not a fire, and not a portal.
     -- Switch Isaac's position with the entity's position.
@@ -51,14 +45,14 @@ function item.triggerMirror()
 
                 player:AnimateTeleport()
 
-                rand_key = random(1, num_ents)
+                rand_key = utils.random(1, num_ents)
             end
         end
     else
-        local teleport_pos = room:FindFreePickupSpawnPosition(room:GetDoorSlotPosition(random(DoorSlot.LEFT0, DoorSlot.DOWN0)), 1, true)
+        local teleport_pos = room:FindFreePickupSpawnPosition(room:GetDoorSlotPosition(utils.random(DoorSlot.LEFT0, DoorSlot.DOWN0)), 1, true)
         player.Position = teleport_pos
         player:AnimateTeleport()
     end
-end
+end)
 
-return item
+return mirror

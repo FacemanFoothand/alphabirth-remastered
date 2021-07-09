@@ -4,35 +4,80 @@
 -- Spawns a bum in every treasure room and stats up for less consumables
 ----------------------------------------------------------------------------
 
-local utils = include("code/utils")
+local g = require("ab_src.modules.globals")
+local Item = include("ab_src.api.item")
+local utils = include("ab_src.modules.utils")
 local random = utils.random
 
-local charity = {
-	ENABLED = true,
-	NAME = "Charity",
-	TYPE = "Passive",
-	COSTUME = "gfx/animations/costumes/accessories/animation_costume_charity.anm2",
-	DAMAGE_MODIFIER = 0,
-	SPEED_MODIFIER = 0,
-	TEAR_HEIGHT_MODIFIER = 0,
-	PREVIOUS_TOTAL = 0,
-	AB_REF = nil,
-	ITEM_REF = nil
-}
+local charity = Item("Charity")
 
-function charity.setup(Alphabirth)
-	charity.AB_REF = Alphabirth
-	Alphabirth.ITEMS.PASSIVE.CHARITY = Alphabirth.API_MOD:registerItem(charity.NAME, charity.COSTUME)
-	charity.ITEM_REF = Alphabirth.ITEMS.PASSIVE.CHARITY
-	charity.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, charity.handle)
-	charity.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, charity.evaluate)
-	Alphabirth.MOD:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, charity.postNewRoom)
-end
+utils.mixTables(g.defaultPlayerSaveData, {
+	damage_modifier = 0,
+	speed_modifier = 0,
+	tear_height_modifier = 0,
+	previous_total = nil
+})
 
-function charity.postNewRoom()
-	local room = AlphaAPI.GAME_STATE.ROOM
+charity:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(player, cache_flag)
+	local save = g.getPlayerSave(player)
+	if(cache_flag == CacheFlag.CACHE_DAMAGE) then
+		player.Damage = player.Damage + save.damage_modifier
+	elseif(cache_flag == CacheFlag.CACHE_SPEED) then
+		player.MoveSpeed = player.MoveSpeed + save.speed_modifier
+	elseif(cache_flag == CacheFlag.CACHE_RANGE) then
+		player.TearHeight = player.TearHeight - save.tear_height_modifier
+	end
+end)
 
-	if utils.hasCollectible(charity.ITEM_REF.id) then
+charity:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, player_type)
+	local keys = player:GetNumKeys()
+	local coins = player:GetNumCoins()
+	local bombs = player:GetNumBombs()
+	local total = (keys + coins + bombs) / 2
+	local save = g.getPlayerSave(player)
+
+	-- Only run if total has changed
+	if total ~= save.previous_total then
+
+		save.previous_total = total
+
+		-- Values are made to be a little higher than magic mushroom.
+		local damage_threshhold = 1.5
+		local speed_threshhold = 0.1
+		local tear_height_threshhold = 7.5
+
+		local damage_minimum = -1.5
+		local speed_minimum = -0.1
+		local tear_height_minimum = -7.5
+
+		-- Values are made so that at 20 of each consumable you hit 0 stat boosts.
+		save.damage_modifier = damage_threshhold - total * 0.15
+		save.speed_modifier = speed_threshhold - total * 0.05
+		save.tear_height_modifier = tear_height_threshhold - total * 0.75
+
+		if save.damage_modifier < damage_minimum then
+			save.damage_modifier = damage_minimum
+		end
+
+		if save.speed_modifier < speed_minimum then
+			save.speed_modifier = speed_minimum
+		end
+
+		if save.tear_height_modifier < tear_height_minimum then
+			save.tear_height_modifier = tear_height_minimum
+		end
+
+		player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
+		player:AddCacheFlags(CacheFlag.CACHE_SPEED)
+		player:AddCacheFlags(CacheFlag.CACHE_RANGE)
+		player:EvaluateItems()
+	end
+end)
+
+charity:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function(player)
+	local room = Game():GetRoom()
+
+	if utils.hasCollectible(charity.ID) then
 		if room:GetType() == RoomType.ROOM_TREASURE
 				and room:IsFirstVisit() then
 			local center_position = room:GetCenterPos()
@@ -48,60 +93,7 @@ function charity.postNewRoom()
 			)
 		end
     end
-end
+end)
 
-function charity.handle(player)
-	local keys = player:GetNumKeys()
-	local coins = player:GetNumCoins()
-	local bombs = player:GetNumBombs()
-	local total = (keys + coins + bombs) / 2
-
-	-- Only run if total has changed
-	if total ~= charity.PREVIOUS_TOTAL then
-
-		charity.PREVIOUS_TOTAL = total
-
-		-- Values are made to be a little higher than magic mushroom.
-		local damage_threshhold = 1.5
-		local speed_threshhold = 0.1
-		local tear_height_threshhold = 7.5
-
-		local damage_minimum = -1.5
-		local speed_minimum = -0.1
-		local tear_height_minimum = -7.5
-
-		-- Values are made so that at 20 of each consumable you hit 0 stat boosts.
-		charity.DAMAGE_MODIFIER = damage_threshhold - total * 0.15
-		charity.SPEED_MODIFIER = speed_threshhold - total * 0.05
-		charity.TEAR_HEIGHT_MODIFIER = tear_height_threshhold - total * 0.75
-
-		if charity.DAMAGE_MODIFIER < damage_minimum then
-			charity.DAMAGE_MODIFIER = damage_minimum
-		end
-
-		if charity.SPEED_MODIFIER < speed_minimum then
-			charity.SPEED_MODIFIER = speed_minimum
-		end
-
-		if charity.TEAR_HEIGHT_MODIFIER < tear_height_minimum then
-			charity.TEAR_HEIGHT_MODIFIER = tear_height_minimum
-		end
-
-		player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-		player:AddCacheFlags(CacheFlag.CACHE_SPEED)
-		player:AddCacheFlags(CacheFlag.CACHE_RANGE)
-		player:EvaluateItems()
-	end
-end
-
-function charity.evaluate(player, cache_flag)
-	if(cache_flag == CacheFlag.CACHE_DAMAGE) then
-		player.Damage = player.Damage + charity.DAMAGE_MODIFIER
-	elseif(cache_flag == CacheFlag.CACHE_SPEED) then
-		player.MoveSpeed = player.MoveSpeed + charity.SPEED_MODIFIER
-	elseif(cache_flag == CacheFlag.CACHE_RANGE) then
-		player.TearHeight = player.TearHeight - charity.TEAR_HEIGHT_MODIFIER
-	end
-end
 
 return charity

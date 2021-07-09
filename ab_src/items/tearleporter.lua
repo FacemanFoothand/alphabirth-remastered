@@ -4,30 +4,17 @@
 -- Teleport you to the farthest tear away from you
 ----------------------------------------------------------------------------
 
-local utils = include("code/utils")
+local g = require("ab_src.modules.globals")
+local Item = include("ab_src.api.item")
+local utils = include("ab_src.modules.utils")
 
-local TEARLEPORTER = {
-	ENABLED = true,
-	NAME = "Tearleporter",
-	TYPE = "Active",
-	AB_REF = nil,
-	ITEM_REF = nil
-}
+local tearleporter = Item("Tearleporter")
 
-function TEARLEPORTER.setup(Alphabirth)
-	TEARLEPORTER.AB_REF = Alphabirth
-	Alphabirth.ITEMS.ACTIVE.TEARLEPORTER = Alphabirth.API_MOD:registerItem(TEARLEPORTER.NAME)
-	TEARLEPORTER.ITEM_REF = Alphabirth.ITEMS.ACTIVE.TEARLEPORTER
-	TEARLEPORTER.ITEM_REF:addCallback(AlphaAPI.Callbacks.ITEM_USE, TEARLEPORTER.trigger)
-end
-
-function TEARLEPORTER.trigger()
-	local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+tearleporter:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
 	local furthest_tear
-	for _, entity in ipairs(AlphaAPI.entities.all) do
+	for _, entity in ipairs(Isaac:GetRoomEntities()) do
 		if entity.Type == EntityType.ENTITY_TEAR then
 			furthest_tear = furthest_tear or entity
-
 			local distance_to_this_tear = player.Position:Distance(entity.Position)
 			local distance_to_furthest_tear = player.Position:Distance(furthest_tear.Position)
 			if distance_to_furthest_tear < distance_to_this_tear then
@@ -40,6 +27,6 @@ function TEARLEPORTER.trigger()
 		player.Position = furthest_tear.Position
 		player:AnimateTeleport(false)
 	end
-end
+end)
 
-return TEARLEPORTER
+return tearleporter

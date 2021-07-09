@@ -120,10 +120,12 @@ function Item:AddCallback(id, func, param)
                 local checkTbl = (self.IsTrinket and save.trinkets) or save.collectibles
 
                 if checkTbl[self.StringID] ~= count then
-                    if id == "ITEM_PICKUP" and count > checkTbl[self.StringID] then
-                        func(player)
-                    elseif id == "ITEM_REMOVE" and count < checkTbl[self.StringID] then
-                        func(player)
+                    if checkTbl[self.StringID] then
+                        if id == "ITEM_PICKUP" and count > checkTbl[self.StringID] then
+                            func(player)
+                        elseif id == "ITEM_REMOVE" and count < checkTbl[self.StringID] then
+                            func(player)
+                        end
                     end
 
                     checkTbl[self.StringID] = count

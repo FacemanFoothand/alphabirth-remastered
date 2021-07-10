@@ -28,6 +28,19 @@ function utils.random(min, max) -- Re-implements math.random()
     return utils.RNG:RandomFloat() -- float [0,1)
 end
 
+function utils.isItemInList(list, item)
+	for _, value in ipairs(list) do
+		if value == item then
+			return true
+		end
+	end	
+	return false
+end
+
+function utils.getLuckRNG(player, chance, factor)
+	return utils.RNG:RandomInt(100)  + (player.Luck * factor) + chance >= 100
+end
+
 function utils.isOfType(entity, eType)
 	if entity.Variant == eType.variant and entity.SubType == eType.subtype then
 		return true

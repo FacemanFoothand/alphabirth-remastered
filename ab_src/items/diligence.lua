@@ -13,6 +13,7 @@ local diligence = Item("Diligence")
 diligence:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, damage_amount, damage_flags, damage_source, invincibility_frames, entity_type)
 	local ignore_damage = utils.random(1, 5)
 	if ignore_damage == 1 then
+		print("GAMERS")
 		return false
 	end
 

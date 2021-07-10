@@ -8,20 +8,21 @@
 
 local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
+local Flag = include("ab_src.api.flag")
 local utils = include("ab_src.modules.utils")
 
 local mutant_fetus = Item("Mutant Fetus")
+local tear_flag = Flag("mutant_fetus_tear")
 mutant_fetus.charm_duration = 100
 mutant_fetus.charm_chance = 100
 
-g.mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, damage_amount, damage_flags, damage_source, invincibility_frames, entity_type)
+g.mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity, damage_amount, damage_flags, damage_source, invincibility_frames, entity_type)
 	local player = damage_source.Parent
 
-	if AlphaAPI.hasFlag(damage_source, MUTANT_FETUS.AB_REF.ENTITY_FLAGS.MUTANT_TEAR)
-	and entity:IsActiveEnemy(false) then
+	if tear_flag:EntityHas(damage_source) and entity:IsActiveEnemy(false) then
 		player = player:ToPlayer()
-		AlphaAPI.clearFlag(damage_source, MUTANT_FETUS.AB_REF.ENTITY_FLAGS.MUTANT_TEAR)
-		local bomb_roll = random(1, 200)
+		tear_flag:Clear(damage_source)
+		local bomb_roll = utils.random(1, 200)
 		if bomb_roll == 1 then
 			Isaac.Spawn(
 				EntityType.ENTITY_BOMBDROP,
@@ -38,22 +39,14 @@ g.mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, damage_amoun
 	end
 end)
 
-g.mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(entity, data)
-	local tear = entity:ToTear()
-	if tear.SpawnerType == EntityType.ENTITY_PLAYER then
-		local plist = utils.hasCollectible(MUTANT_FETUS.ITEM_REF.id)
-		if plist then
-			for _, player in ipairs(plist) do
-				if GetPtrHash(tear.Parent) == GetPtrHash(player) and AlphaAPI.getLuckRNG(7, 3) and entity.Variant ~= TearVariant.CHAOS_CARD then
-					AlphaAPI.addFlag(tear, MUTANT_FETUS.AB_REF.ENTITY_FLAGS.MUTANT_TEAR)
-					local tear_sprite = entity:GetSprite()
-					tear_sprite:Load("gfx/animations/effects/animation_tears_mutantfetus.anm2", true)
-					tear_sprite:Play("Idle")
-					tear_sprite:LoadGraphics()
-				end
-			end
-		end
+mutant_fetus:AddCallback(ModCallbacks.MC_POST_TEAR_INIT, function(player, tear)
+	if tear.Variant ~= TearVariant.CHAOS_CARD and utils.getLuckRNG(player, 7, 3) then
+		tear_flag:Apply(tear)
+		local tear_sprite = tear:GetSprite()
+		tear_sprite:Load("gfx/animations/effects/animation_tears_mutantfetus.anm2", true)
+		tear_sprite:Play("Idle")
+		tear_sprite:LoadGraphics()
 	end
-end, EntityType.ENTITY_TEAR)
+end)
 
 return mutant_fetus

@@ -29,6 +29,7 @@ local files = {
 	"ab_src.items.candle_kit",
 	"ab_src.items.diligence",
 	"ab_src.items.divine_wrath",
+	"ab_src.items.mutant_fetus",
 }
 
 function itemLoader.loadAll(Alphabirth)

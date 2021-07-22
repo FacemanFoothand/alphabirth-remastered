@@ -4,8 +4,6 @@
 -- Has a chance to spawn a bomb when you hit an enemy
 ----------------------------------------------------------------------------
 
--- [[ He'll yeah brother ]]
-
 local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local Flag = include("ab_src.api.flag")
@@ -16,11 +14,8 @@ local tear_flag = Flag("mutant_fetus_tear")
 mutant_fetus.charm_duration = 100
 mutant_fetus.charm_chance = 100
 
-g.mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity, damage_amount, damage_flags, damage_source, invincibility_frames, entity_type)
-	local player = damage_source.Parent
-
+mutant_fetus:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(player, entity, damage_amount, damage_flags, damage_source, invincibility_frames, entity_type)
 	if tear_flag:EntityHas(damage_source) and entity:IsActiveEnemy(false) then
-		player = player:ToPlayer()
 		tear_flag:Clear(damage_source)
 		local bomb_roll = utils.random(1, 200)
 		if bomb_roll == 1 then

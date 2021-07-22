@@ -243,7 +243,6 @@ local function start()
 		end
 	end
 	mod:AddCallback(ModCallbacks.MC_POST_UPDATE, Alphabirth.modUpdate)
-	mod:AddCallback(ModCallbacks.MC_POST_RENDER, Alphabirth.handleHumilityEffect)
 
 	function Alphabirth:PostGameStarted(continued)
 		if not continued then
@@ -308,21 +307,21 @@ local function start()
 	                    -- ITEMS.PASSIVE.BEGGARS_CUP.id,
 	                    -- ITEMS.PASSIVE.FURNACE.id,
 	                    -- ITEMS.PASSIVE.WHITE_CANDLE.id,
-						ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT.id,
+						-- ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT.id,
 						-- ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id,
 						-- ITEMS.PASSIVE.DIVINE_WRATH.id,
 						-- ITEMS.PASSIVE.DILIGENCE.id,
 						-- ITEMS.PASSIVE.CHARITY.id,
-						ITEMS.PASSIVE.PATIENCE.id,
+						-- ITEMS.PASSIVE.PATIENCE.id,
 						-- ITEMS.PASSIVE.TEMPERANCE.id,
 						-- ITEMS.PASSIVE.CHASTITY.id,
-						ITEMS.PASSIVE.HUMILITY.id,
-						ITEMS.PASSIVE.KINDNESS.id,
+						-- ITEMS.PASSIVE.HUMILITY.id,
+						-- ITEMS.PASSIVE.KINDNESS.id,
 						-- ITEMS.PASSIVE.CANDLE_KIT.id,
 						ITEMS.TRINKET.EMPEROR_CROWN.id,
 						ITEMS.TRINKET.BROWN_EYE.id,
-						ITEMS.PASSIVE.OLD_CONTROLLER.id,
-						ITEMS.PASSIVE.GRAPHICS_ERROR.id
+						-- ITEMS.PASSIVE.OLD_CONTROLLER.id,
+						-- ITEMS.PASSIVE.GRAPHICS_ERROR.id
 				}
 	            local row = 31
 	            for i, item in ipairs(new_items) do
@@ -481,7 +480,7 @@ local function start()
 		    elseif challenge == CHALLENGES.EXPLODING_HEAD_SYNDROME then
 		        player:AddCollectible(CollectibleType.COLLECTIBLE_IPECAC, 0, false)
 		        player:AddCollectible(CollectibleType.COLLECTIBLE_CONTINUUM, 0, false)
-		        player:AddCollectible(ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT.id, 0, false)
+		        --player:AddCollectible(ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT.id, 0, false)
 		    elseif challenge == CHALLENGES.FAUST then
 		        player:AddCollectible(CollectibleType.COLLECTIBLE_GOAT_HEAD, 0, false)
 		        player:AddCollectible(CollectibleType.COLLECTIBLE_CHAOS, 0, false)
@@ -690,35 +689,9 @@ function Alphabirth.itemSetup()
 	-- Passives --
 	--------------
 
-	-- Pseudobulbar Affect
-	ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT = api_mod:registerItem("Pseudobulbar Affect", "gfx/animations/costumes/accessories/animation_costume_pseudobulbaraffect.anm2")
-	ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handlePseudobulbarAffect)
-
-	-- Damage up the longer you're in a room
-	ITEMS.PASSIVE.PATIENCE = api_mod:registerItem("Patience", "gfx/animations/costumes/accessories/animation_costume_patience.anm2")
-	ITEMS.PASSIVE.PATIENCE:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handlePatience)
-	ITEMS.PASSIVE.PATIENCE:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluatePatience)
-
-	-- Marks a random enemy in the room that takes increased damage
-	ITEMS.PASSIVE.HUMILITY = api_mod:registerItem("Humility", "gfx/animations/costumes/accessories/animation_costume_humility.anm2")
-	ITEMS.PASSIVE.HUMILITY:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleHumility)
-
-	-- Randomly charms enemies. Chance to spawn hearts on killing enemies
-	ITEMS.PASSIVE.KINDNESS = api_mod:registerItem("Kindness", "gfx/animations/costumes/accessories/animation_costume_kindness.anm2")
-	ITEMS.PASSIVE.KINDNESS:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleKindness)
-
 	-- Spawns a familiar that persues the nearest enemy, pushing them away and blocking tears
 	ITEMS.PASSIVE.STONED_BUDDY = api_mod:registerItem("Stoned Buddy")
     ITEMS.PASSIVE.STONED_BUDDY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateStonedBuddy)
-
-	LOCKS.OLD_CONTROLLER = api_mod:createUnlock("alphaOldController")
-	ITEMS.PASSIVE.OLD_CONTROLLER = api_mod:registerItem("Old Controller", "gfx/animations/costumes/accessories/animation_costume_oldcontroller.anm2")
-	ITEMS.PASSIVE.OLD_CONTROLLER:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.initDeathVariable)
-	ITEMS.PASSIVE.OLD_CONTROLLER:addLock(LOCKS.OLD_CONTROLLER)
-
-	LOCKS.GRAPHICS_ERROR = api_mod:createUnlock("alphaGraphicsError")
-	ITEMS.PASSIVE.GRAPHICS_ERROR = api_mod:registerItem("Graphics Error", "gfx/animations/costumes/accessories/animation_costume_graphicserror.anm2")
-	ITEMS.PASSIVE.GRAPHICS_ERROR:addLock(LOCKS.GRAPHICS_ERROR)
 
 	-- Teleports you to the boss room every time you enter a new floor
 	LOCKS.EMPEROR_CROWN = api_mod:createUnlock("alphaEmperorsCrown")
@@ -1201,8 +1174,6 @@ end
 -- Setup Function for Miscellaneous Callbacks
 function Alphabirth.setupMiscCallbacks()
 	api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.entityTakeDamage)
-	api_mod:addCallback(AlphaAPI.Callbacks.PLAYER_DIED, Alphabirth.handleOldController)
-	api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_DEATH, Alphabirth.handleGraphicsError)
 
 	-- Take Damage
 	mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.triggerCrackedRockEffect)
@@ -1269,10 +1240,10 @@ end
 
 function Alphabirth.killDelirium()
 	local player_type = AlphaAPI.GAME_STATE.PLAYERS[1]:GetPlayerType()
-	if player_type == character_null and not LOCKS.OLD_CONTROLLER:isUnlocked() then
-		AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/achievement/achievement_oldcontroller.png")
-		LOCKS.OLD_CONTROLLER:setUnlocked(true)
-	end
+	--if player_type == character_null and not LOCKS.OLD_CONTROLLER:isUnlocked() then
+	--	AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/achievement/achievement_oldcontroller.png")
+	--	LOCKS.OLD_CONTROLLER:setUnlocked(true)
+	--end
 	if player_type == endor_type and not LOCKS.SUBCONSCIOUS:isUnlocked() then
 		AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/Achievement/achievement_subconscious.png")
 		LOCKS.SUBCONSCIOUS:setUnlocked(true)
@@ -1293,10 +1264,10 @@ end
 
 function Alphabirth.killMegaSatan()
 	local player_type = AlphaAPI.GAME_STATE.PLAYERS[1]:GetPlayerType()
-	if player_type == character_null and not LOCKS.GRAPHICS_ERROR:isUnlocked() then
-		AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/achievement/achievement_graphicserror.png")
-		LOCKS.GRAPHICS_ERROR:setUnlocked(true)
-	end
+	--if player_type == character_null and not LOCKS.GRAPHICS_ERROR:isUnlocked() then
+	--	AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/achievement/achievement_graphicserror.png")
+	--	LOCKS.GRAPHICS_ERROR:setUnlocked(true)
+	--end
 	local player_type = AlphaAPI.GAME_STATE.PLAYERS[1]:GetPlayerType()
 	if player_type == endor_type and not LOCKS.ENDOR_HAT:isUnlocked() then
 		AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/Achievement/achievement_endorshat.png")
@@ -2005,200 +1976,6 @@ end
 
 -- Passive Item Function Definitions
 do
-	----------------------------------------
-	-- Pseudobulbar Affect Logic
-	----------------------------------------
-	function Alphabirth.handlePseudobulbarAffect(player)
-        local direction = player:GetMovementVector():Normalized()
-		local data = player:GetData()
-		if not data.pseudoCharge then
-			data.pseudoCharge = 0
-		end
-
-        if(direction:Length() ~= 0.0) then
-			data.pseudoCharge = data.pseudoCharge + 1
-            if (data.pseudoCharge % (player.MaxFireDelay) == 0) then
-				data.pseudoCharge = 0
-				local shot_velocity = player:GetTearMovementInheritance(direction) * (4 * player.ShotSpeed)
-                player:FireTear(player.Position, shot_velocity, false, false, false)
-            end
-		else
-			data.pseudoCharge = 0
-        end
-	end
-
-	----------------------------------------
-	-- Patience Logic
-	----------------------------------------
-	local patience_damage_modifier = 0
-	local patience_damage_modifier_maximum = 0
-	function Alphabirth.evaluatePatience(player, cache_flag)
-	    if player:HasCollectible(ITEMS.PASSIVE.PATIENCE.id) then
-	        if cache_flag ==  CacheFlag.CACHE_DAMAGE and AlphaAPI.GAME_STATE.ROOM:GetFrameCount() > 1 then
-	            player.Damage = player.Damage + patience_damage_modifier
-	        end
-	    end
-	end
-
-	function Alphabirth.handlePatience(player)
-	    local second_has_passed = AlphaAPI.GAME_STATE.ROOM:GetFrameCount() % 61 == 1
-	    local room_is_clear = AlphaAPI.GAME_STATE.ROOM:IsClear()
-	    local last_patience_bonus = patience_damage_modifier
-
-	    if player:HasCollectible(ITEMS.PASSIVE.PATIENCE.id)
-	        and second_has_passed
-	        and not room_is_clear then
-	        patience_damage_modifier = math.min(patience_damage_modifier + 0.2, 5.0)
-	        if last_patience_bonus ~= patience_damage_modifier then
-		        player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-		        player:EvaluateItems()
-		    end
-	    end
-	    if AlphaAPI.GAME_STATE.ROOM:GetFrameCount() == 1 then
-	        patience_damage_modifier = 0
-	    end
-	end
-
-	----------------------------------------
-	-- Humility Logic
-	----------------------------------------
-	local humility_chance = 10 -- 1 out of 20
-	local humility_application_interval = 10
-	local effect_target
-	function Alphabirth.handleHumility(player)
-        local valid_entities = nil
-		local humility_active = false
-		local should_find_target = true
-
-        for _, entity in ipairs(AlphaAPI.entities.enemies) do
-            if entity:IsActiveEnemy(false) then
-                if AlphaAPI.hasFlag(entity, ENTITY_FLAGS.DOUBLE_DAMAGE) then
-                    should_find_target = false
-                    break
-                end
-
-                local enemy = entity:ToNPC()
-                if enemy then
-                    if not enemy:IsBoss() then
-                    	valid_entities = valid_entities or {}
-                        valid_entities[#valid_entities + 1] = entity
-                    end
-                end
-            end
-        end
-
-        if should_find_target == true and
-        	valid_entities ~= nil and
-        	#valid_entities > 0 and
-        	AlphaAPI.GAME_STATE.GAME:GetFrameCount() % humility_application_interval == 0 and
-        	random( 1, math.max( 1, humility_chance - player.Luck ) ) <= 1
-        then
-            local target_entity_index = 1
-            if #valid_entities > 1 then
-                target_entity_index = random(#valid_entities)
-            end
-
-            local target_entity = valid_entities[target_entity_index]
-			effect_target = target_entity
-            AlphaAPI.addFlag(target_entity, ENTITY_FLAGS.DOUBLE_DAMAGE)
-		end
-	end
-
-	local humility_sprite = Sprite()
-	humility_sprite:Load("gfx/animations/effects/animation_effect_humility.anm2", true)
-	humility_sprite:LoadGraphics()
-
-	function Alphabirth.handleHumilityEffect()
-		if effect_target then
-			if effect_target:IsDead() then
-				effect_target = nil
-				return
-			end
-			humility_sprite:Play("Humility")
-			humility_sprite.Offset = effect_target:GetSprite().Offset - Vector(0, effect_target.Size * (effect_target.SizeMulti.Y * 3))
-			humility_sprite:RenderLayer(0, AlphaAPI.GAME_STATE.ROOM:WorldToScreenPosition(effect_target.Position))
-		end
-	end
-
-	----------------------------------------
-	-- Kindness Logic
-	----------------------------------------
-	local kindness_chance = 20 -- 1 out of 100
-	local kindness_charm_duration = 100
-	local kindness_last_charm_frame = 0
-	local kindness_application_interval = 10
-	-- If it's been at least 100 frames since the last kindness application, every 10 frames there's a 1 in (10 - Luck) chance an enemy
-	-- will have kindness applied
-	function Alphabirth.handleKindness(player)
-    	local valid_entities = nil
-        local should_find_target = false
-        local game_frame = AlphaAPI.GAME_STATE.GAME:GetFrameCount()
-        if game_frame - kindness_last_charm_frame >= kindness_charm_duration and
-        	game_frame % kindness_application_interval == 0 and
-        	random( 1, math.max( 1, kindness_chance - player.Luck ) ) <= 1 then
-        	should_find_target = true
-        end
-
-        for _, entity in ipairs(AlphaAPI.entities.enemies) do
-            if entity:HasEntityFlags( EntityFlag.FLAG_CHARM ) and entity:HasMortalDamage() and not entity:IsDead() then
-                Isaac.Spawn(
-                    EntityType.ENTITY_PICKUP,
-                    PickupVariant.PICKUP_HEART,
-                    HeartSubType.HEART_HALF,
-                    entity.Position,
-                    entity.Velocity,
-                    entity
-                )
-            end
-            if should_find_target and entity:IsVulnerableEnemy() then
-            	valid_entities = valid_entities or {}
-                valid_entities[#valid_entities + 1] = entity
-            end
-        end
-
-        if valid_entities ~= nil and should_find_target and #valid_entities > 0 then
-            valid_entities[random(#valid_entities)]:AddCharmed(EntityRef(player), 100)
-            kindness_last_charm_frame = game_frame
-        end
-	end
-
-	----------------------------------------
-	-- Old Conctroller Logic
-	----------------------------------------
-	function Alphabirth.handleOldController()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		if api_mod.data.run.controller_respawn > 0 then
-			api_mod.data.run.controller_respawn = api_mod.data.run.controller_respawn - 1
-
-			AlphaAPI.callDelayed(function(player)
-				player:Revive()
-				AlphaAPI.GAME_STATE.LEVEL:ChangeRoom(AlphaAPI.GAME_STATE.LEVEL:GetPreviousRoomIndex())
-				player:UseActiveItem(CollectibleType.COLLECTIBLE_CLICKER, false, true, true, false)
-				player:UseActiveItem(CollectibleType.COLLECTIBLE_D4, false, true, true, false)
-				player:AddSoulHearts(2)
-			end, 40, false, player)
-		end
-	end
-
-	function Alphabirth.initDeathVariable()
-		api_mod.data.run.controller_respawn = api_mod.data.run.controller_respawn + 1
-	end
-
-	----------------------------------------
-	-- Graphics Error Logic
-	----------------------------------------
-	function Alphabirth.handleGraphicsError(entity, data)
-		if AlphaAPI.GAME_STATE.PLAYERS[1]:HasCollectible(ITEMS.PASSIVE.GRAPHICS_ERROR.id) then
-			if entity:ToNPC() then
-				if math.random(1, math.floor(100 / entity.MaxHitPoints) + 1) == 1 and AlphaAPI.GAME_STATE.PLAYERS[1]:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_GB_BUG) < 5 then
-					-- I reaches this point but crashes on the AddCollectibleEffect
-					-- AlphaAPI.log("YEP")
-					-- AlphaAPI.GAME_STATE.PLAYERS[1]:GetEffects():AddCollectibleEffect(CollectibleType.COLLECTIBLE_GB_BUG, true)
-				end
-			end
-		end
-	end
-
 	-- Brown Eye Logic
 	function Alphabirth.handleBrownEye(player)
 		-- All poop in the room will shoot at the nearest enemy once every second (61 Frames)

@@ -100,15 +100,10 @@ Item.SecondArgPlayerCallbacks = {
     [ModCallbacks.MC_USE_CARD] = true
 }
 
--- Callbacks which pass any entity
-Item.EntityCallbacks = {
-    [ModCallbacks.MC_ENTITY_TAKE_DMG] = true,
-    [ModCallbacks.MC_POST_ENTITY_REMOVE] = true
-}
-
 Item.CustomCallbacks = {
     ITEM_PICKUP = true,
-    ITEM_REMOVE = true
+    ITEM_REMOVE = true,
+    PLAYER_TAKE_DAMAGE = true
 }
 
 function Item:AddCallback(id, func, param)
@@ -131,12 +126,17 @@ function Item:AddCallback(id, func, param)
                     checkTbl[self.StringID] = count
                 end
             end, param)
+        elseif id == "PLAYER_TAKE_DAMAGE" then
+            mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, player, ...)
+                player = player:ToPlayer()
+                if self:PlayerHas(player) then
+                    return func(...)
+                end
+            end, EntityType.ENTITY_PLAYER)
         end
     else
         if Item.DirectCallbacks[id] then
             param = self.IDList or self.ID
-        elseif Item.EntityCallbacks[id] then
-            param = EntityType.ENTITY_PLAYER
         end
 
         local params = param
@@ -156,7 +156,7 @@ function Item:AddCallback(id, func, param)
             mod:AddCallback(id, function(_, ...)
                 if Item.DirectCallbacks[id] then
                     return func(...)
-                elseif Item.EntityCallbacks[id] or Item.DirectPlayerCallbacks[id] or Item.SecondArgPlayerCallbacks[id] then
+                elseif Item.DirectPlayerCallbacks[id] or Item.SecondArgPlayerCallbacks[id] then
                     local args = {...}
                     local player
                     if Item.SecondArgPlayerCallbacks[id] then

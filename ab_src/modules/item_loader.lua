@@ -30,6 +30,13 @@ local files = {
 	"ab_src.items.diligence",
 	"ab_src.items.divine_wrath",
 	"ab_src.items.mutant_fetus",
+	"ab_src.items.graphics_error",
+	"ab_src.items.humility",
+	"ab_src.items.kindness",
+	"ab_src.items.old_controller",
+	"ab_src.items.patience",
+	"ab_src.items.pseudobulbar_affect",
+	"ab_src.items.talisman_of_absorption",
 }
 
 function itemLoader.loadAll(Alphabirth)

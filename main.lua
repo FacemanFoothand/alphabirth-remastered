@@ -424,9 +424,9 @@ local function start()
 					-- ITEMS.ACTIVE.ISAACS_SKULL.id,
 					-- ITEMS.PASSIVE.SMART_BOMBS.id,
 					-- ITEMS.PASSIVE.THE_COSMOS.id,
-					ITEMS.PASSIVE.ROCKET_SHOES.id,
+					-- ITEMS.PASSIVE.ROCKET_SHOES.id,
 					ITEMS.PASSIVE.MINIATURE_METEOR.id,
-					ITEMS.PASSIVE.ENTROPY.id,
+					-- ITEMS.PASSIVE.ENTROPY.id,
 					ITEMS.PASSIVE.PAINT_PALETTE.id,
 					ITEMS.PASSIVE.CRYSTALLIZED.id,
 					ITEMS.PASSIVE.POLYMITOSIS.id,
@@ -865,9 +865,9 @@ function Alphabirth.itemSetup()
     ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.leakingBombsCreepUpdate, EntityType.ENTITY_EFFECT, EffectVariant.PLAYER_CREEP_BLACKPOWDER)
     ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.leakingBombsDamage)
 
-    ITEMS.PASSIVE.ROCKET_SHOES = api_mod:registerItem("Rocket Shoes", "gfx/animations/costumes/accessories/animation_costume_rocketshoes.anm2")
-    ITEMS.PASSIVE.ROCKET_SHOES:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleRocketShoes)
-    ITEMS.PASSIVE.ROCKET_SHOES:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateRocketShoes)
+    -- ITEMS.PASSIVE.ROCKET_SHOES = api_mod:registerItem("Rocket Shoes", "gfx/animations/costumes/accessories/animation_costume_rocketshoes.anm2")
+    -- ITEMS.PASSIVE.ROCKET_SHOES:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleRocketShoes)
+    -- ITEMS.PASSIVE.ROCKET_SHOES:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateRocketShoes)
 
     -- ITEMS.PASSIVE.THE_COSMOS = api_mod:registerItem("The Cosmos")
     -- ITEMS.PASSIVE.THE_COSMOS:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.cosmosDamage)

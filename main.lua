@@ -856,8 +856,8 @@ function Alphabirth.itemSetup()
     ITEMS.PASSIVE.LIL_ALASTOR:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateLilAlastor)
 
     -- PASSIVES
-    ITEMS.PASSIVE.SMART_BOMBS = api_mod:registerItem("Smart Bombs")
-    ITEMS.PASSIVE.SMART_BOMBS:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.onPickupBombItem)
+    -- ITEMS.PASSIVE.SMART_BOMBS = api_mod:registerItem("Smart Bombs")
+    -- ITEMS.PASSIVE.SMART_BOMBS:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.onPickupBombItem)
 
     ITEMS.PASSIVE.LEAK_BOMBS = api_mod:registerItem("Leaking Bombs", "gfx/animations/costumes/accessories/animation_costume_leakybombs.anm2")
     ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.onPickupBombItem)
@@ -869,9 +869,9 @@ function Alphabirth.itemSetup()
     ITEMS.PASSIVE.ROCKET_SHOES:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleRocketShoes)
     ITEMS.PASSIVE.ROCKET_SHOES:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateRocketShoes)
 
-    ITEMS.PASSIVE.THE_COSMOS = api_mod:registerItem("The Cosmos")
-    ITEMS.PASSIVE.THE_COSMOS:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.cosmosDamage)
-    ITEMS.PASSIVE.THE_COSMOS:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateCosmos)
+    -- ITEMS.PASSIVE.THE_COSMOS = api_mod:registerItem("The Cosmos")
+    -- ITEMS.PASSIVE.THE_COSMOS:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.cosmosDamage)
+    -- ITEMS.PASSIVE.THE_COSMOS:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateCosmos)
 
     ITEMS.PASSIVE.MINIATURE_METEOR = api_mod:registerItem("Miniature Meteor", "gfx/animations/costumes/accessories/animation_costume_miniaturemeteor.anm2")
     ITEMS.PASSIVE.MINIATURE_METEOR:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.miniatureMeteorDamage)
@@ -1092,9 +1092,9 @@ function Alphabirth.entitySetup()
 	-- 			PACK 3			 --
 	-------------------------------
 
-	FAMILIARS.MERCURY = api_mod:getEntityConfig("Cosmos Mercury", 0)
-	FAMILIARS.VENUS = api_mod:getEntityConfig("Cosmos Venus", 0)
-	FAMILIARS.PLUTO = api_mod:getEntityConfig("Cosmos Pluto", 0)
+	-- FAMILIARS.MERCURY = api_mod:getEntityConfig("Cosmos Mercury", 0)
+	-- FAMILIARS.VENUS = api_mod:getEntityConfig("Cosmos Venus", 0)
+	-- FAMILIARS.PLUTO = api_mod:getEntityConfig("Cosmos Pluto", 0)
 
 	FAMILIARS.HUSHY_FLY = api_mod:getEntityConfig("Hushy Fly", 0)
 	FAMILIARS.LIL_MINER = api_mod:getEntityConfig("Lil Miner", 0)
@@ -1121,8 +1121,8 @@ function Alphabirth.entitySetup()
     ENTITIES.LARGESACK:addCallback(AlphaAPI.Callbacks.PICKUP_PICKUP, Alphabirth.onLargeSackPickup)
 
     -- Spawn Familiars
-    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.smartBombsEntityAppear, EntityType.ENTITY_BOMBDROP)
-    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.smartBombsEntityUpdate, EntityType.ENTITY_BOMBDROP)
+    -- api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.smartBombsEntityAppear, EntityType.ENTITY_BOMBDROP)
+    -- api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.smartBombsEntityUpdate, EntityType.ENTITY_BOMBDROP)
 
     ENTITIES.LASERUP:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onLaserUpUpdate)
     ENTITIES.LASERDOWN:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onLaserDownUpdate)
@@ -1147,14 +1147,14 @@ function Alphabirth.entitySetup()
 
     ENTITIES.CRYSTAL:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.crystalUpdate)
 
-    FAMILIARS.MERCURY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeMercury)
-    FAMILIARS.MERCURY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateMercury)
+    -- FAMILIARS.MERCURY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeMercury)
+    -- FAMILIARS.MERCURY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateMercury)
 
-    FAMILIARS.VENUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeVenus)
-    FAMILIARS.VENUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateVenus)
+    -- FAMILIARS.VENUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeVenus)
+    -- FAMILIARS.VENUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateVenus)
 
-    FAMILIARS.PLUTO:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializePluto)
-    FAMILIARS.PLUTO:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updatePluto)
+    -- FAMILIARS.PLUTO:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializePluto)
+    -- FAMILIARS.PLUTO:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updatePluto)
 
     FAMILIARS.HUSHY_FLY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeHushyFly)
     FAMILIARS.HUSHY_FLY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateHushyFly)

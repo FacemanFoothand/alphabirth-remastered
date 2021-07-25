@@ -420,10 +420,10 @@ local function start()
 
 			if CONFIG.START_ROOM_ENABLED_PACK3 then
 				local items = {
-					ITEMS.ACTIVE.ALASTORS_CANDLE.id,
-					ITEMS.ACTIVE.ISAACS_SKULL.id,
-					ITEMS.PASSIVE.SMART_BOMBS.id,
-					ITEMS.PASSIVE.THE_COSMOS.id,
+					-- ITEMS.ACTIVE.ALASTORS_CANDLE.id,
+					-- ITEMS.ACTIVE.ISAACS_SKULL.id,
+					-- ITEMS.PASSIVE.SMART_BOMBS.id,
+					-- ITEMS.PASSIVE.THE_COSMOS.id,
 					ITEMS.PASSIVE.ROCKET_SHOES.id,
 					ITEMS.PASSIVE.MINIATURE_METEOR.id,
 					ITEMS.PASSIVE.ENTROPY.id,
@@ -842,12 +842,12 @@ function Alphabirth.itemSetup()
 	--  PACK 3  --
 	--------------
 
-	ITEMS.ACTIVE.ALASTORS_CANDLE = api_mod:registerItem("Alastor's Candle")
-    ITEMS.ACTIVE.ALASTORS_CANDLE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.useAlastorsCandle)
+	-- ITEMS.ACTIVE.ALASTORS_CANDLE = api_mod:registerItem("Alastor's Candle")
+    -- ITEMS.ACTIVE.ALASTORS_CANDLE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.useAlastorsCandle)
 
-    ITEMS.ACTIVE.ISAACS_SKULL = api_mod:registerItem("Isaac's Skull")
-    ITEMS.ACTIVE.ISAACS_SKULL:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.useIsaacsSkull)
-    mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Alphabirth.isaacsSkullNewRoom)
+    -- ITEMS.ACTIVE.ISAACS_SKULL = api_mod:registerItem("Isaac's Skull")
+    -- ITEMS.ACTIVE.ISAACS_SKULL:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.useIsaacsSkull)
+    -- mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Alphabirth.isaacsSkullNewRoom)
 
     ITEMS.PASSIVE.FAITHFUL_AMBIVALENCE = api_mod:registerItem("Faithful Ambivalence", "gfx/animations/costumes/accessories/animation_costume_faithfulambivalence.anm2")
     ITEMS.PASSIVE.FAITHFUL_AMBIVALENCE:addCallback(AlphaAPI.Callbacks.ROOM_NEW, Alphabirth.faithfulAmbivalenceNewRoom)
@@ -1101,7 +1101,7 @@ function Alphabirth.entitySetup()
 	FAMILIARS.HIVE_HEAD = api_mod:getEntityConfig("Hive Head Orbital", 0)
 
 	FAMILIARS.LIL_ALASTOR = api_mod:getEntityConfig("Lil Alastor", 0)
-	FAMILIARS.ALASTORS_FLAME = api_mod:getEntityConfig("Alastor's Flame", 0)
+	-- FAMILIARS.ALASTORS_FLAME = api_mod:getEntityConfig("Alastor's Flame", 0)
 
 	ENTITIES.METEOR_SHARD = api_mod:getPickupConfig("Meteor Shard", 0)
 	ENTITIES.APPARITION = api_mod:getEntityConfig("Apparition", 0)
@@ -1115,7 +1115,7 @@ function Alphabirth.entitySetup()
 	ENTITIES.BRIMSTONE_HOST = api_mod:getEntityConfig("Brimstone Host", 20)
 	ENTITIES.LARGESACK = api_mod:getPickupConfig("Large Sack", 0)
 
-    FAMILIARS.ALASTORS_FLAME:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateAlastorsFlame)
+    -- FAMILIARS.ALASTORS_FLAME:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateAlastorsFlame)
     FAMILIARS.LIL_ALASTOR:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateLilAlastor)
 
     ENTITIES.LARGESACK:addCallback(AlphaAPI.Callbacks.PICKUP_PICKUP, Alphabirth.onLargeSackPickup)

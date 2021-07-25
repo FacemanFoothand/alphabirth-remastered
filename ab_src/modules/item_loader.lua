@@ -6,6 +6,7 @@ local itemLoader = {}
 itemLoader.loadedItems = {}
 local files = {
 	"ab_src.items.addicted",
+	"ab_src.items.alastors_candle",
 	"ab_src.items.black_pepper",
 	"ab_src.items.beggars_cup",
 	"ab_src.items.bugged_bombs",
@@ -19,6 +20,7 @@ local files = {
 	"ab_src.items.furnace",
 	"ab_src.items.green_candle",
 	"ab_src.items.isaacs_apple",
+	"ab_src.items.isaacs_skull",
 	"ab_src.items.lifeline",
 	"ab_src.items.satans_contract",
 	"ab_src.items.tearleporter",

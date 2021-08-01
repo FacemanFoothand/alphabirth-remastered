@@ -207,7 +207,6 @@ local function start()
 
     function Alphabirth.floorChanged()
         api_mod.data.run.seenTreasure = false
-		api_mod.data.run.miniatureMeteorBonus = 0
 		api_mod.data.run.apparitionRooms = {}
     end
 
@@ -420,13 +419,6 @@ local function start()
 
 			if CONFIG.START_ROOM_ENABLED_PACK3 then
 				local items = {
-					-- ITEMS.ACTIVE.ALASTORS_CANDLE.id,
-					-- ITEMS.ACTIVE.ISAACS_SKULL.id,
-					-- ITEMS.PASSIVE.SMART_BOMBS.id,
-					-- ITEMS.PASSIVE.THE_COSMOS.id,
-					-- ITEMS.PASSIVE.ROCKET_SHOES.id,
-					ITEMS.PASSIVE.MINIATURE_METEOR.id,
-					-- ITEMS.PASSIVE.ENTROPY.id,
 					ITEMS.PASSIVE.PAINT_PALETTE.id,
 					ITEMS.PASSIVE.CRYSTALLIZED.id,
 					ITEMS.PASSIVE.POLYMITOSIS.id,
@@ -602,7 +594,6 @@ function Alphabirth.miscEntityHandling()
 		LOCKED_ATTEMPT = AlphaAPI.createFlag(),
 		SMART_BOMB = AlphaAPI.createFlag(),
         METEOR_SHOT = AlphaAPI.createFlag(),
-        ENTROPY_TEAR = AlphaAPI.createFlag(),
         PAINTED = AlphaAPI.createFlag(),
         CRYSTAL = AlphaAPI.createFlag(),
         POLYMITOSIS_TEAR = AlphaAPI.createFlag(),
@@ -865,22 +856,9 @@ function Alphabirth.itemSetup()
     ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.leakingBombsCreepUpdate, EntityType.ENTITY_EFFECT, EffectVariant.PLAYER_CREEP_BLACKPOWDER)
     ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.leakingBombsDamage)
 
-    -- ITEMS.PASSIVE.ROCKET_SHOES = api_mod:registerItem("Rocket Shoes", "gfx/animations/costumes/accessories/animation_costume_rocketshoes.anm2")
-    -- ITEMS.PASSIVE.ROCKET_SHOES:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleRocketShoes)
-    -- ITEMS.PASSIVE.ROCKET_SHOES:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateRocketShoes)
-
     -- ITEMS.PASSIVE.THE_COSMOS = api_mod:registerItem("The Cosmos")
     -- ITEMS.PASSIVE.THE_COSMOS:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.cosmosDamage)
     -- ITEMS.PASSIVE.THE_COSMOS:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateCosmos)
-
-    ITEMS.PASSIVE.MINIATURE_METEOR = api_mod:registerItem("Miniature Meteor", "gfx/animations/costumes/accessories/animation_costume_miniaturemeteor.anm2")
-    ITEMS.PASSIVE.MINIATURE_METEOR:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.miniatureMeteorDamage)
-    ITEMS.PASSIVE.MINIATURE_METEOR:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.miniatureMeteorAppear, EntityType.ENTITY_TEAR)
-    ITEMS.PASSIVE.MINIATURE_METEOR:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.onMeteorPickup)
-
-    ITEMS.PASSIVE.ENTROPY = api_mod:registerItem("Entropy", "gfx/animations/costumes/accessories/animation_costume_entropy.anm2")
-    ITEMS.PASSIVE.ENTROPY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.entropyCache)
-    ITEMS.PASSIVE.ENTROPY:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.entropyNewTear, EntityType.ENTITY_TEAR)
 
     ITEMS.PASSIVE.PAINT_PALETTE = api_mod:registerItem("Paint Palette", "gfx/animations/costumes/accessories/animation_costume_palette.anm2")
     ITEMS.PASSIVE.PAINT_PALETTE:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.paintPaletteDamage)
@@ -4732,67 +4710,6 @@ function Alphabirth.infectionUpdate(entity, data)
         end
     end
 end
-
--------------------
--- Rocket Shoes
--------------------
-function Alphabirth.handleRocketShoes()
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    if player:GetLastActionTriggers() & ActionTriggers.ACTIONTRIGGER_MOVED ~= 0 then
-        local max_speed = player.MoveSpeed * 5
-        if player.Velocity:Length() < max_speed then
-            player.Velocity = player:GetMovementVector():Resized(max_speed)
-        end
-    elseif player:GetLastActionTriggers() & ActionTriggers.ACTIONTRIGGER_MOVED == 0 then
-        player.Velocity = player.Velocity * 0
-    end
-end
-
-function Alphabirth.evaluateRocketShoes(player, cache_flag)
-    if cache_flag == CacheFlag.CACHE_SPEED then
-        player.MoveSpeed = player.MoveSpeed + 0.1
-    end
-end
-
--------------------
--- Miniature Meteor
--------------------
-
-function Alphabirth.onMeteorPickup()
-    if not api_mod.data.run.miniatureMeteorBonus then
-        api_mod.data.run.miniatureMeteorBonus = 0
-    end
-end
-
-function Alphabirth.miniatureMeteorAppear(e, _)
-    if AlphaAPI.getLuckRNG(10, 3) then
-        AlphaAPI.addFlag(e, ENTITY_FLAGS.METEOR_SHOT)
-        local tear_sprite = e:GetSprite()
-        tear_sprite:Load("gfx/animations/effects/animation_tears_miniaturemeteor.anm2", true)
-        local sprite_index = math.floor((api_mod.data.run.miniatureMeteorBonus / 2) + 1)
-        if sprite_index > 6 then
-            sprite_index = 6
-        end
-        tear_sprite:Play("Stone"..sprite_index.."Move")
-        tear_sprite:LoadGraphics()
-        if api_mod.data.run.miniatureMeteorBonus then
-            e.CollisionDamage = e.CollisionDamage + (api_mod.data.run.miniatureMeteorBonus * 0.5)
-        end
-    end
-end
-
-function Alphabirth.miniatureMeteorDamage(entity, amount, damage_flag, source, invincibility_frames)
-    if AlphaAPI.hasFlag(source.Entity, ENTITY_FLAGS.METEOR_SHOT) and random() < 0.4 then
-        Isaac.Spawn(ENTITIES.METEOR_SHARD.id, ENTITIES.METEOR_SHARD.variant, 0, entity.Position, Vector(0,0), AlphaAPI.GAME_STATE.PLAYERS[1])
-    end
-end
-
-function Alphabirth.meteorShardPickup()
-    SFX_MANAGER:Play(SoundEffect.SOUND_SCAMPER, 1, 0, false, 1)
-    api_mod.data.run.miniatureMeteorBonus = api_mod.data.run.miniatureMeteorBonus + 1
-    return true
-end
-
 -------------------
 -- Crystallized
 -------------------
@@ -4927,46 +4844,6 @@ local splitFlags = {
 }
 
 local allSplitFlag = TearFlags.TEAR_SPLIT | TearFlags.TEAR_QUADSPLIT | TearFlags.TEAR_BONE
-
--------------------
--- Entropy
--------------------
-function Alphabirth.entropyCache(player, flag)
-    if flag == CacheFlag.CACHE_FIREDELAY then
-        player.MaxFireDelay = player.MaxFireDelay - 3
-    end
-end
-
-function Alphabirth.entropyNewTear(entity)
-    if AlphaAPI.hasFlag(entity, ENTITY_FLAGS.TEAR_IGNORE) then return end
-    if not AlphaAPI.hasFlag(entity, ENTITY_FLAGS.ENTROPY_TEAR) and AlphaAPI.getLuckRNG(66, 5) then
-        local angle = entity.Velocity:GetAngleDegrees()
-        local length = entity.Velocity:Length()
-        local oldTear = entity:ToTear()
-        local flags = oldTear.TearFlags
-        local variance = 10 --in degrees
-        local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-        local entropyTears = {oldTear}
-
-        for _, flag in ipairs(splitFlags) do
-            if flags & flag == flag then
-                if AlphaAPI.getLuckRNG(66, 5) then
-                    local tear = player:FireTear(player.Position, Vector.FromAngle(angle + random(-variance,variance)):Resized(length), true, false, false)
-                    AlphaAPI.addFlag(tear, ENTITY_FLAGS.ENTROPY_TEAR)
-                    entropyTears[#entropyTears + 1] = tear
-                end
-            end
-        end
-
-        local tear = player:FireTear(player.Position, Vector.FromAngle(angle + random(-variance,variance)):Resized(length), true, false, false)
-        entropyTears[#entropyTears + 1] = tear
-        AlphaAPI.addFlag(tear, ENTITY_FLAGS.ENTROPY_TEAR)
-
-        for _, tear in ipairs(entropyTears) do
-            tear.TearFlags = tear.TearFlags & ~allSplitFlag
-        end
-    end
-end
 
 -------------------
 -- Poly-Mitosis

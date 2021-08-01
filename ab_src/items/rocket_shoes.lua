@@ -5,7 +5,6 @@
 local Item = include("ab_src.api.item")
 
 local rocketShoes = Item("Rocket Shoes", false)
-rocketShoes.NullCostume = Isaac.GetCostumeIdByPath("gfx/animations/costumes/accessories/animation_costume_rocketshoes.anm2")
 
 rocketShoes:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, player_type)
     if player:GetLastActionTriggers() & ActionTriggers.ACTIONTRIGGER_MOVED ~= 0 then

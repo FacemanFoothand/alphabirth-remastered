@@ -9,7 +9,12 @@ local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 local random = utils.random
 
-local cologne = Item("Cologne")
+local desc = {
+    ["en_us"] = { "Cologne", "{{Charm}} Creates an aura around Isaac that has a chance to charm enemies who get too close" },
+    ["pt_br"] = { "Colônia", "{{Charm}} Cria uma aura ao redor de Isaac que tem chance de encantar inimigos que chegarem muito perto" },
+}
+
+local cologne = Item("Cologne", desc)
 cologne.charm_duration = 100
 cologne.charm_chance = 100
 

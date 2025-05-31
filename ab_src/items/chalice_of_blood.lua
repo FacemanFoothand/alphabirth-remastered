@@ -10,7 +10,7 @@ local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local chaliceOfBlood = Item("Chalice of Blood", false, " Chalice of Blood ", "  Chalice of Blood  ", "   Chalice of Blood   ")
+local chaliceOfBlood = Item("Chalice of Blood", {}, false, " Chalice of Blood ", "  Chalice of Blood  ", "   Chalice of Blood   ")
 chaliceOfBlood.NullCostume = Isaac.GetCostumeIdByPath("gfx/animations/costumes/accessories/animation_costume_chaliceofblood.anm2")
 chaliceOfBlood.Chalice = EntityConfig("Chalice of Blood")
 chaliceOfBlood.SoulLimit = 15

@@ -9,9 +9,10 @@ utils.mixTables(g.defaultPlayerSaveData, {
 
 
 local Item = utils.class("Item")
-function Item:Init(name, isTrinket, ...)
+function Item:Init(name, desc, isTrinket, ...)
     self.Name = name
     self.IsTrinket = isTrinket
+    desc = desc or {}
 
     if not self.IsTrinket then
         self.ID = Isaac.GetItemIdByName(name)
@@ -30,6 +31,14 @@ function Item:Init(name, isTrinket, ...)
             else
                 self.IDList[#self.IDList + 1] = Isaac.GetTrinketIdByName(extraName)
             end
+        end
+    end
+
+    -- External Item Descriptions integration
+    -- TODO: Should use their callback instead. Maybe both.
+    if EID then
+        for lang, loc in pairs(desc) do
+            EID:addCollectible(self.ID, loc[2], loc[1], lang)
         end
     end
 
@@ -106,7 +115,16 @@ Item.CustomCallbacks = {
     PLAYER_TAKE_DAMAGE = true
 }
 
+Item.ThirdPartyCallbacks = {
+    EID_POST_LOAD = true
+}
+
 function Item:AddCallback(id, func, param)
+    if Item.ThirdPartyCallbacks[id] then
+        if id == "EID_POST_LOAD" then
+            mod:AddCallback("EID_POST_LOAD", func)
+        end
+    end
     if Item.CustomCallbacks[id] then
         if id == "ITEM_PICKUP" or id == "ITEM_REMOVE" then
             mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)

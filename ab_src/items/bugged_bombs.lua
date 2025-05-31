@@ -13,6 +13,11 @@ local BombFlags = {
 	"TEAR_SPECTRAL",
 	"TEAR_HOMING",
 	"TEAR_POISON"
+    "TEAR_SCATTER_BOMB",
+    "TEAR_CROSS_BOMB",
+    "TEAR_BLOOD_BOMB",
+    "TEAR_BRIMSTONE_BOMB",
+    "TEAR_GHOST_BOMB",
 }
 
 local desc = {

@@ -8,7 +8,12 @@ local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local beggars_cup = Item("Beggar's Cup")
+local desc = {
+    ["en_us"] = {"Beggar's Cup", "#{{ArrowUp}} +5 Luck#{{ArrowDown}} For every coin Isaac has he loses {{ColorRed}}0.1{{CR}} of the Luck bonus."},
+    ["pt_br"] = {"Caneca de Pedinte", "#{{ArrowUp}} +5 Sorte#{{ArrowDown}} Para cada moeda que Isaac tem é subtraido {{ColorRed}}0.1{{CR}} Sorte do bonus."},
+}
+
+local beggars_cup = Item("Beggar's Cup", desc)
 
 utils.mixTables(g.defaultPlayerSaveData, {
 	luck_modifier = 0,

@@ -8,7 +8,12 @@ local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local EntityConfig = include("ab_src.api.entity")
 
-local alastorsCandle = Item("Alastor's Candle")
+local desc = {
+    ["en_us"] = {"Alastor's Candle", "#{{Burning}} Creates spinning flames around Isaac for the duration of the room#{{Fear}} The flames apply {{ColorPurple}}Fear{{CR}} to nearby enemies"},
+    ["pt_br"] = {"Vela do Alastor", "#{{Burning}} Cria chamas que circulam Isaac pelo resto do quarto#{{Fear}} Aplica {{ColorPurple}}Medo{{CR}} aos inimigos próximos às chamas"},
+}
+
+local alastorsCandle = Item("Alastor's Candle", desc)
 alastorsCandle.Flame = EntityConfig("Alastor's Flame")
 
 alastorsCandle:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)

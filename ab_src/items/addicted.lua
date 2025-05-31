@@ -55,8 +55,8 @@ local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
 local desc = {
-    ["en_us"] = {"Addicted", "#{{Pill}} Upon being damaged Isaac has a chance to activate a random pill effect.#{{Luck}} Not affected by luck. Static 1/6 chance."},
-    ["pt_br"] = {"Viciado", "#{{Pill}} Ao receber dano, Isaac terá uma chance de ativar um efeito de pílula.#{{Luck}} Não afetado por sorte. 1/6 chance."},
+    ["en_us"] = {"Addicted", "#{{Pill}} Upon being damaged Isaac has a chance to activate a random pill effect#{{Luck}} Static 1/6 chance"},
+    ["pt_br"] = {"Viciado", "#{{Pill}} Ao receber dano, Isaac terá uma chance de ativar um efeito de pílula{{Luck}} Chance estática de 1/6"},
 }
 
 local addicted = Item("Addicted", desc)

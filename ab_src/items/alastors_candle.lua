@@ -17,10 +17,6 @@ local alastorsCandle = Item("Alastor's Candle", desc)
 alastorsCandle.Flame = EntityConfig("Alastor's Flame")
 
 alastorsCandle:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
-    if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
-        return
-    end
-
     local offset
     for i = 1, 2 do
         local flame = alastorsCandle.Flame:Spawn(player.Position, Vector(0,0), nil)

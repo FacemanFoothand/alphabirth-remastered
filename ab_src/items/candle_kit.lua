@@ -31,6 +31,9 @@ end)
 
 candle_entity:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (familiar)
 	local player = familiar.Player
+    if player:GetCollectibleNum(candle_kit.ID) < 1 then
+        familiar:Remove()
+    end
 	familiar.OrbitDistance = EntityFamiliar.GetOrbitDistance(familiar.OrbitLayer)
 	local target_position = familiar:GetOrbitPosition(player.Position)
 	familiar.Velocity = target_position - familiar.Position

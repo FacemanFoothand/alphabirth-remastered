@@ -3716,22 +3716,22 @@ end
 function Alphabirth.roomChanged(room)
     -- Max Deal with the Devil chance
     local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    if api_mod.data.run.didMaxOutDevilDeal == true then
-        player:GetEffects():AddCollectibleEffect(CollectibleType.COLLECTIBLE_GOAT_HEAD, false)
-    end
-
-    api_mod.data.run.times_used_box_of_friends = 1
-    if not api_mod.data.run.sowiloRooms then
-        api_mod.data.run.sowiloRooms = 0
-    end
-
-    if api_mod.data.run.sowiloRooms > 0 and room:GetAliveEnemiesCount() > 0 then
-        for _, entity in ipairs(AlphaAPI.entities.enemies) do
-            entity:AddBurn(EntityRef(player), 180, player.Damage)
-        end
-
-        api_mod.data.run.sowiloRooms = api_mod.data.run.sowiloRooms - 1
-    end
+    -- if api_mod.data.run.didMaxOutDevilDeal == true then
+    --     player:GetEffects():AddCollectibleEffect(CollectibleType.COLLECTIBLE_GOAT_HEAD, false)
+    -- end
+    --
+    -- api_mod.data.run.times_used_box_of_friends = 1
+    -- if not api_mod.data.run.sowiloRooms then
+    --     api_mod.data.run.sowiloRooms = 0
+    -- end
+    --
+    -- if api_mod.data.run.sowiloRooms > 0 and room:GetAliveEnemiesCount() > 0 then
+    --     for _, entity in ipairs(AlphaAPI.entities.enemies) do
+    --         entity:AddBurn(EntityRef(player), 180, player.Damage)
+    --     end
+    --
+    --     api_mod.data.run.sowiloRooms = api_mod.data.run.sowiloRooms - 1
+    -- end
 end
 
 -- Aimbot Logic

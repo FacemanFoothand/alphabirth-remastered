@@ -3,48 +3,29 @@
 -- Originally from Pack 3
 ----------------------------------------------------------------------------
 
-local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
-local utils = include("ab_src.modules.utils")
 
-local isaacsSkull = Item("Isaac's Skull")
+local desc = {
+    ["en_us"] = {"Isaac's Skull", "{{Timer}} {{Collectible118}} Brimstone or {{Collectible331}} Godhead for the duration of the room#Using multiple times in one room stacks the effects#{{Blank}} #{{Collectible498}} Duality will give you both effects at once"},
+    ["pt_br"] = {"Caveira do Isaac", "{{Timer}} {{Collectible118}} Brimstone ou {{Collectible331}} Godhead para o resto do quarto#Usando varias vezes no mesmo quarto amplifica o efeito#{{Blank}} #{{Collectible498}} Duality dará os dois efeitos sempre"},
+}
+
+local isaacsSkull = Item("Isaac's Skull", desc)
 
 isaacsSkull:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
-    local data = player:GetData()
-    if not data.godheads then
-        data.godheads = 0
-    end
+    local effects = player:GetEffects()
+    local has_duality = player:GetCollectibleNum(CollectibleType.COLLECTIBLE_DUALITY) > 0
 
-    if not data.brimstones then
-        data.brimstones = 0
-    end
-
-    if rng:RandomInt(2) == 1 then
-        player:AddCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE, 0, false)
-        data.brimstones = data.brimstones + 1
+    if has_duality then
+        effects:AddCollectibleEffect(CollectibleType.COLLECTIBLE_GODHEAD)
+        effects:AddCollectibleEffect(CollectibleType.COLLECTIBLE_BRIMSTONE)
     else
-        player:AddCollectible(CollectibleType.COLLECTIBLE_GODHEAD, 0, false)
-        data.godheads = data.godheads + 1
+        if rng:RandomInt(2) == 1 then
+            effects:AddCollectibleEffect(CollectibleType.COLLECTIBLE_BRIMSTONE)
+        else
+            effects:AddCollectibleEffect(CollectibleType.COLLECTIBLE_GODHEAD)
+        end
     end
 
     return true
-end)
-
-g.mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
-    local playersThatHaveIt = utils.hasCollectible(isaacsSkull.ID)
-    for _, player in ipairs(playersThatHaveIt) do
-        local data = player:GetData()
-		if data.godheads or data.brimstones then
-            for i = 1, data.godheads do
-                player:RemoveCollectible(CollectibleType.COLLECTIBLE_GODHEAD)
-            end
-    
-            for i = 1, data.brimstones do
-                player:RemoveCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE)
-            end
-    
-            data.godheads = 0
-            data.brimstones = 0
-        end
-	end
 end)

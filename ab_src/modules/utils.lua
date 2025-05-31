@@ -52,7 +52,7 @@ function utils.getVectorFromDirection(direction)
     if direction == Direction.NO_DIRECTION then
         return utils.VECTOR_ZERO
     end
-    return Vector.FromAngle(-180 + direction * 90)
+    return Vector.FromAngle(180 - direction * 90)
 end
 
 function utils.compareEntities(entity1, entity2)

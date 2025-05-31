@@ -8,7 +8,12 @@ local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local black_pepper = Item("Black Pepper")
+local desc = {
+    ["en_us"] = {"Black Pepper", "#{{Throwable}} Fires a volley of booger tears that latch onto enemies"},
+    ["pt_br"] = {"Pimenta-do-Reino", "#{{Throwable}} Atira uma salva de lágrimas que grudam nos inimigos"},
+}
+
+local black_pepper = Item("Black Pepper", desc)
 
 utils.mixTables(g.defaultPlayerSaveData, {
 	holding_black_pepper = false
@@ -27,6 +32,8 @@ black_pepper:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, p
 		local direction_vector = utils.getVectorFromDirection(direction)
 
 		if direction_vector ~= utils.VECTOR_ZERO then
+            AlphaAPI.log(direction)
+            AlphaAPI.log(direction_vector)
 			for tears = 1, 15 do
 				-- Get random angle per tear
 				local angle = 15

@@ -8,7 +8,12 @@ local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local deliriums_brain = Item("Delirium's Brain")
+local desc = {
+    ["en_us"] = {"Delirium's Brain", "Reverses the trajectories of all tears and damages enemies"},
+    ["pt_br"] = {"Cerebro do Delirium", "Reverte as trajetórias de todas as lágrimas e causa dano aos inimigos"},
+}
+
+local deliriums_brain = Item("Delirium's Brain", desc)
 
 deliriums_brain:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
 	for _, entity in ipairs(Isaac.GetRoomEntities()) do

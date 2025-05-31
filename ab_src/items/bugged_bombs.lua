@@ -15,9 +15,14 @@ local BombFlags = {
 	"TEAR_POISON"
 }
 
+local desc = {
+    ["en_us"] = {"Bugged Bombs", "#{{Bomb}} +5 Bombs#{{UltraSecretRoom}} Isaac's bombs explode with random bomb effects"},
+    ["pt_br"] = {"Bombas Bugadas", "#{{Bomb}} +5 Bombas#{{UltraSecretRoom}} As bombas de Isaac explodem com efeitos randomizados"},
+}
+
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
-local bugged_bombs = Item("Bugged Bombs")
+local bugged_bombs = Item("Bugged Bombs", desc)
 
 bugged_bombs:AddCallback("ITEM_PICKUP", function(player)
 	player:AddBombs(5)

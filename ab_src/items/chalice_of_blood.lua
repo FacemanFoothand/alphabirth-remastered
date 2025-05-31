@@ -10,7 +10,12 @@ local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local chaliceOfBlood = Item("Chalice of Blood", {}, false, " Chalice of Blood ", "  Chalice of Blood  ", "   Chalice of Blood   ")
+local desc = {
+    ["en_us"] = {"Chalice of Blood", "When placed down in a room will collect enemy kills#At 15 kills stored it can be used one more time for a big stat boost for the rest of the floor"},
+    ["pt_br"] = {"Cálice de Sangue", "Quando colocado em um quarto coleta as almas de inimigos#A 15 almas roubadas pode ser usado mais uma vez para ganhar atributos bonus pelo resto do andar."},
+}
+
+local chaliceOfBlood = Item("Chalice of Blood", desc, false, " Chalice of Blood ", "  Chalice of Blood  ", "   Chalice of Blood   ")
 chaliceOfBlood.NullCostume = Isaac.GetCostumeIdByPath("gfx/animations/costumes/accessories/animation_costume_chaliceofblood.anm2")
 chaliceOfBlood.Chalice = EntityConfig("Chalice of Blood")
 chaliceOfBlood.SoulLimit = 15

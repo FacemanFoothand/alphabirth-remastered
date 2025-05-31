@@ -9,7 +9,12 @@ local Item = include("ab_src.api.item")
 local EntityConfig = include("ab_src.api.entity")
 local utils = include("ab_src.modules.utils")
 
-local candle_kit = Item("Candle Kit")
+local desc = {
+    ["en_us"] = {"Candle Kit", "Spawns two candle orbitals around Isaac#{{Burning}} The candles deal 80% of Isaac's damage as contact damage and {{Burning}} burns nearby enemies"},
+    ["pt_br"] = {"Kit de Velas", "Cria velas orbitais ao redor de Isaac#{{Burning}} As velas infrigem 80% do dano de Isaac em forma de dado de contato e aplica {{Burning}} chamas aos inimigos"},
+}
+
+local candle_kit = Item("Candle Kit", desc)
 local candle_entity = EntityConfig("Candle Kit")
 
 candle_kit:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(player, cache_flag)

@@ -38,7 +38,17 @@ function Item:Init(name, desc, isTrinket, ...)
     -- TODO: Should use their callback instead. Maybe both.
     if EID then
         for lang, loc in pairs(desc) do
-            EID:addCollectible(self.ID, loc[2], loc[1], lang)
+            if lang ~= "synergy" then
+                EID:addCollectible(self.ID, loc[2], loc[1], lang)
+                goto continue
+            end
+
+            for ID2, langTable in pairs(loc) do
+                for lang, texts in pairs(langTable) do
+                    EID:addSynergyCondition(self.ID, ID2, texts.up, texts.down, lang)
+                end
+            end
+            ::continue::
         end
     end
 

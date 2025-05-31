@@ -3853,11 +3853,11 @@ function Alphabirth:modUpdate()
         player:EvaluateItems()
     end
 
-    if api_mod.data.run.bloodDriveTimesUsed and api_mod.data.run.bloodDriveTimesUsed > 0 then
-        Alphabirth.handleBloodDrive()
-    end
+    -- if api_mod.data.run.bloodDriveTimesUsed and api_mod.data.run.bloodDriveTimesUsed > 0 then
+    --     Alphabirth.handleBloodDrive()
+    -- end
     handlePossessedShot()
-    handleBlacklight()
+    -- handleBlacklight()
 
 	Alphabirth.apparitionSpawnCheck()
 	Alphabirth.checkEnemyFlames()

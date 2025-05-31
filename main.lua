@@ -3971,18 +3971,6 @@ local function hasTalismanProtection(damage_flags)
 	end
 end
 
-local function hasDiligenceProtection(damage_flags, damage_source)
-	if (
-		damage_flags & DamageFlag.DAMAGE_FIRE == DamageFlag.DAMAGE_FIRE
-		or (damage_flags & DamageFlag.DAMAGE_SPIKES == DamageFlag.DAMAGE_SPIKES and AlphaAPI.GAME_STATE.ROOM:GetType() ~= RoomType.ROOM_SACRIFICE)
-		or damage_flags & DamageFlag.DAMAGE_EXPLOSION == DamageFlag.DAMAGE_EXPLOSION
-		or damage_flags & DamageFlag.DAMAGE_POOP == DamageFlag.DAMAGE_POOP
-		or damage_source.Type == EntityType.ENTITY_FIREPLACE
-	) then
-		return true
-	end
-end
-
 local function hasWaxedProtection(damage_flags, damage_source)
 	if (
 		damage_flags & DamageFlag.DAMAGE_FIRE == DamageFlag.DAMAGE_FIRE
@@ -3995,7 +3983,6 @@ end
 local function hasProtection(player, damage_flags, damage_source)
 	return
 	(AlphaAPI.hasTransformation(TRANSFORMATIONS.WAXED) and hasWaxedProtection(damage_flags, damage_source))
-	-- or (player:HasCollectible(ITEMS.PASSIVE.DILIGENCE.id) and hasDiligenceProtection(damage_flags, damage_source))
 	-- or (player:HasCollectible(ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id) and hasTalismanProtection(damage_flags))
 end
 

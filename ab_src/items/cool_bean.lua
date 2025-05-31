@@ -9,7 +9,12 @@ local Item = include("ab_src.api.item")
 local EntityConfig = include("ab_src.api.entity")
 local utils = include("ab_src.modules.utils")
 
-local cool_bean = Item("Cool Bean")
+local desc = {
+    ["en_us"] = {"Cool Bean", "{{Freezing}} Deals 30 damage to nearby enemies and freezes them upon death"},
+    ["pt_br"] = {"Feijão Gelado", "{{Freezing}} Dá 30 dano à inimigos próximos e os congelam se o dano for mortal"},
+}
+
+local cool_bean = Item("Cool Bean", desc)
 local ice_fart = EntityConfig("Ice Fart")
 cool_bean.freeze_range = 160
 cool_bean.freeze_duration = 150
@@ -19,7 +24,9 @@ cool_bean:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
 		if entity:IsActiveEnemy() then
 			local distance_to_enemy = player.Position:Distance(entity.Position)
 			if distance_to_enemy < cool_bean.freeze_range then
-				entity:AddFreeze(EntityRef(player), cool_bean.freeze_duration)
+                entity:AddFreeze(EntityRef(player), cool_bean.freeze_duration)
+                entity:AddEntityFlags(EntityFlag.FLAG_ICE)
+                entity:TakeDamage(30, 0, EntityRef(player), 0)
 			end
 		end
 	end

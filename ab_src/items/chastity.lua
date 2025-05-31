@@ -8,7 +8,12 @@ local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local chastity = Item("Chastity")
+local desc = {
+    ["en_us"] = {"Chastity", "{{ArrowUp}} +1.5x Damage Multiplier#{{ArrowUp}} +0.4 Shot Speed#{{ArrowUp}} +0.2 Speed#{{ArrowUp}} +5 Range#{{DevilRoom}} All effects are lost if Isaac enters a devil room, even via a {{RedChest}} red chest"},
+    ["pt_br"] = {"Castidade", "{{ArrowUp}} +1.5x Multiplicador de Dano#{{ArrowUp}} +0.4 Velocidade de Lágrima#{{ArrowUp}} +0.2 Velocidade#{{ArrowUp}} +5 Distância#{{DevilRoom}} Todos os efeitos são desfeitos se Isaac entrar em um quarto demoniaco, mesmo se for por um {{RedChest}} baú vermelho"},
+}
+
+local chastity = Item("Chastity", desc)
 
 utils.mixTables(g.defaultSaveData, {
 	run = {

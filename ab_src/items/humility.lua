@@ -9,7 +9,12 @@ local Item = include("ab_src.api.item")
 local Flag = include("ab_src.api.flag")
 local utils = include("ab_src.modules.utils")
 
-local humility = Item("Humility")
+local desc = {
+    ["en_us"] = {"Humility", "{{MiniBoss}} Chance to mark a random enemy while room is active#That enemy takes double damage"},
+    ["pt_br"] = {"Humildade", "{{MiniBoss}} Chance de marcar um inimigo enquanto o quarto estiver ativo#Este inimigo receberá dano em dobro"},
+}
+
+local humility = Item("Humility", desc)
 local double_damage_flag = Flag("humility_double_damage")
 humility.interval = 10
 humility.chance = 10

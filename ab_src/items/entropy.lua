@@ -18,7 +18,7 @@ entropy:AddCallback(ModCallbacks.MC_POST_TEAR_INIT, function(entity)
     local data = entity:GetData()
     local player = entity:GetLastParent():ToPlayer()
     if not entropy_flag and utils.getLuckRNG(player, 66, 5) then
-        local angle = player:GetAimDirection():GetAngleDegrees()
+        local angle = player:GetLastDirection():GetAngleDegrees()
         local avoid_center = 6
         local variance = 15
         local deviation

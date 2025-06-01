@@ -10,13 +10,13 @@ local EntityConfig = include("ab_src.api.entity")
 local utils = include("ab_src.modules.utils")
 
 local desc = {
-    ["en_us"] = {"Green Candle", "Throws green flame#Blocks enemy tears and take up to 4 shots#{{Poison}} Deals contact damage and nearby enemies become poisoned"},
-    ["pt_br"] = {"Vela Verde", "Joga uma chama verde#Bloqueia até 4 lágrimas de inimigos#{{Poison}} Dá dano de contato e aplica veneno aos inimigos próximos"},
+    ["en_us"] = {"Green Candle", "Throws a green flame#Blocks enemy tears and take up to 4 shots#{{Poison}} Poisons nearby enemies and deals contact damage"},
+    ["pt_br"] = {"Vela Verde", "Joga uma chama verde#Bloqueia até 4 lágrimas de inimigos#{{Poison}} Envenena inimigos próximos e causa dano de contato"},
 }
 
 local green_candle = Item("Green Candle", desc)
 local flame_entity = EntityConfig("Green Candle", 20)
-green_candle.poison_range = 120
+green_candle.poison_range = 80
 green_candle.poison_duration = 120
 
 utils.mixTables(g.defaultPlayerSaveData, {
@@ -36,7 +36,8 @@ green_candle:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, p
 		local direction_vector = utils.getVectorFromDirection(direction)
 
 		if direction_vector ~= utils.VECTOR_ZERO then
-			local firevelocity = (direction_vector * player.ShotSpeed) * 28
+		    local d = player:GetLastDirection()
+			local firevelocity = (d * player.ShotSpeed) * 28
 			flame_entity:Spawn(
 				player.Position,
 				firevelocity,

@@ -2,7 +2,6 @@
 -- Item: Entropy
 -- Originally from Pack 3
 ----------------------------------------------------------------------------
-local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 

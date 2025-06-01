@@ -9,7 +9,12 @@ local Item = include("ab_src.api.item")
 local EntityConfig = include("ab_src.api.entity")
 local utils = include("ab_src.modules.utils")
 
-local green_candle = Item("Green Candle")
+local desc = {
+    ["en_us"] = {"Green Candle", "Throws green flame#Blocks enemy tears and take up to 4 shots#{{Poison}} Deals contact damage and nearby enemies become poisoned"},
+    ["pt_br"] = {"Vela Verde", "Joga uma chama verde#Bloqueia até 4 lágrimas de inimigos#{{Poison}} Dá dano de contato e aplica veneno aos inimigos próximos"},
+}
+
+local green_candle = Item("Green Candle", desc)
 local flame_entity = EntityConfig("Green Candle", 20)
 green_candle.poison_range = 120
 green_candle.poison_duration = 120

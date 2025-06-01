@@ -9,7 +9,12 @@ local Item = include("ab_src.api.item")
 local EntityConfig = include("ab_src.api.entity")
 local utils = include("ab_src.modules.utils")
 
-local divine_wrath = Item("Divine Wrath")
+local desc = {
+    ["en_us"] = {"Divine Wrath", "Isaac's tears are replaced with a controllable laser from the heavens"},
+    ["pt_br"] = {"Fúria Divina", "As lágrimas de Isaac são trocadas por um laser dos céus"},
+}
+
+local divine_wrath = Item("Divine Wrath", desc)
 local laser = EntityConfig("Divine Wrath")
 
 utils.mixTables(g.defaultPlayerSaveData, {
@@ -18,14 +23,6 @@ utils.mixTables(g.defaultPlayerSaveData, {
 
 divine_wrath:AddCallback("ITEM_PICKUP", function(player)
 	laser:Spawn(player.Position, Vector(0,0), player)
-end)
-
-divine_wrath:AddCallback("ITEM_REMOVE", function(player)
-	for _, entity in ipairs(Isaac:GetRoomEntities()) do
-		if laser:Matches(entity) and entity.Parent == player then
-			entity:Remove()
-		end
-	end
 end)
 
 laser:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function(familiar)
@@ -37,6 +34,10 @@ laser:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(familiar)
 	local save = g.getPlayerSave(player)
 	local grid_position = g.room:GetGridIndex(familiar.Position)
 	local grid_entity = g.room:GetGridEntity(grid_position)
+
+    if player:GetCollectibleNum(divine_wrath.ID) < 1 then
+        familiar:Remove()
+    end
 
 	player.FireDelay = 1
 

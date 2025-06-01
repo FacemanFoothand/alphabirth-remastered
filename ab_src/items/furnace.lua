@@ -8,7 +8,12 @@ local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local furnace = Item("Furnace")
+local desc = {
+    ["en_us"] = {"Furnace", "{{BleedingOut}} Upon taking damage {{Burning}} flames will shoot out of Isaac in all directions#{{Collectible289}} These are Red Candle flames"},
+    ["pt_br"] = {"Fornalha", "{{BleedingOut}} Ao receber dano Isaac terá {{Burning}} chamas expulsadas ao seu redor#{{Collectible289}} São as chamas da Red Candle"},
+}
+
+local furnace = Item("Furnace", desc)
 
 furnace:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, damage_amount, damage_flags, damage_source, invincibility_frames, entity_type)
 	local player = entity:ToPlayer()
@@ -19,7 +24,7 @@ furnace:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, damage_amo
 				EffectVariant.RED_CANDLE_FLAME,
 				0,
 				player.Position,
-				direction * (10 * player.ShotSpeed),
+				direction:Normalized() * (10 * player.ShotSpeed),
 				player
 			)
 		end

@@ -6,10 +6,14 @@
 
 local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
-local Flag = include("ab_src.api.flag")
 local utils = include("ab_src.modules.utils")
 
-local kindness = Item("Kindness")
+local desc = {
+    ["en_us"] = {"Kindness", "{{Charm}} Has a chance to charm a random enemy in the room#All charmed enemies drop {{HalfHeart}} Half Hearts#{{Luck}} Not affected by Luck"},
+    ["pt_br"] = {"Bondade", "{{Charm}} Tem chance de encantar um inimigo enquanto o quarto estiver ativo#Todos inimigos encantados dropam {{HalfHeart}} Meio Corações#{{Luck}} Não afetado por sorte"},
+}
+
+local kindness = Item("Kindness", desc)
 kindness.chance = 20 -- 1 out of 100
 kindness.charm_duration = 100
 kindness.last_charm_frame = 0

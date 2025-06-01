@@ -45,7 +45,9 @@ function Item:Init(name, desc, isTrinket, ...)
 
             for ID2, langTable in pairs(loc) do
                 for lang, texts in pairs(langTable) do
-                    EID:addSynergyCondition(self.ID, ID2, texts.up, texts.down, lang)
+                    if EID['loaded_ab'] == nil then
+                        EID:addSynergyCondition(self.ID, ID2, texts.up, texts.down, lang)
+                    end
                 end
             end
             ::continue::

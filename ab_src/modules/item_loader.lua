@@ -52,6 +52,9 @@ function itemLoader.loadAll(Alphabirth)
         local mod = include(file)
 		itemLoader.loadedItems[#itemLoader.loadedItems + 1] = mod
     end
+    if EID then
+        EID['loaded_ab'] = true
+    end
 end
 
 return itemLoader

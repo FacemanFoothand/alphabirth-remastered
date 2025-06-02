@@ -16,13 +16,12 @@ local cosmos = Item("The Cosmos", desc)
 cosmos.Mercury = EntityConfig("Cosmos Mercury")
 cosmos.Venus = EntityConfig("Cosmos Venus")
 cosmos.Pluto = EntityConfig("Cosmos Pluto")
-
-local mercury_burn_chance = 0.08
-local mercury_burn_duration = 60
-local venus_charm_chance = 0.08
-local venus_charm_duration = 120
-local pluto_freeze_chance = 0.08
-local pluto_freeze_duration = 90
+cosmos.Mercury.burn_chance = 0.08
+cosmos.Mercury.burn_duration = 60
+cosmos.Venus.charm_chance = 0.08
+cosmos.Venus.charm_duration = 120
+cosmos.Pluto.freeze_chance = 0.08
+cosmos.Pluto.freeze_duration = 90
 
 cosmos:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(player, flag)
     if flag == CacheFlag.CACHE_FAMILIARS then
@@ -73,16 +72,16 @@ cosmos:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(player, entity, _, 
     if damage_source.Entity then
         local random = utils.random(0,100) / 100.0
         if cosmos.Mercury:Matches(damage_source.Entity) then
-            if random < mercury_burn_chance then
-                entity:AddBurn(EntityRef(player), mercury_burn_duration, player.Damage)
+            if random < cosmos.Mercury.burn_chance then
+                entity:AddBurn(EntityRef(player), cosmos.Mercury.burn_duration, player.Damage)
             end
         elseif cosmos.Venus:Matches(damage_source.Entity) then
-            if random < venus_charm_chance then
-                entity:AddCharmed(EntityRef(player), venus_charm_duration)
+            if random < cosmos.Venus.charm_chance then
+                entity:AddCharmed(EntityRef(player), cosmos.Venus.charm_duration)
             end
         elseif cosmos.Pluto:Matches(damage_source.Entity) then
-            if random < pluto_freeze_chance then
-                entity:AddFreeze(EntityRef(player), pluto_freeze_duration)
+            if random < cosmos.Pluto.freeze_chance then
+                entity:AddFreeze(EntityRef(player), cosmos.Pluto.freeze_duration)
                 entity:AddEntityFlags(EntityFlag.FLAG_ICE)
                 entity:TakeDamage(20, 0, EntityRef(player), 0)
             end

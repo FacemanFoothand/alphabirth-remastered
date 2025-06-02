@@ -5,6 +5,7 @@
 local g = require("ab_src.modules.globals")
 local utils = include("ab_src.modules.utils")
 local Item = include("ab_src.api.item")
+local Flag = include("ab_src.api.flag")
 local PickupConfig = include("ab_src.api.pickup")
 
 local desc = {
@@ -14,6 +15,7 @@ local desc = {
 
 local miniature_meteor = Item("Miniature Meteor", desc)
 miniature_meteor.Shard = PickupConfig("Meteor Shard")
+miniature_meteor.TearFlag  = Flag("meteor_tear")
 
 utils.mixTables(g.defaultPlayerSaveData, {
 	miniature_meteor_bonus = 0
@@ -21,9 +23,8 @@ utils.mixTables(g.defaultPlayerSaveData, {
 
 miniature_meteor:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(player, tear)
     local save = g.getPlayerSave(player)
-    local data = tear:GetData()
     if utils.getLuckRNG(player, 10, 3) then
-        data.is_meteor = true
+        miniature_meteor.TearFlag:Apply(tear)
         local tear_sprite = tear:GetSprite()
         tear_sprite:Load("gfx/animations/effects/animation_tears_miniaturemeteor.anm2", true)
         local sprite_index = math.floor((save.miniature_meteor_bonus / 6) + 1)
@@ -39,7 +40,7 @@ miniature_meteor:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(player, te
 end)
 
 miniature_meteor:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function (player, target, _, _, source)
-    if source.Entity:GetData().is_meteor and utils.random(0, 4) == 1 then
+    if miniature_meteor.TearFlag:EntityHas(source.Entity) and utils.random(0, 4) == 1 then
         miniature_meteor.Shard:Spawn(target.Position, utils.VECTOR_ZERO, player)
     end
 end)

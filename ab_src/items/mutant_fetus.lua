@@ -156,11 +156,11 @@ local desc = {
 }
 
 local mutant_fetus = Item("Mutant Fetus", desc)
-local tear_flag = Flag("mutant_fetus_tear")
+mutant_fetus.TearFlag = Flag("mutant_fetus_tear")
 
 mutant_fetus:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(player, entity, damage_amount, damage_flags, damage_source, invincibility_frames, entity_type)
-	if tear_flag:EntityHas(damage_source) and entity:IsActiveEnemy(false) then
-		tear_flag:Clear(damage_source)
+	if mutant_fetus.TearFlag:EntityHas(damage_source) and entity:IsActiveEnemy(false) then
+		mutant_fetus.TearFlag:Clear(damage_source)
 		local bomb_roll = utils.random(1, 200)
 		if bomb_roll == 1 then
 			Isaac.Spawn(
@@ -179,7 +179,7 @@ end)
 
 mutant_fetus:AddCallback(ModCallbacks.MC_POST_TEAR_INIT, function(player, tear)
 	if tear.Variant ~= TearVariant.CHAOS_CARD and utils.getLuckRNG(player, 7, 3) then
-		tear_flag:Apply(tear)
+		mutant_fetus.TearFlag:Apply(tear)
 		local tear_sprite = tear:GetSprite()
 		tear_sprite:Load("gfx/animations/effects/animation_tears_mutantfetus.anm2", true)
 		tear_sprite:Play("Idle")

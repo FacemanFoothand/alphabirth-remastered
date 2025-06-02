@@ -1,6 +1,4 @@
-local g = require("ab_src.modules.globals")
 local utils = include("ab_src.modules.utils")
-local mod = g.mod
 
 local Flag = utils.class()
 

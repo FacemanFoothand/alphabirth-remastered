@@ -1908,13 +1908,13 @@ do
 			end
 
 			local room = AlphaAPI.GAME_STATE.ROOM
-			for _, entity in ipairs(AlphaAPI.entities.all) do
-				local data = entity:GetData()
-				if data.__alphaLog then
-					local entity_screen_pos = room:WorldToScreenPosition(entity.Position)
-					Isaac.RenderText(data.__alphaLog, entity_screen_pos.X - string.len(data.__alphaLog) * 2, entity_screen_pos.Y, 255, 255, 255, 1)
-				end
-			end
+			-- for _, entity in ipairs(AlphaAPI.entities.all) do
+			-- 	local data = entity:GetData()
+			-- 	if data.__alphaLog then
+			-- 		local entity_screen_pos = room:WorldToScreenPosition(entity.Position)
+			-- 		Isaac.RenderText(data.__alphaLog, entity_screen_pos.X - string.len(data.__alphaLog) * 2, entity_screen_pos.Y, 255, 255, 255, 1)
+			-- 	end
+			-- end
 
 			for i = 0, AlphaAPI.GAME_STATE.ROOM:GetGridSize() do
 				if LocalAPI.gridLog[i] then

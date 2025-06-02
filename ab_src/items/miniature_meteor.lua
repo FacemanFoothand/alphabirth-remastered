@@ -8,8 +8,8 @@ local Item = include("ab_src.api.item")
 local PickupConfig = include("ab_src.api.pickup")
 
 local desc = {
-    ["en_us"] = {"Miniature Meteor", "Chance to fire meteor tears#Meteor tears deal extra damage depending on the size of the meteor#Upon damaging an enemy with a meteor tear here is a 1 in 4 chance to create a Meteor Shard#Meteor Shards make your meteors tears bigger#Every shard adds 0.5 Damage to meteor tears#{{Luck}} 50% chance to shoot a meteor tear at 13 Luck"},
-    ["pt_br"] = {"Meteoro Miniatura", ""},
+    ["en_us"] = {"Miniature Meteor", "Chance to fire meteor tears#Meteor tears deal extra damage depending on the size of the meteor#Upon damaging an enemy with a meteor tear here is a 1 in 4 chance to create a Meteor Shard#Meteor Shards make meteor tears bigger#Every shard adds 0.5 Damage to meteor tears#{{Luck}} 50% chance to shoot a meteor tear at 13 Luck"},
+    ["pt_br"] = {"Meteoro Miniatura", "Chance de atirar lágrimas meteoro#Lágrimas meteoro dão dano extra dependendo do tamanho do meteoro#Ao causar dano a um inimigo há uma chance em 1/4 de criar um fragmento de meteoro#Coletar fragmentos fazem as lágrimas meteoro maiores#Cada fragmento adiciona 0.5 de Dano por lágrima meteoro#{{Luck}} 50% de chance de atirar uma lágrima meteoro com 13 Sorte"},
 }
 
 local miniature_meteor = Item("Miniature Meteor", desc)

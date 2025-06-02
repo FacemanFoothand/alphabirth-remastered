@@ -15,27 +15,6 @@ function PickupConfig:Init(name, subtype)
     self.radius2 = 24*24
 end
 
-function PickupConfig:SetDropSound(soundId)
-    self.dropSound = soundId
-    if not self.dropCallback then
-        self.dropCallback = true
-        EntityConfig.AddCallback(
-            self,
-            AlphaAPI.Callbacks.ENTITY_UPDATE,
-            function(entity, data)
-                local sprite = entity:GetSprite()
-                if (not entity:IsDead()) and
-                sprite:IsPlaying("Appear") and
-                sprite:IsEventTriggered("DropSound") then
-                    if self.dropSound then
-                        SFXManager():Play(self.dropSound, 1, 0, false, 1)
-                    end
-                end
-            end
-        )
-    end
-end
-
 function PickupConfig:SetCollectSound(soundId)
     self.collectSound = soundId
 end
@@ -48,21 +27,40 @@ function PickupConfig:SetCollisionClass(coll_class)
     self.collisionClass = coll_class
 end
 
+function PickupConfig:SetDropSound(soundId)
+    self.dropSound = soundId
+    if not self.dropCallback then
+        self.dropCallback = true
+        EntityConfig.AddCallback(self, ModCallbacks.MC_POST_PICKUP_UPDATE, function(entity)
+            if not entity:GetData()["ab_init_snd_pckp"] then
+                local sprite = entity:GetSprite()
+                if (not entity:IsDead()) and
+                    sprite:IsPlaying("Appear") and
+                    sprite:IsEventTriggered("DropSound") then
+                    if self.dropSound then
+                        SFXManager():Play(self.dropSound, 1, 0, false, 1)
+                    end
+                end
+                entity:GetData()["ab_init_snd_pckp"] = true
+            end
+        end)
+    end
+end
+
 function PickupConfig:AddCallback(enum, fn, a, b, c, d, e, f, g)
     if enum == PickupConfig.Callbacks.PICKUP_PICKUP then
-        EntityConfig.AddCallback(
-            self,
-            ModCallbacks.MC_POST_PICKUP_UPDATE,
-            function(entity)
-                local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-                if not entity:GetData()["ab_init"] then
-                    entity.EntityCollisionClass = self.collisionClass
-                    entity:GetData()["ab_init"] = true
-                end
+        EntityConfig.AddCallback(self, ModCallbacks.MC_POST_PICKUP_UPDATE, function(entity)
+            if not entity:GetData()["ab_init_pckp"] then
+                entity.EntityCollisionClass = self.collisionClass
+                entity:GetData()["ab_init_pckp"] = true
+            end
+
+            local g = require("ab_src.modules.globals")
+            for _, player in ipairs(g.players) do
                 if (not entity:IsDead()) and
-                player:CanPickupItem() and
-                (not entity:GetSprite():IsPlaying("Appear")) and
-                (player.Position - entity.Position):LengthSquared() < self.radius2 then
+                    player:CanPickupItem() and
+                    (not entity:GetSprite():IsPlaying("Appear")) and
+                    (player.Position - entity.Position):LengthSquared() < self.radius2 then
                     local ret = fn(player, entity)
                     if ret then
                         if self.collectSound then
@@ -73,7 +71,7 @@ function PickupConfig:AddCallback(enum, fn, a, b, c, d, e, f, g)
                     end
                 end
             end
-        )
+        end)
     else
         EntityConfig.AddCallback(self, enum, fn, a, b, c, d, e, f, g)
     end

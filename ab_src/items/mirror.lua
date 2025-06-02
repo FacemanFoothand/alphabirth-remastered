@@ -22,6 +22,8 @@ mirror:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
 
     local room = g.room
     local ents = Isaac.GetRoomEntities()
+    SFXManager():Play(SoundEffect.SOUND_HELL_PORTAL1, 1, 0, false, 1)
+    player:AnimateTeleport()
     if room:GetAliveEnemiesCount() > 0 then
         local possible_ents = {}
         for _, entity in pairs(ents) do
@@ -42,11 +44,9 @@ mirror:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
         local entity_pos = the_one.Position
         player.Position = entity_pos
         the_one.Position = player_pos
-        player:AnimateTeleport()
     else
         local teleport_pos = room:FindFreePickupSpawnPosition(room:GetDoorSlotPosition(utils.random(DoorSlot.LEFT0, DoorSlot.DOWN0)), 1, true)
         player.Position = teleport_pos
-        player:AnimateTeleport()
     end
 end)
 

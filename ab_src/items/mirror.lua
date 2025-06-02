@@ -8,46 +8,41 @@ local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local mirror = Item("Mirror")
+local desc = {
+    ["en_us"] = {"Mirror", "Swaps Isaac's position with a random enemy in the room#If there are no enemies Isaac will teleport to a random free spot"},
+    ["pt_br"] = {"Espelho", "Troca as posições de Isaac com um inimigo no quarto#Se não tiverem inimigos no quarto Isaac será teleportado à uma posição livre"},
+}
+
+local mirror = Item("Mirror", desc)
 
 mirror:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
-    local room = g.room
-
     if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
         return
     end
 
-    -- Get room entities.
-    local ents = AlphaAPI.entities.enemies
-
-    -- Get number of entities, and generate a random number between 1 and the number of entities.
-    local num_ents = #ents
-
-    local rand_key = utils.random(num_ents)
-
-    -- Make sure the entity is an enemy, not a fire, and not a portal.
-    -- Switch Isaac's position with the entity's position.
-    -- Animate the teleportation.
-    -- Further randomize the selection.
+    local room = g.room
+    local ents = Isaac.GetRoomEntities()
     if room:GetAliveEnemiesCount() > 0 then
-        for rand_key, entity in pairs(ents) do
+        local possible_ents = {}
+        for _, entity in pairs(ents) do
             if entity.Type ~= 306 and -- Portals
-                    entity.Type ~= 304 and -- The Thing
-                    entity.Type ~= EntityType.ENTITY_RAGE_CREEP and
-                    entity.Type ~= EntityType.ENTITY_BLIND_CREEP and
-                    entity.Type ~= EntityType.ENTITY_WALL_CREEP and
-                    entity.Velocity:Length() > 0.1 then
-                local player_pos = player.Position
-                local entity_pos = entity.Position
-
-                player.Position = entity_pos
-                entity.Position = player_pos
-
-                player:AnimateTeleport()
-
-                rand_key = utils.random(1, num_ents)
+            entity.Type ~= 304 and -- The Thing
+            entity.Type ~= EntityType.ENTITY_RAGE_CREEP and
+            entity.Type ~= EntityType.ENTITY_BLIND_CREEP and
+            entity.Type ~= EntityType.ENTITY_WALL_CREEP and
+            entity:IsVulnerableEnemy() and entity:IsActiveEnemy() and
+            entity.Velocity:Length() > 0.1 then
+                possible_ents[#possible_ents + 1] = entity
             end
         end
+
+        local chosen = math.max(utils.random(#possible_ents), 1)
+        local the_one = possible_ents[chosen]
+        local player_pos = player.Position
+        local entity_pos = the_one.Position
+        player.Position = entity_pos
+        the_one.Position = player_pos
+        player:AnimateTeleport()
     else
         local teleport_pos = room:FindFreePickupSpawnPosition(room:GetDoorSlotPosition(utils.random(DoorSlot.LEFT0, DoorSlot.DOWN0)), 1, true)
         player.Position = teleport_pos

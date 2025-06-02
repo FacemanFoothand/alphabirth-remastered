@@ -833,13 +833,6 @@ function Alphabirth.itemSetup()
 	--  PACK 3  --
 	--------------
 
-	-- ITEMS.ACTIVE.ALASTORS_CANDLE = api_mod:registerItem("Alastor's Candle")
-    -- ITEMS.ACTIVE.ALASTORS_CANDLE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.useAlastorsCandle)
-
-    -- ITEMS.ACTIVE.ISAACS_SKULL = api_mod:registerItem("Isaac's Skull")
-    -- ITEMS.ACTIVE.ISAACS_SKULL:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.useIsaacsSkull)
-    -- mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Alphabirth.isaacsSkullNewRoom)
-
     ITEMS.PASSIVE.FAITHFUL_AMBIVALENCE = api_mod:registerItem("Faithful Ambivalence", "gfx/animations/costumes/accessories/animation_costume_faithfulambivalence.anm2")
     ITEMS.PASSIVE.FAITHFUL_AMBIVALENCE:addCallback(AlphaAPI.Callbacks.ROOM_NEW, Alphabirth.faithfulAmbivalenceNewRoom)
 
@@ -847,18 +840,11 @@ function Alphabirth.itemSetup()
     ITEMS.PASSIVE.LIL_ALASTOR:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateLilAlastor)
 
     -- PASSIVES
-    -- ITEMS.PASSIVE.SMART_BOMBS = api_mod:registerItem("Smart Bombs")
-    -- ITEMS.PASSIVE.SMART_BOMBS:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.onPickupBombItem)
-
     ITEMS.PASSIVE.LEAK_BOMBS = api_mod:registerItem("Leaking Bombs", "gfx/animations/costumes/accessories/animation_costume_leakybombs.anm2")
     ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.onPickupBombItem)
     ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.leakingBombsUpdate, EntityType.ENTITY_BOMBDROP)
     ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.leakingBombsCreepUpdate, EntityType.ENTITY_EFFECT, EffectVariant.PLAYER_CREEP_BLACKPOWDER)
     ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.leakingBombsDamage)
-
-    -- ITEMS.PASSIVE.THE_COSMOS = api_mod:registerItem("The Cosmos")
-    -- ITEMS.PASSIVE.THE_COSMOS:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.cosmosDamage)
-    -- ITEMS.PASSIVE.THE_COSMOS:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateCosmos)
 
     ITEMS.PASSIVE.PAINT_PALETTE = api_mod:registerItem("Paint Palette", "gfx/animations/costumes/accessories/animation_costume_palette.anm2")
     ITEMS.PASSIVE.PAINT_PALETTE:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.paintPaletteDamage)
@@ -1070,10 +1056,6 @@ function Alphabirth.entitySetup()
 	-- 			PACK 3			 --
 	-------------------------------
 
-	-- FAMILIARS.MERCURY = api_mod:getEntityConfig("Cosmos Mercury", 0)
-	-- FAMILIARS.VENUS = api_mod:getEntityConfig("Cosmos Venus", 0)
-	-- FAMILIARS.PLUTO = api_mod:getEntityConfig("Cosmos Pluto", 0)
-
 	FAMILIARS.HUSHY_FLY = api_mod:getEntityConfig("Hushy Fly", 0)
 	FAMILIARS.LIL_MINER = api_mod:getEntityConfig("Lil Miner", 0)
 	FAMILIARS.HIVE_HEAD = api_mod:getEntityConfig("Hive Head Orbital", 0)
@@ -1091,7 +1073,6 @@ function Alphabirth.entitySetup()
 	ENTITIES.BRIMSTONE_HOST = api_mod:getEntityConfig("Brimstone Host", 20)
 	ENTITIES.LARGESACK = api_mod:getPickupConfig("Large Sack", 0)
 
-    -- FAMILIARS.ALASTORS_FLAME:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateAlastorsFlame)
     FAMILIARS.LIL_ALASTOR:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateLilAlastor)
 
     ENTITIES.LARGESACK:addCallback(AlphaAPI.Callbacks.PICKUP_PICKUP, Alphabirth.onLargeSackPickup)
@@ -1120,15 +1101,6 @@ function Alphabirth.entitySetup()
     ENTITIES.PLANETOID:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.planetoidTakeDamage)
 
     ENTITIES.CRYSTAL:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.crystalUpdate)
-
-    -- FAMILIARS.MERCURY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeMercury)
-    -- FAMILIARS.MERCURY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateMercury)
-
-    -- FAMILIARS.VENUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeVenus)
-    -- FAMILIARS.VENUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateVenus)
-
-    -- FAMILIARS.PLUTO:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializePluto)
-    -- FAMILIARS.PLUTO:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updatePluto)
 
     FAMILIARS.HUSHY_FLY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeHushyFly)
     FAMILIARS.HUSHY_FLY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateHushyFly)
@@ -4277,108 +4249,6 @@ end
 ---- ALASTOR'S RAGE ITEMS AND FAMILIARS
 ------------------------------------------------------------------------------
 -------------------
--- Alastor's Candle
--------------------
-function Alphabirth.useAlastorsCandle()
-	local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-
-    if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
-        return
-    end
-
-    local offset
-    for i = 1, 2 do
-        local flame = FAMILIARS.ALASTORS_FLAME:spawn(player.Position, Vector(0,0), nil)
-        local data = flame:GetData()
-        if i == 1 then
-            offset = math.pi
-        elseif i == 2 then
-            offset = 0
-        end
-        data.offset = offset
-        data.roomIdx = AlphaAPI.GAME_STATE.LEVEL:GetCurrentRoomIndex()
-        data.center_distance = 100
-    end
-
-    return true
-end
-
-local dist_modifier
-function Alphabirth.updateAlastorsFlame(flame)
-    local room = AlphaAPI.GAME_STATE.ROOM
-    local room_index = AlphaAPI.GAME_STATE.LEVEL:GetCurrentRoomIndex()
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-
-    local frame = AlphaAPI.GAME_STATE.GAME:GetFrameCount()
-    local data = flame:GetData()
-
-    if data.roomIdx ~= room_index or room:GetFrameCount() == 1 then
-        flame:Remove()
-    end
-
-    if data.center_distance == 100 then
-        dist_modifier = 1
-    elseif data.center_distance == 30 then
-        dist_modifier = -1
-    end
-
-    local off = (frame / 10) + data.offset
-
-    local x_offset = math.cos(off) * data.center_distance
-    local y_offset = math.sin(off) * data.center_distance
-    flame.Velocity = Vector(player.Position.X + x_offset, player.Position.Y + y_offset) - flame.Position
-
-    data.center_distance = data.center_distance - dist_modifier
-
-    --Add Fear to Nearby entities
-    for _, entity in ipairs(AlphaAPI.entities.enemies) do
-        if entity.Position:Distance(flame.Position) < 60 and math.random(100) == 1 then
-            entity:AddFear(EntityRef(flame), 60)
-        end
-    end
-end
-
--------------------
--- Isaac's Skull
--------------------
-function Alphabirth.useIsaacsSkull()
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    if not api_mod.data.run.godheads then
-        api_mod.data.run.godheads = 0
-    end
-
-    if not api_mod.data.run.brimstones then
-        api_mod.data.run.brimstones = 0
-    end
-
-    if random() > 0.5 then
-        player:AddCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE, 0, false)
-        api_mod.data.run.brimstones = api_mod.data.run.brimstones + 1
-    else
-        player:AddCollectible(CollectibleType.COLLECTIBLE_GODHEAD, 0, false)
-        api_mod.data.run.godheads = api_mod.data.run.godheads + 1
-    end
-
-    return true
-end
-
-function Alphabirth.isaacsSkullNewRoom()
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    if api_mod.data.run.godheads or api_mod.data.run.brimstones then
-        for i = 1, api_mod.data.run.godheads do
-            player:RemoveCollectible(CollectibleType.COLLECTIBLE_GODHEAD)
-        end
-
-        for i = 1, api_mod.data.run.brimstones do
-            player:RemoveCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE)
-        end
-
-        api_mod.data.run.godheads = 0
-        api_mod.data.run.brimstones = 0
-    end
-end
-
--------------------
 -- Lil Alastor
 -------------------
 function Alphabirth.evaluateLilAlastor(player, flag)
@@ -5247,84 +5117,6 @@ end
 -------------------------------------------------------------------------------
 ---- FAMILIAR LOGIC
 -------------------------------------------------------------------------------
--------------------
--- The Cosmos
--------------------
-function Alphabirth.evaluateCosmos(player, flag)
-    if flag == CacheFlag.CACHE_FAMILIARS then
-        local amount_to_spawn = player:GetCollectibleNum(ITEMS.PASSIVE.THE_COSMOS.id) * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
-        player:CheckFamiliar(FAMILIARS.MERCURY.variant, amount_to_spawn, modRNG)
-        player:CheckFamiliar(FAMILIARS.PLUTO.variant, amount_to_spawn, modRNG)
-        player:CheckFamiliar(FAMILIARS.VENUS.variant, amount_to_spawn, modRNG)
-    end
-end
-
----MERCURY---
-local mercury_burn_chance = 0.05
-local mercury_burn_duration = 60
-function Alphabirth.initializeMercury(familiar)
-    familiar = familiar:ToFamiliar()
-    familiar:AddToOrbit(30)
-    familiar:GetData().orbit_distance = Vector(40, 40)
-end
-
-function Alphabirth.updateMercury(familiar)
-	familiar.OrbitDistance = familiar:GetData().orbit_distance
-    familiar.OrbitAngleOffset = familiar.OrbitAngleOffset + 0.05
-    familiar.Velocity = (familiar:GetOrbitPosition(AlphaAPI.GAME_STATE.PLAYERS[1].Position) - familiar.Position)
-end
-
----VENUS---
-local venus_charm_chance = 0.05
-local venus_charm_duration = 120
-function Alphabirth.initializeVenus(familiar)
-    familiar = familiar:ToFamiliar()
-    familiar:AddToOrbit(31)
-    familiar:GetData().orbit_distance = Vector(60, 60)
-end
-
-function Alphabirth.updateVenus(familiar)
-    familiar.OrbitDistance = familiar:GetData().orbit_distance
-    familiar.OrbitAngleOffset = familiar.OrbitAngleOffset + 0.035
-    familiar.Velocity = (familiar:GetOrbitPosition(AlphaAPI.GAME_STATE.PLAYERS[1].Position) - familiar.Position)
-end
-
----PLUTO---
-local pluto_freeze_chance = 0.05
-local pluto_freeze_duration = 90
-function Alphabirth.initializePluto(familiar)
-    familiar = familiar:ToFamiliar()
-    familiar:AddToOrbit(50)
-    familiar:GetData().orbit_distance = Vector(80, 80)
-end
-
-function Alphabirth.updatePluto(familiar)
-	familiar.OrbitDistance = familiar:GetData().orbit_distance
-    familiar.OrbitAngleOffset = familiar.OrbitAngleOffset + 0.02
-    familiar.Velocity = (familiar:GetOrbitPosition(AlphaAPI.GAME_STATE.PLAYERS[1].Position) - familiar.Position)
-end
-
----DAMAGE---
-function Alphabirth.cosmosDamage(entity, damage_amount, damage_flag, damage_source, invincibility_frames)
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    if damage_source.Entity then
-        if AlphaAPI.matchConfig(damage_source.Entity, FAMILIARS.MERCURY) then
-            if random() < mercury_burn_chance then
-                entity:AddBurn(EntityRef(player), mercury_burn_duration, player.Damage)
-            end
-        elseif AlphaAPI.matchConfig(damage_source.Entity, FAMILIARS.VENUS) then
-            if random() < venus_charm_chance then
-                entity:AddCharmed(venus_charm_duration)
-            end
-        elseif AlphaAPI.matchConfig(damage_source.Entity, FAMILIARS.PLUTO) then
-            if random() < pluto_freeze_chance then
-                entity:AddFreeze(EntityRef(player), pluto_freeze_duration)
-            end
-        end
-    end
-end
-
-
 -------------------
 -- Hushy Fly
 -------------------

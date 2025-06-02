@@ -8,7 +8,7 @@ utils.mixTables(g.defaultPlayerSaveData, {
 })
 
 
-local Item = utils.class("Item")
+local Item = utils.class()
 function Item:Init(name, desc, isTrinket, ...)
     self.Name = name
     self.IsTrinket = isTrinket
@@ -160,7 +160,7 @@ function Item:AddCallback(id, func, param)
             mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, player, ...)
                 player = player:ToPlayer()
                 if self:PlayerHas(player) then
-                    return func(...)
+                    return func(player, ...)
                 end
             end, EntityType.ENTITY_PLAYER)
         end

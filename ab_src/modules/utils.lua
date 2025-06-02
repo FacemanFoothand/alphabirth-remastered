@@ -172,32 +172,31 @@ function utils.hasCollectible(itemID)
 	return playersThatHaveIt
 end
 
-utils.class = {}
-local classInit
-function classInit(tbl, ...)
-    local inst = {}
-    setmetatable(inst, tbl)
-    tbl.__index = tbl
-    tbl.__call = classInit
+function utils.class(parent)
+    parent = parent or {}
+    local newClass = {}
 
-    if inst.Init then
-        inst:Init(...)
-    end
+    setmetatable(newClass, { __index = parent })
+    newClass.super = parent
 
-    if inst.PostInit then
-        inst:PostInit(...)
-    end
+    newClass.__index = newClass
 
-    return inst
+    setmetatable(newClass, {
+        __index = parent,
+        __call = function(cls, ...)
+            local inst = setmetatable({}, newClass)
+            if inst.Init then
+                inst:Init(...)
+            end
+            if inst.PostInit then
+                inst:PostInit(...)
+            end
+            return inst
+        end
+    })
+
+    return newClass
 end
-
-function utils.class:Init(Type)
-    self.Type = Type
-end
-
-setmetatable(utils.class, {
-    __call = classInit
-})
 
 function utils.getUniquePlayerIdentifier(player) -- CollectibleRNG seed is a number that is consistent across player type changing, save and continue, and new players being added.
     local data = player:GetData()

@@ -1079,9 +1079,7 @@ function Alphabirth.entitySetup()
 	FAMILIARS.HIVE_HEAD = api_mod:getEntityConfig("Hive Head Orbital", 0)
 
 	FAMILIARS.LIL_ALASTOR = api_mod:getEntityConfig("Lil Alastor", 0)
-	-- FAMILIARS.ALASTORS_FLAME = api_mod:getEntityConfig("Alastor's Flame", 0)
 
-	ENTITIES.METEOR_SHARD = api_mod:getPickupConfig("Meteor Shard", 0)
 	ENTITIES.APPARITION = api_mod:getEntityConfig("Apparition", 0)
 	ENTITIES.MEATHEAD = api_mod:getEntityConfig("Meathead", 0)
 	ENTITIES.CRYSTAL = api_mod:getEntityConfig("Crystal", 0)
@@ -1107,8 +1105,6 @@ function Alphabirth.entitySetup()
     ENTITIES.STARGAZER:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onStarGazerUpdate)
 
     ENTITIES.BRIMSTONE_HOST:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onBrimstoneHostUpdate)
-
-    ENTITIES.METEOR_SHARD:addCallback(AlphaAPI.Callbacks.PICKUP_PICKUP, Alphabirth.meteorShardPickup)
 
     LOCKS.APPARITION = api_mod:createUnlock("alphaApparitionLock")
     ENTITIES.APPARITION:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.apparitionUpdate)

@@ -1,7 +1,7 @@
 local g = require("ab_src.modules.globals")
 local utils = include("ab_src.modules.utils")
 
-local Pathfinder = utils.class("Pathfinder")
+local Pathfinder = utils.class()
 function Pathfinder:Init(entity, speed, updateInterval, collisionDistance)
     self.Entity = entity
     self.Speed = speed

@@ -183,7 +183,7 @@
         <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
     </entity>
 
-    <entity anm2path="pickups/animation_pickup_meteor.anm2" baseHP="0" boss="0" champion="0" collisionMass="10" collisionRadius="1" friction="1" id="5" name="Meteor Shard" numGridCollisionPoints="12" shadowSize="5" stageHP="0" variant="1110">
+    <entity anm2path="pickups/animation_pickup_meteor.anm2" baseHP="0" boss="0" champion="0" collisionMass="15" collisionRadius="12" friction="1" id="5" name="Meteor Shard" numGridCollisionPoints="12" shadowSize="16" stageHP="0" variant="1110">
 		<gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
 	</entity>
 

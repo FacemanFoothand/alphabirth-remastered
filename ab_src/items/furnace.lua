@@ -15,8 +15,7 @@ local desc = {
 
 local furnace = Item("Furnace", desc)
 
-furnace:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, damage_amount, damage_flags, damage_source, invincibility_frames, entity_type)
-	local player = entity:ToPlayer()
+furnace:AddCallback("PLAYER_TAKE_DAMAGE", function(player, damage_amount, damage_flags, damage_source, invincibility_frames, entity_type)
 	if not g.hasProtection(player, damage_flags, damage_source) then
 		for _, direction in ipairs(utils.direction_list) do
 			Isaac.Spawn(

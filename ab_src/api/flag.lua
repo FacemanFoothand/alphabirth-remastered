@@ -2,7 +2,7 @@ local g = require("ab_src.modules.globals")
 local utils = include("ab_src.modules.utils")
 local mod = g.mod
 
-local Flag = utils.class("Flag")
+local Flag = utils.class()
 
 local function getEntityFromRef(entityref)
 	if entityref == nil then return end

@@ -2,7 +2,7 @@ local g = require("ab_src.modules.globals")
 local utils = include("ab_src.modules.utils")
 local mod = g.mod
 
-local EntityConfig = utils.class("EntityConfig")
+local EntityConfig = utils.class()
 function EntityConfig:Init(name, subtype)
     self.Name = name
 

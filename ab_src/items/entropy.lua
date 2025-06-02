@@ -15,7 +15,6 @@ local entropy = Item("Entropy", desc)
 local entropy_flag = false
 
 entropy:AddCallback(ModCallbacks.MC_POST_TEAR_INIT, function(entity)
-    local data = entity:GetData()
     local player = entity:GetLastParent():ToPlayer()
     if not entropy_flag and utils.getLuckRNG(player, 66, 5) then
         local angle = player:GetLastDirection():GetAngleDegrees()

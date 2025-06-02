@@ -15,6 +15,12 @@ local desc = {
 }
 
 local charity = Item("Charity", desc)
+charity.max_damage = 2.0
+charity.max_speed = 0.2
+charity.max_luck = 3
+charity.min_damage = -1
+charity.min_speed = -0.1
+charity.min_luck = -1.5
 
 utils.mixTables(g.defaultPlayerSaveData, {
     damage_modifier = 0,
@@ -52,16 +58,6 @@ charity:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, player
         local over_capacity = total > (max_capacity * 0.7)
         local fraction = total / max_capacity
 
-        -- Stat maxes
-        local base_damage = 2
-        local base_speed = 0.2
-        local base_luck = 3
-
-        -- Stat minimums (half of max, negative)
-        local damage_min = -1
-        local speed_min = -0.1
-        local luck_min = -1.5
-
         local function scaleStat(base, min)
             local value = base * (1 - fraction)
             if over_capacity then
@@ -71,9 +67,9 @@ charity:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, player
             end
         end
 
-        save.damage_modifier = scaleStat(base_damage, damage_min)
-        save.speed_modifier = scaleStat(base_speed, speed_min)
-        save.luck_modifier = scaleStat(base_luck, luck_min)
+        save.damage_modifier = scaleStat(charity.max_damage, charity.min_damage)
+        save.speed_modifier = scaleStat(charity.max_speed, charity.min_speed)
+        save.luck_modifier = scaleStat(charity.max_luck, charity.min_luck)
 
         player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
         player:AddCacheFlags(CacheFlag.CACHE_SPEED)
@@ -95,7 +91,7 @@ charity:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function(player)
                 beggartype,
                 0,
                 position,
-                utils.VECTOR_ZERO,
+                Vector.Zero,
                 nil
             )
         end

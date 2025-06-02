@@ -4,10 +4,8 @@
 -- Chance to charm nearby enemies
 ----------------------------------------------------------------------------
 
-local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
-local random = utils.random
 
 local desc = {
     ["en_us"] = { "Cologne", "{{Charm}} Creates an aura around Isaac that has a chance to charm enemies who get too close" },
@@ -30,10 +28,10 @@ end)
 
 cologne:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, player_type)
 	local max_charm_distance = 120 * math.max( player.SpriteScale.X, player.SpriteScale.Y )
-	for _, entity in ipairs(AlphaAPI.entities.all) do
+	for _, entity in ipairs(Isaac.GetRoomEntities()) do
 		if player.Position:Distance(entity.Position) < max_charm_distance
 		and entity:IsVulnerableEnemy() then
-			local charm_roll = random(1, cologne.charm_chance)
+			local charm_roll = utils.random(1, cologne.charm_chance)
 			if charm_roll == 1 then
 				entity:AddCharmed(EntityRef(player), cologne.charm_duration)
 			end

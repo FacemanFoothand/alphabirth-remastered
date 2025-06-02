@@ -41,7 +41,7 @@ end)
 
 miniature_meteor:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function (player, target, _, _, source)
     if miniature_meteor.TearFlag:EntityHas(source.Entity) and utils.random(0, 4) == 1 then
-        miniature_meteor.Shard:Spawn(target.Position, utils.VECTOR_ZERO, player)
+        miniature_meteor.Shard:Spawn(target.Position, Vector.Zero, player)
     end
 end)
 

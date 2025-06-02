@@ -16,9 +16,10 @@ local cosmos = Item("The Cosmos", desc)
 cosmos.Mercury = EntityConfig("Cosmos Mercury")
 cosmos.Venus = EntityConfig("Cosmos Venus")
 cosmos.Pluto = EntityConfig("Cosmos Pluto")
+
 cosmos.Mercury.burn_chance = 0.08
 cosmos.Mercury.burn_duration = 60
-cosmos.Venus.charm_chance = 0.08
+cosmos.Venus.charm_chance = 0.080
 cosmos.Venus.charm_duration = 120
 cosmos.Pluto.freeze_chance = 0.08
 cosmos.Pluto.freeze_duration = 90

@@ -168,11 +168,11 @@ mutant_fetus:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(player, entit
 				BombVariant.BOMB_SUPERTROLL,
 				0,
 				entity.Position,
-				utils.VECTOR_ZERO,
+				Vector.Zero,
 				player
 			)
 		else
-			player:FireBomb( entity.Position, utils.VECTOR_ZERO )
+			player:FireBomb( entity.Position, Vector.Zero )
 		end
 	end
 end)

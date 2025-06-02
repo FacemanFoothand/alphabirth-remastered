@@ -159,7 +159,7 @@ function utils.atan2(a,b)
 end
 
 function utils.hasCollectible(itemID)
-	local players = AlphaAPI.GAME_STATE.PLAYERS
+	local players = g.players
 	local playersThatHaveIt = {}
 	for _, player in ipairs(players) do
 		if player:HasCollectible(itemID) then

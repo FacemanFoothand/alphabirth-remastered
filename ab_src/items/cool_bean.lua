@@ -7,7 +7,6 @@
 local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local EntityConfig = include("ab_src.api.entity")
-local utils = include("ab_src.modules.utils")
 
 local desc = {
     ["en_us"] = {"Cool Bean", "{{Freezing}} Deals 30 damage to nearby enemies and freezes them upon death"},
@@ -35,7 +34,7 @@ cool_bean:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
 				ice_fart.Variant,  	                            -- Variant
 				0,                          					-- Subtype
 				player.Position,
-				utils.VECTOR_ZERO,          					-- Velocity
+				Vector.Zero,          					        -- Velocity
 				player)                    				 		-- Spawner
 	g.sfx:Play(SoundEffect.SOUND_FART,1.0,0,false,1.0)
 end)

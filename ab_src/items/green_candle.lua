@@ -35,7 +35,7 @@ green_candle:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, p
 		local direction = player:GetFireDirection()
 		local direction_vector = utils.getVectorFromDirection(direction)
 
-		if direction_vector ~= utils.VECTOR_ZERO then
+		if direction_vector ~= Vector.Zero then
 		    local d = player:GetLastDirection()
 			local firevelocity = (d * player.ShotSpeed) * 28
 			flame_entity:Spawn(

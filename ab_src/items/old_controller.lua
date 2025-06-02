@@ -8,7 +8,12 @@ local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local old_controller = Item("Old Controller")
+local desc = {
+    ["en_us"] = {"Old Controller", "{{ArrowUp}} +1 Life#Upon taking mortal damage revives Isaac as a {{Collectible"..CollectibleType.COLLECTIBLE_CLICKER.."}} random character with {{Collectible"..CollectibleType.COLLECTIBLE_D4.."}} random items"},
+    ["pt_br"] = {"Controle Velho", "{{ArrowUp}} +1 Vida#Ao receber dano mortal revive Isaac como um {{Collectible"..CollectibleType.COLLECTIBLE_CLICKER.."}} personagem randomizado com {{Collectible"..CollectibleType.COLLECTIBLE_D4.."}} itens randomizados"},
+}
+
+local old_controller = Item("Old Controller", desc)
 
 utils.mixTables(g.defaultPlayerSaveData, {
 	run = {

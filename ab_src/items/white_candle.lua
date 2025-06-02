@@ -48,7 +48,7 @@ white_candle:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, damag
 						EffectVariant.CRACK_THE_SKY,
 						0,              	-- Subtype
 						position_to_hit,
-						utils.VECTOR_ZERO,	-- Velocity
+						Vector.Zero,	-- Velocity
 						player          	-- Spawner
 					)
 				end
@@ -58,7 +58,7 @@ white_candle:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, damag
 					EffectVariant.CRACK_THE_SKY,
 					0,              	-- Subtype
 					AlphaAPI.GAME_STATE.ROOM:GetRandomPosition(0),
-					utils.VECTOR_ZERO,	-- Velocity
+					Vector.Zero,	-- Velocity
 					player          	-- Spawner
 				)
 			end

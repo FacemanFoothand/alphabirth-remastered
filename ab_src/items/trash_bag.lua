@@ -66,7 +66,7 @@ trash_bag:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
 			pickup_to_spawn,
 			subtype_to_spawn,
 			spawn_position,
-			utils.VECTOR_ZERO,
+			Vector.Zero,
 			player)
 	end
 
@@ -77,7 +77,7 @@ trash_bag:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
 			PickupVariant.PICKUP_TRINKET,
 			0,
 			spawn_position,
-			utils.VECTOR_ZERO,
+			Vector.Zero,
 			player)
 	end
 
@@ -88,7 +88,7 @@ trash_bag:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
 			PickupVariant.PICKUP_COLLECTIBLE,
 			0,
 			spawn_position,
-			utils.VECTOR_ZERO,
+			Vector.Zero,
 			player)
 	end
 end)

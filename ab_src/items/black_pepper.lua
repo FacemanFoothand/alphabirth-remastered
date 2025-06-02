@@ -31,7 +31,7 @@ black_pepper:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, p
 		local direction = player:GetFireDirection()
 		local direction_vector = utils.getVectorFromDirection(direction)
 
-		if direction_vector ~= utils.VECTOR_ZERO then
+		if direction_vector ~= Vector.Zero then
 			for tears = 1, 15 do
 				-- Get random angle per tear
 				local angle = 15

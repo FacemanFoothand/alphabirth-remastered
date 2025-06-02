@@ -32,7 +32,7 @@ cool_bean:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
 	end
 
 	Isaac.Spawn(ice_fart.ID,
-				ice_fart.Variant,  	-- Variant
+				ice_fart.Variant,  	                            -- Variant
 				0,                          					-- Subtype
 				player.Position,
 				utils.VECTOR_ZERO,          					-- Velocity

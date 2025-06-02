@@ -13,7 +13,7 @@ local desc = {
 }
 
 local miniature_meteor = Item("Miniature Meteor", desc)
-miniature_meteor.shard = PickupConfig("Meteor Shard")
+miniature_meteor.Shard = PickupConfig("Meteor Shard")
 
 utils.mixTables(g.defaultPlayerSaveData, {
 	miniature_meteor_bonus = 0
@@ -40,11 +40,11 @@ end)
 
 miniature_meteor:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function (player, target, _, _, source)
     if source.Entity:GetData().is_meteor and utils.random(0, 4) == 1 then
-        miniature_meteor.shard:Spawn(target.Position, utils.VECTOR_ZERO, player)
+        miniature_meteor.Shard:Spawn(target.Position, utils.VECTOR_ZERO, player)
     end
 end)
 
-miniature_meteor.shard:AddCallback(PickupConfig.Callbacks.PICKUP_PICKUP, function(player, entity)
+miniature_meteor.Shard:AddCallback(PickupConfig.Callbacks.PICKUP_PICKUP, function(player, entity)
     local save = g.getPlayerSave(player)
     SFXManager():Play(SoundEffect.SOUND_SCAMPER, 1, 0, false, 1)
     save.miniature_meteor_bonus = save.miniature_meteor_bonus + 1

@@ -13,7 +13,7 @@ local files = {
 	"ab_src.items.chalice_of_blood",
 	"ab_src.items.charity",
 	"ab_src.items.chastity",
-	-- "ab_src.items.the_cosmos",
+	"ab_src.items.the_cosmos",
 	"ab_src.items.cologne",
 	"ab_src.items.cool_bean",
 	"ab_src.items.debug",

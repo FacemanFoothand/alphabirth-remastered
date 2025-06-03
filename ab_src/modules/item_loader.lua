@@ -26,7 +26,7 @@ local files = {
 	"ab_src.items.lifeline",
 	"ab_src.items.rocket_shoes",
 	"ab_src.items.satans_contract",
-	-- "ab_src.items.smart_bombs",
+	"ab_src.items.smart_bombs",
 	"ab_src.items.tearleporter",
 	"ab_src.items.temperance",
 	"ab_src.items.trash_bag",

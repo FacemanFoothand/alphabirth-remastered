@@ -4,3 +4,4 @@
 *.it
 .vscode
 .vscode/*
+.luarc.json

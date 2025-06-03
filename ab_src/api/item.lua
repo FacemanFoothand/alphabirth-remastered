@@ -16,10 +16,10 @@ function Item:Init(name, desc, isTrinket, ...)
 
     if not self.IsTrinket then
         self.ID = Isaac.GetItemIdByName(name)
-        self.Config = g.itemConfig:GetCollectible(self.ID)
+        self.Config = g.item_config:GetCollectible(self.ID)
     else
         self.ID = Isaac.GetTrinketIdByName(name)
-        self.Config = g.itemConfig:GetTrinket(self.ID)
+        self.Config = g.item_config:GetTrinket(self.ID)
     end
 
     local extraNames = {...}

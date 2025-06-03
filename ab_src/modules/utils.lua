@@ -1,5 +1,7 @@
 local utils = {}
 
+local g = require("ab_src.modules.globals")
+
 -- Make sure to load this After Alpha API
 
 -- Setup
@@ -65,6 +67,17 @@ end
 
 function utils.degToRad (deg)
 	return ((deg * math.pi) / 180)
+end
+
+function utils.get_grid_entities()
+    local grid_entities = {}
+    for i = 0, g.room:GetGridSize() do
+        local entity = g.room:GetGridEntity(i)
+        if entity then
+            grid_entities[#grid_entities+1] = entity
+        end
+    end
+    return grid_entities
 end
 
 function utils.findClosestEnemy(entity)
@@ -158,7 +171,7 @@ function utils.atan2(a,b)
     return utils.degToRad(Vector(a, b):GetAngleDegrees())
 end
 
-function utils.hasCollectible(itemID)
+function utils.has_collectible(itemID)
 	local players = g.players
 	local playersThatHaveIt = {}
 	for _, player in ipairs(players) do

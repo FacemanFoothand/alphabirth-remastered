@@ -15,7 +15,7 @@ local desc = {
 
 local mirror = Item("Mirror", desc)
 
-mirror:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
+mirror:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, player)
     if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
         return
     end

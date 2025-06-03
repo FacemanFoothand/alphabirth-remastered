@@ -11,7 +11,7 @@
   <active description="Return to sender" gfx="collectible_deliriumsbrain.png" maxcharges="3" name="Delirium's Brain" />
   <active description="One man's trash..." gfx="collectible_trashbag.png" maxcharges="3" name="Trash Bag" />
   <passive id="5" description="Stress just changes me, ok?" cache="tearcolor" gfx="collectible_addicted.png" name="Addicted" />
-  <passive id="19" description="Read the fine print." blackhearts="2" cache="damage flying tearcolor" gfx="collectible_satanscontract.png" devilprice="2" name="Satan's Contract" />
+  <passive id="19" description="Read the fine print." blackhearts="2" cache="damage flying tearcolor color" gfx="collectible_satanscontract.png" devilprice="2" name="Satan's Contract" />
   <familiar description="Personal pushover." cache="familiars" gfx="collectible_stonedbuddy.png" name="Stoned Buddy" />
   <passive id="3" description="Bomb tears?" cache="tearcolor" gfx="collectible_mutantfetus.png" name="Mutant Fetus" />
   <passive id="4" description="Rhymes with alone..." cache="tearcolor" gfx="collectible_cologne.png" name="Cologne" />

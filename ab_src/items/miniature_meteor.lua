@@ -27,15 +27,9 @@ miniature_meteor:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(player, te
         miniature_meteor.TearFlag:Apply(tear)
         local tear_sprite = tear:GetSprite()
         tear_sprite:Load("gfx/animations/effects/animation_tears_miniaturemeteor.anm2", true)
-        local sprite_index = math.floor((save.miniature_meteor_bonus / 6) + 1)
-        if sprite_index > 6 then
-            sprite_index = 6
-        end
-        tear_sprite:LoadGraphics()
+        local sprite_index = math.min(math.floor((save.miniature_meteor_bonus / 6) + 1), 6)
         tear_sprite:Play("Stone"..sprite_index.."Move")
-        if save.miniature_meteor_bonus then
-            tear.CollisionDamage = tear.CollisionDamage + (save.miniature_meteor_bonus * 0.5)
-        end
+        tear.CollisionDamage = tear.CollisionDamage + (save.miniature_meteor_bonus * 0.5)
     end
 end)
 

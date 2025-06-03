@@ -21,7 +21,7 @@ end)
 
 white_candle:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, damage_amount, damage_flags, damage_source, invincibility_frames, entity_type)
 	local player = entity:ToPlayer()
-	if not g.hasProtection(player, damage_flags, damage_source) then
+	if not g.HasProtection(player, damage_flags, damage_source) then
 		local num_lasers = utils.random(2, 8)
 		for i = 1, num_lasers do
 			local entities = Isaac:GetRoomEntities()

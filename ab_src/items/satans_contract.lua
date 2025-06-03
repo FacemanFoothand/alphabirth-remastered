@@ -8,7 +8,12 @@ local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local satans_contract = Item("Satan's Contract")
+local desc = {
+    ["en_us"] = {"Satan's Contract", "{{ArrowUp}} Isaac deals dobule damage#{{ArrowDown}} Isaac takes double damage"},
+    ["pt_br"] = {"Contrato do Satã", "{{ArrowUp}} Isaac dá o dobro de Dano#{{ArrowDown}} Isaac leva o dobro de dano"},
+}
+
+local satans_contract = Item("Satan's Contract", desc)
 
 satans_contract:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(player, cache_flag)
 	if cache_flag == CacheFlag.CACHE_DAMAGE then
@@ -24,10 +29,8 @@ satans_contract:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(player, cac
 	end
 end)
 
-satans_contract:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, damage_amount, damage_flags, damage_source, invincibility_frames, entity_type)
-	local player = entity:ToPlayer()
-	if player:HasCollectible(satans_contract.ID)
-	and not g.hasProtection(player, damage_flags, damage_source) then
+satans_contract:AddCallback("PLAYER_TAKE_DAMAGE", function(player, damage_amount, damage_flags, damage_source, invincibility_frames, entity_type)
+	if not g.HasProtection(player, damage_flags, damage_source) then
 		for i = 1, damage_amount do
 			if player:GetSoulHearts() > 0 then
 				player:AddSoulHearts(-1)

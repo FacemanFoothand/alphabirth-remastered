@@ -19,7 +19,7 @@
     <costume id="16" anm2path="accessories/animation_costume_humility.anm2" priority = "96" type="passive" />
     <costume id="17" anm2path="accessories/animation_costume_chastity.anm2" priority = "96" type="passive" />
     <costume id="18" anm2path="accessories/animation_costume_kindness.anm2" priority = "96" type="passive" />
-    <costume id="19" anm2path="accessories/animation_costume_contract.anm2" priority = "97" isFlying = "true" type="passive" />
+    <costume id="19" anm2path="accessories/animation_costume_contract.anm2" priority = "97" skinColor = "3" overwriteColor = "true" isFlying = "true" type="passive" />
     <costume anm2path="accessories/animation_transformation_waxed.anm2" priority = "98" type="none" />
     <costume anm2path="accessories/animation_costume_null.anm2" priority = "99" isFlying = "true" type="none" />
 

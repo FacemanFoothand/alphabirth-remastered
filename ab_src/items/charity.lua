@@ -81,7 +81,7 @@ end)
 charity:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function(player)
     local room = Game():GetRoom()
 
-    if utils.hasCollectible(charity.ID) then
+    if utils.has_collectible(charity.ID) then
         if room:GetType() == RoomType.ROOM_TREASURE and room:IsFirstVisit() then
             local center_position = room:GetCenterPos()
             local position = Isaac.GetFreeNearPosition(center_position, 0)

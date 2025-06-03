@@ -47,7 +47,7 @@ local valid_effects = {
 	PillEffect.PILLEFFECT_X_LAX,
 	PillEffect.PILLEFFECT_SOMETHINGS_WRONG,
 	PillEffect.PILLEFFECT_SUNSHINE,
-	PillEffect.PILLEFFECT_VURP
+	PillEffect.PILLEFFECT_VURP,
 }
 
 local g = require("ab_src.modules.globals")
@@ -61,9 +61,9 @@ local desc = {
 
 local addicted = Item("Addicted", desc)
 
-addicted:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, damage_amount, damage_flags, damage_source, invincibility_frames)
+addicted:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, _, damage_flags, damage_source, _)
     local player = entity:ToPlayer()
-    if not g.hasProtection(player, damage_flags, damage_source) then
+    if not g.HasProtection(player, damage_flags, damage_source) then
         local pill_chance = utils.random(1, 6)
         if pill_chance == 1 then
             local chosen_pill = valid_effects[utils.random(1, #valid_effects)]

@@ -26,7 +26,7 @@ cologne:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(player, cache_flag)
 	end
 end)
 
-cologne:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, player_type)
+cologne:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, _)
 	local max_charm_distance = 120 * math.max( player.SpriteScale.X, player.SpriteScale.Y )
 	for _, entity in ipairs(Isaac.GetRoomEntities()) do
 		if player.Position:Distance(entity.Position) < max_charm_distance

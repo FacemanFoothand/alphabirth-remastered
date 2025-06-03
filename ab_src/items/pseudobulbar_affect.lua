@@ -4,11 +4,14 @@
 -- Tears shoot out in the direction Isaac moves.
 ----------------------------------------------------------------------------
 
-local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
-local utils = include("ab_src.modules.utils")
 
-local pseudobulbar_affect = Item("Pseudobulbar Affect")
+local desc = {
+    ["en_us"] = {"Pseudobulbar Affect", "Tears shoot out in Isaac's movement direction"},
+    ["pt_br"] = {"Afeto Pseudobulbar", "Lágrimas serão atiradas na direção de movimento do Isaac"},
+}
+
+local pseudobulbar_affect = Item("Pseudobulbar Affect", desc)
 
 pseudobulbar_affect:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, player_type)
 	local direction = player:GetMovementVector():Normalized()

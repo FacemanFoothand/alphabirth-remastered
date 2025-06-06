@@ -56,11 +56,10 @@ local valid_effects = {
 local addicted = Item("Addicted") ---@type Item
 addicted.desc = include("ab_src.integrations.eid").addicted
 
----@param entity Entity
+---@param player EntityPlayer
 ---@param damage_flags DamageFlag
 ---@param damage_source EntityRef
-addicted:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, _, damage_flags, damage_source)
-    local player = entity:ToPlayer()
+addicted:AddCallback("PLAYER_TAKE_DAMAGE", function(player, _, damage_flags, damage_source)
     if not g.HasProtection(player, damage_flags, damage_source) then
         local pill_chance = utils.random(1, 6)
         if pill_chance == 1 and player then
@@ -68,6 +67,6 @@ addicted:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, _, damage
             player:UsePill(chosen_pill, PillColor.PILL_BLUE_BLUE)
         end
     end
-end, EntityType.ENTITY_PLAYER)
+end)
 
 return addicted

@@ -3,39 +3,35 @@
 -- Originally from Pack 1
 -- Freezes nearby enemies
 ----------------------------------------------------------------------------
-
 local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local EntityConfig = include("ab_src.api.entity")
 
-local desc = {
-    ["en_us"] = {"Cool Bean", "{{Freezing}} Deals 30 damage to nearby enemies and freezes them upon death"},
-    ["pt_br"] = {"Feijão Gelado", "{{Freezing}} Dá 30 dano à inimigos próximos e os congelam se o dano for mortal"},
-}
+local cool_bean = Item("Cool Bean") ---@type Item
+cool_bean.desc = include("ab_src.integrations.eid").cool_bean
+cool_bean.IceFart = EntityConfig("Ice Fart") ---@type EntityConfig
+cool_bean.IceFart.freeze_range = 160
+cool_bean.IceFart.freeze_duration = 150
 
-local cool_bean = Item("Cool Bean", desc)
-local ice_fart = EntityConfig("Ice Fart")
-cool_bean.freeze_range = 160
-cool_bean.freeze_duration = 150
-
-cool_bean:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
+---@param player EntityPlayer
+cool_bean:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, player)
 	for _, entity in ipairs(Isaac.GetRoomEntities()) do
 		if entity:IsActiveEnemy() then
 			local distance_to_enemy = player.Position:Distance(entity.Position)
-			if distance_to_enemy < cool_bean.freeze_range then
-                entity:AddFreeze(EntityRef(player), cool_bean.freeze_duration)
+			if distance_to_enemy < cool_bean.IceFart.freeze_range then
+                entity:AddFreeze(EntityRef(player), cool_bean.IceFart.freeze_duration)
                 entity:AddEntityFlags(EntityFlag.FLAG_ICE)
                 entity:TakeDamage(30, 0, EntityRef(player), 0)
 			end
 		end
 	end
 
-	Isaac.Spawn(ice_fart.ID,
-				ice_fart.Variant,  	                            -- Variant
-				0,                          					-- Subtype
+	Isaac.Spawn(cool_bean.IceFart.ID,
+				cool_bean.IceFart.Variant,
+				0,
 				player.Position,
-				Vector.Zero,          					        -- Velocity
-				player)                    				 		-- Spawner
+				Vector.Zero,
+				player)
 	g.sfx:Play(SoundEffect.SOUND_FART,1.0,0,false,1.0)
 end)
 

@@ -3,6 +3,8 @@
 -- Originally from Pack 1
 -- Bombs become Bugged Bombs, which have tear flags randomly applied to them.
 ----------------------------------------------------------------------------
+local Item = include("ab_src.api.item")
+local utils = include("ab_src.modules.utils")
 
 local BombFlags = {
 	"TEAR_BURN",
@@ -25,15 +27,14 @@ local desc = {
     ["pt_br"] = {"Bombas Bugadas", "#{{Bomb}} +5 Bombas#{{UltraSecretRoom}} As bombas de Isaac explodem com efeitos randomizados"},
 }
 
-local Item = include("ab_src.api.item")
-local utils = include("ab_src.modules.utils")
-local bugged_bombs = Item("Bugged Bombs", desc)
+local bugged_bombs = Item("Bugged Bombs")
+bugged_bombs.desc = desc
 
 bugged_bombs:AddCallback("ITEM_PICKUP", function(player)
 	player:AddBombs(5)
 end)
 
-bugged_bombs:AddCallback(ModCallbacks.MC_POST_BOMB_INIT, function(player, bomb, bomb_variant)
+bugged_bombs:AddCallback(ModCallbacks.MC_POST_BOMB_INIT, function(_, bomb, bomb_variant)
 	if bomb_variant ~= BombVariant.BOMB_SUPERTROLL and bomb_variant ~= BombVariant.BOMB_TROLL then
 		local bomb_sprite = bomb:GetSprite()
 		if bomb_sprite:GetFilename() ~= "gfx/animations/effects/animation_effect_buggedbombs.anm2" then
@@ -43,7 +44,7 @@ bugged_bombs:AddCallback(ModCallbacks.MC_POST_BOMB_INIT, function(player, bomb, 
 	end
 end)
 
-bugged_bombs:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, function(player, bomb, bomb_variant)
+bugged_bombs:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, function(_, bomb, bomb_variant)
 	if bomb_variant ~= BombVariant.BOMB_SUPERTROLL and bomb.Variant ~= BombVariant.BOMB_TROLL then
 		if bomb.FrameCount % 15 == 0 then
 			bomb.Flags = bomb.Flags | TearFlags[BombFlags[utils.random(1, #BombFlags)]]

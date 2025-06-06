@@ -3,23 +3,19 @@
 -- Originally from Pack 3
 -- Spawn 2 Spinning Flames
 ----------------------------------------------------------------------------
-
 local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local EntityConfig = include("ab_src.api.entity")
 
-local desc = {
-    ["en_us"] = {"Alastor's Candle", "#{{Burning}} Creates spinning flames around Isaac for the duration of the room#{{Fear}} The flames apply {{ColorPurple}}Fear{{CR}} to nearby enemies"},
-    ["pt_br"] = {"Vela do Alastor", "#{{Burning}} Cria chamas que circulam Isaac pelo resto do quarto#{{Fear}} Aplica {{ColorPurple}}Medo{{CR}} aos inimigos próximos às chamas"},
-}
+local alastors_candle = Item("Alastor's Candle") ---@type Item
+alastors_candle.desc = include("ab_src.integrations.eid").alastors_candle
+alastors_candle.Flame = EntityConfig("Alastor's Flame") ---@type EntityConfig
 
-local alastorsCandle = Item("Alastor's Candle", desc)
-alastorsCandle.Flame = EntityConfig("Alastor's Flame")
-
-alastorsCandle:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
+---@param player EntityPlayer
+alastors_candle:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, player)
     local offset
     for i = 1, 2 do
-        local flame = alastorsCandle.Flame:Spawn(player.Position, Vector(0,0), nil)
+        local flame = alastors_candle.Flame:Spawn(player.Position, Vector(0,0), nil)
         local data = flame:GetData()
         if i == 1 then
             offset = math.pi
@@ -27,14 +23,15 @@ alastorsCandle:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
             offset = 0
         end
         data.offset = offset
-        data.roomIdx = g.level:GetCurrentRoomIndex()
+        data.room_idx = g.level:GetCurrentRoomIndex()
         data.center_distance = 100
     end
 
     return true
 end)
 
-alastorsCandle.Flame:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(familiar)
+---@param familiar EntityFamiliar
+alastors_candle.Flame:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(familiar)
     local data = familiar:GetData()
     local room = g.room
     local player = familiar:ToFamiliar().Player
@@ -46,7 +43,7 @@ alastorsCandle.Flame:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(famil
         data.dist_modifier = 1
     end
 
-    if data.roomIdx ~= room_index or room:GetFrameCount() == 1 then
+    if data.room_idx ~= room_index or room:GetFrameCount() == 1 then
         familiar:Remove()
     end
 
@@ -74,4 +71,4 @@ alastorsCandle.Flame:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(famil
     end
 end)
 
-return alastorsCandle
+return alastors_candle

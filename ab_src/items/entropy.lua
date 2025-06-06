@@ -5,16 +5,12 @@
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local desc = {
-    ["en_us"] = {"Entropy", "{{ArrowUp}} 1.5x Tears multiplier#Chance to fire an extra tear with a slightly off trajectory#{{LuckSmall}} 100% Chance at 7 Luck"},
-    ["pt_br"] = {"Entropia", "{{ArrowUp}} 1.5x Multiplicador de Lágrimas#Chance de atirar uma lágrima extra com trajetória diferente%{{LuckSmall}} 100% de chance com 7 Sorte"},
-}
-
-local entropy = Item("Entropy", desc)
+local entropy = Item("Entropy") ---@type Item
+entropy.desc = include("ab_src.integrations.eid").entropy
 
 local entropy_flag = false
 
-entropy:AddCallback(ModCallbacks.MC_POST_TEAR_INIT, function(entity)
+entropy:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(entity)
     local player = entity:GetLastParent():ToPlayer()
     if not entropy_flag and utils.getLuckRNG(player, 66, 5) then
         local angle = player:GetLastDirection():GetAngleDegrees()
@@ -27,7 +23,6 @@ entropy:AddCallback(ModCallbacks.MC_POST_TEAR_INIT, function(entity)
             deviation = utils.random(avoid_center, variance)
         end
         local length = player.ShotSpeed * 10.0 + entity.Velocity:Length()
-
         entropy_flag = true
         player:FireTear(
             player.Position,

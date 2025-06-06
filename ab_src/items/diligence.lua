@@ -3,19 +3,17 @@
 -- Originally from Pack 1
 -- Immunity to fire, spikes, and bombs. 20% chance to dodge all damage
 ----------------------------------------------------------------------------
-
 local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local desc = {
-    ["en_us"] = {"Diligence", "Immunity to {{Burning}} fire, {{RedPoop}} Red Poop, {{SacrificeRoom}} spikes, {{SpikedChest}} Spiked Chests and {{Bomb}} explosive damage#20% chance to ignore any damage taken#{{SacrificeRoom}} Spikes in Sacrifice Rooms still deal damage"},
-    ["pt_br"] = {"Diligência", "Imunidade a {{Burning}} fogo, {{RedPoop}} Cocô Vermelho, {{SacrificeRoom}} estacas, {{Spiked}} Baús Armadilha e {{Bomb}} dano explosivo#20% de chance de ignorar qualquer dano recebido#{{SacrificeRoom}} Estacas em Quartos de Sarifício ainda dão dano"},
-}
-
-local diligence = Item("Diligence", desc)
+local diligence = Item("Diligence") ---@type Item
+diligence.desc = include("ab_src.integrations.eid").diligence
 diligence.dodge_chance = 0.2
 
+---@param player EntityPlayer
+---@param damage_flags DamageFlag|integer
+---@param damage_source EntityRef
 g.RegisterProtectionFunction(function(player, damage_flags, damage_source)
 	if player:HasCollectible(diligence.ID) and (
 		damage_flags & DamageFlag.DAMAGE_FIRE == DamageFlag.DAMAGE_FIRE
@@ -25,13 +23,16 @@ g.RegisterProtectionFunction(function(player, damage_flags, damage_source)
 		or damage_flags & DamageFlag.DAMAGE_POOP == DamageFlag.DAMAGE_POOP
 		or damage_flags & DamageFlag.DAMAGE_CHEST == DamageFlag.DAMAGE_CHEST
 		or damage_source.Type == EntityType.ENTITY_FIREPLACE
-        or utils.random(0, 100) / 100.0 < diligence.dodge_chance
+        or utils.random() < diligence.dodge_chance
 	) then
 		return true
 	end
 end)
 
-diligence:AddCallback("PLAYER_TAKE_DAMAGE", function(player, _, damage_flags, damage_source, _, _)
+---@param player EntityPlayer
+---@param damage_flags DamageFlag|integer
+---@param damage_source EntityRef
+diligence:AddCallback("PLAYER_TAKE_DAMAGE", function(player, _, damage_flags, damage_source)
 	return not g.HasProtection(player, damage_flags, damage_source)
 end)
 

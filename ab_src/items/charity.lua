@@ -3,24 +3,27 @@
 -- Originally from Pack 1
 -- Spawns a bum in every treasure room and stats up for less consumables
 ----------------------------------------------------------------------------
-
 local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
-local random = utils.random
 
-local desc = {
-    ["en_us"] = {"Charity", "{{ArrowUp}} +0.2 Speed#{{ArrowUp}} +3 Luck#{{ArrowUp}} +2 Damage#{{ArrowDown}} For every pickup Isaac has the bonus is reduced, eventually going negative if he carries over 70% of max#Spawns a beggar in every item room"},
-    ["pt_br"] = {"Caridade", "{{ArrowUp}} +0.2 Velocidade#{{ArrowUp}} +3 Sorte#{{ArrowUp}} +2 Dano#{{ArrowDown}} Para cada pickup que Isaac tem o bonus é reduzido, eventualmente tornando negativo se estiver carregando mais de 70% da capacidade máxima#Spawna um pedinte em cada quarto de item."},
-}
-
-local charity = Item("Charity", desc)
+local charity = Item("Charity") ---@type Item
+charity.desc = include("ab_src.integrations.eid").charity
 charity.max_damage = 2.0
 charity.max_speed = 0.2
 charity.max_luck = 3
 charity.min_damage = -1
 charity.min_speed = -0.1
 charity.min_luck = -1.5
+
+charity.beggar_variants = {
+    4,  -- Beggar
+    7,  -- Key Master
+    8,  -- Donation Machine
+    9,  -- Bomb Bum
+    13, -- Battery Bum
+    18, -- Rotten Beggar
+}
 
 utils.mixTables(g.defaultPlayerSaveData, {
     damage_modifier = 0,
@@ -29,6 +32,8 @@ utils.mixTables(g.defaultPlayerSaveData, {
     previous_total = nil
 })
 
+---@param player EntityPlayer
+---@param cache_flag CacheFlag
 charity:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(player, cache_flag)
     local save = g.getPlayerSave(player)
     if cache_flag == CacheFlag.CACHE_DAMAGE then
@@ -40,7 +45,8 @@ charity:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(player, cache_flag)
     end
 end)
 
-charity:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, player_type)
+---@param player EntityPlayer
+charity:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player)
     local keys = player:GetNumKeys()
     local bombs = player:GetNumBombs()
     local coins = player:GetNumCoins()
@@ -78,23 +84,20 @@ charity:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, player
     end
 end)
 
-charity:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function(player)
+charity:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
     local room = Game():GetRoom()
-
-    if utils.has_collectible(charity.ID) then
-        if room:GetType() == RoomType.ROOM_TREASURE and room:IsFirstVisit() then
-            local center_position = room:GetCenterPos()
-            local position = Isaac.GetFreeNearPosition(center_position, 0)
-            local beggartype = random(4, 7)
-            Isaac.Spawn(
-                EntityType.ENTITY_SLOT,
-                beggartype,
-                0,
-                position,
-                Vector.Zero,
-                nil
-            )
-        end
+    if room:GetType() == RoomType.ROOM_TREASURE and room:IsFirstVisit() then
+        local center_position = room:GetCenterPos()
+        local position = Isaac.GetFreeNearPosition(center_position, 0)
+        local beggar_type = charity.beggar_variants[utils.random(1, #charity.beggar_variants)]
+        Isaac.Spawn(
+            EntityType.ENTITY_SLOT,
+            beggar_type,
+            0,
+            position,
+            Vector.Zero,
+            nil
+        )
     end
 end)
 

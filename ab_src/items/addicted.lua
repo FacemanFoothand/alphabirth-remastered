@@ -3,6 +3,9 @@
 -- Originally from Pack 1
 -- Has a chance to swallow a random pill when damage is taken
 ----------------------------------------------------------------------------
+local g = require("ab_src.modules.globals")
+local Item = include("ab_src.api.item")
+local utils = include("ab_src.modules.utils")
 
 local valid_effects = {
 	PillEffect.PILLEFFECT_48HOUR_ENERGY,
@@ -50,27 +53,21 @@ local valid_effects = {
 	PillEffect.PILLEFFECT_VURP,
 }
 
-local g = require("ab_src.modules.globals")
-local Item = include("ab_src.api.item")
-local utils = include("ab_src.modules.utils")
+local addicted = Item("Addicted") ---@type Item
+addicted.desc = include("ab_src.integrations.eid").addicted
 
-local desc = {
-    ["en_us"] = {"Addicted", "#{{Pill}} Upon being damaged Isaac has a chance to activate a random pill effect#{{Luck}} Static 1/6 chance"},
-    ["pt_br"] = {"Viciado", "#{{Pill}} Ao receber dano, Isaac terá uma chance de ativar um efeito de pílula{{Luck}} Chance estática de 1/6"},
-}
-
-local addicted = Item("Addicted", desc)
-
-addicted:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, _, damage_flags, damage_source, _)
+---@param entity Entity
+---@param damage_flags DamageFlag
+---@param damage_source EntityRef
+addicted:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(entity, _, damage_flags, damage_source)
     local player = entity:ToPlayer()
     if not g.HasProtection(player, damage_flags, damage_source) then
         local pill_chance = utils.random(1, 6)
-        if pill_chance == 1 then
+        if pill_chance == 1 and player then
             local chosen_pill = valid_effects[utils.random(1, #valid_effects)]
             player:UsePill(chosen_pill, PillColor.PILL_BLUE_BLUE)
         end
     end
 end, EntityType.ENTITY_PLAYER)
-
 
 return addicted

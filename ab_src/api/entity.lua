@@ -2,7 +2,12 @@ local g = require("ab_src.modules.globals")
 local utils = include("ab_src.modules.utils")
 local mod = g.mod
 
+--- @class EntityConfig
+--- @field Name string
+--- @field SubType integer
+--- @field [string] any
 local EntityConfig = utils.class()
+
 function EntityConfig:Init(name, subtype)
     self.Name = name
 

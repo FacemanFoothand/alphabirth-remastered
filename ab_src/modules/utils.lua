@@ -35,7 +35,7 @@ function utils.isItemInList(list, item)
 		if value == item then
 			return true
 		end
-	end	
+	end
 	return false
 end
 

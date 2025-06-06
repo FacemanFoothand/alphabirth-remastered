@@ -7,12 +7,19 @@ utils.mixTables(g.defaultPlayerSaveData, {
     collectibles = {}
 })
 
+--- @class Item
+--- @field Name string
+--- @field ID CollectibleType|TrinketType|integer
+--- @field Config ItemConfig
+--- @field IsTrinket boolean
+--- @field IDList? integer[]
+--- @field StringID string
+--- @field [string] any
+local Item = utils.class() ---@type Item
 
-local Item = utils.class()
-function Item:Init(name, desc, isTrinket, ...)
+function Item:Init(name, isTrinket, ...)
     self.Name = name
     self.IsTrinket = isTrinket
-    desc = desc or {}
 
     if not self.IsTrinket then
         self.ID = Isaac.GetItemIdByName(name)
@@ -31,26 +38,6 @@ function Item:Init(name, desc, isTrinket, ...)
             else
                 self.IDList[#self.IDList + 1] = Isaac.GetTrinketIdByName(extraName)
             end
-        end
-    end
-
-    -- External Item Descriptions integration
-    -- TODO: Should use their callback instead. Maybe both.
-    if EID then
-        for lang, loc in pairs(desc) do
-            if lang ~= "synergy" then
-                EID:addCollectible(self.ID, loc[2], loc[1], lang)
-                goto continue
-            end
-
-            for ID2, langTable in pairs(loc) do
-                for lang, texts in pairs(langTable) do
-                    if EID['loaded_ab'] == nil then
-                        EID:addSynergyCondition(self.ID, ID2, texts.up, texts.down, lang)
-                    end
-                end
-            end
-            ::continue::
         end
     end
 

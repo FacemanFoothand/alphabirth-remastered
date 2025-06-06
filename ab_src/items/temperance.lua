@@ -3,12 +3,12 @@
 -- Originally from Pack 1
 -- Stats up if you haven't gone to the treasure room on the floor
 ----------------------------------------------------------------------------
-
 local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local temperance = Item("Temperance")
+local temperance = Item("Temperance") ---@type Item
+temperance.desc = include("ab_src.integrations.eid").temperance
 
 utils.mixTables(g.defaultPlayerSaveData, {
 	run = {
@@ -18,6 +18,8 @@ utils.mixTables(g.defaultPlayerSaveData, {
 	}
 })
 
+---@param player EntityPlayer
+---@param cache_flag CacheFlag
 temperance:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(player, cache_flag)
 	local save = g.getPlayerSave(player)
 
@@ -32,6 +34,7 @@ temperance:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(player, cache_fl
 	end
 end)
 
+---@param player EntityPlayer
 temperance:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function(player)
 	local room = g.room
 	local save = g.getPlayerSave(player)

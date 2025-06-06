@@ -4,14 +4,11 @@
 ----------------------------------------------------------------------------
 local Item = include("ab_src.api.item")
 
-local desc = {
-    ["en_us"] = {"Rocket Shoes", "{{ArrowUp}} +0.1 Speed#{{SpeedSmall}} Instant acceleration to max speed"},
-    ["pt_br"] = {"Sapatos Foguete", "{{ArrowUp}} +0.1 Velocidade#{{SpeedSmall}} Aceleração isntantânea para a velocidade máxima"},
-}
+local rocket_shoes = Item("Rocket Shoes") ---@type Item
+rocket_shoes.desc = include("ab_src.integrations.eid").rocket_shoes
 
-local rocket_shoes = Item("Rocket Shoes", desc)
-
-rocket_shoes:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, player_type)
+---@param player EntityPlayer
+rocket_shoes:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player)
     local count =  player:GetCollectibleNum(rocket_shoes.ID)
     if count < 1 then
         return
@@ -26,9 +23,13 @@ rocket_shoes:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, p
     end
 end)
 
+---@param player EntityPlayer
+---@param flag CacheFlag
 rocket_shoes:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(player, flag)
     local count =  player:GetCollectibleNum(rocket_shoes.ID)
     if flag == CacheFlag.CACHE_SPEED then
         player.MoveSpeed = player.MoveSpeed + 0.1 * count
     end
 end)
+
+return rocket_shoes

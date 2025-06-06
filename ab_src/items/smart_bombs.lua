@@ -7,13 +7,9 @@ local utils = include("ab_src.modules.utils")
 local Item = include("ab_src.api.item")
 local Flag = include("ab_src.api.flag")
 
-local desc = {
-    ["en_us"] = {"Smart Bombs", "{{ArrowUp}} +5 Bombs#If placed after room clear the bomb will walk towards vulnerable secrets#It will seek out {{SecretRoom}} Secret Rooms, {{SoulHeart}} Tinted Rocks and {{MinecartRoom}} Crawlspaces"},
-    ["pt_br"] = {"Bombas Inteligentes", "{{ArrowUp}} +5 Bombas#Se usadas depois de o quarto estiver limpo as bombas andarão até segredos#Irão procurar {{SecretRoom}} Quartos Secretos, {{SoulHeart}} Rochas Tingidas e {{MinecartRoom}} Crawlspaces"},
-}
-
-local smart_bombs = Item("Smart Bombs", desc)
-smart_bombs.Flag = Flag("smart_bomb_flag")
+local smart_bombs = Item("Smart Bombs") ---@type Item
+smart_bombs.desc = include("ab_src.integrations.eid").smart_bombs
+smart_bombs.Flag = Flag("smart_bomb_flag") ---@type Flag
 
 local DOOR_SLOTS = {
     DoorSlot.LEFT0,
@@ -23,26 +19,30 @@ local DOOR_SLOTS = {
     DoorSlot.LEFT1,
     DoorSlot.UP1,
     DoorSlot.RIGHT1,
-    DoorSlot.DOWN1
+    DoorSlot.DOWN1,
 }
 
+---@param player EntityPlayer
 smart_bombs:AddCallback("ITEM_PICKUP", function(player)
-	player:AddBombs(5)
+    player:AddBombs(5)
 end)
 
-smart_bombs:AddCallback(ModCallbacks.MC_POST_BOMB_INIT, function(player, bomb, bomb_variant)
+---@param _ EntityPlayer
+---@param bomb EntityBomb
+smart_bombs:AddCallback(ModCallbacks.MC_POST_BOMB_INIT, function(_, bomb)
     local room = g.room
-    if bomb.SpawnerType == EntityType.ENTITY_PLAYER
-    and not smart_bombs.Flag:EntityHas(bomb)
-    and room:IsClear() then
-        local target_entity
-        for i, entity in pairs(utils.get_grid_entities()) do
+    if bomb.SpawnerType == EntityType.ENTITY_PLAYER and not smart_bombs.Flag:EntityHas(bomb) and room:IsClear() then
+        local target_entity ---@type GridEntity|nil
+        ---@param entity GridEntity
+        for _, entity in pairs(utils.get_grid_entities()) do
             for _, slot in pairs(DOOR_SLOTS) do
-                local door = room:GetDoor(slot)
+                local door = room:GetDoor(slot) ---@type GridEntityDoor
                 if door and door.State ~= 2 then
-                    if door:IsRoomType(RoomType.ROOM_SECRET)
-                    or door:IsRoomType(RoomType.ROOM_ULTRASECRET)
-                    or door:IsRoomType(RoomType.ROOM_SUPERSECRET) then
+                    if
+                        door:IsRoomType(RoomType.ROOM_SECRET)
+                        or door:IsRoomType(RoomType.ROOM_ULTRASECRET)
+                        or door:IsRoomType(RoomType.ROOM_SUPERSECRET)
+                    then
                         target_entity = door
                     end
                 end
@@ -64,33 +64,33 @@ smart_bombs:AddCallback(ModCallbacks.MC_POST_BOMB_INIT, function(player, bomb, b
             if (not target_entity:ToRock()) and target_entity.State == 2 then
                 target_entity = nil
             else
-                local smart_bomb = bomb:ToBomb()
-                smart_bombs.Flag:Apply(smart_bomb)
-                smart_bomb:GetData().target = target_entity
-                smart_bomb:GetData().init = false
+                smart_bombs.Flag:Apply(bomb)
+                bomb:GetData().target = target_entity
+                bomb:GetData().init = false
             end
         end
     end
 end)
 
-smart_bombs:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, function(player, bomb, bomb_variant)
-    local entity = bomb
-    if smart_bombs.Flag:EntityHas(entity) then
-        local sprite = bomb:GetSprite()
-        if not entity:GetData().init then
+---@param _ EntityPlayer
+---@param bomb EntityBomb
+smart_bombs:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, function(_, bomb)
+    if smart_bombs.Flag:EntityHas(bomb) then
+        local sprite = bomb:GetSprite() ---@type Sprite
+        if not bomb:GetData().init then
             sprite:Load("gfx/animations/familiars/animation_familiar_smartbombs.anm2", true)
             sprite:Play("LegsAppear", true)
-            entity:GetData().init = true
+            bomb:GetData().init = true
         end
-        if entity.FrameCount % 20 == 1 then
+        if bomb.FrameCount % 20 == 1 then
             if not sprite:IsPlaying("LegsAppear") and not sprite:IsPlaying("PulseWalk") then
                 sprite:Play("PulseWalk", true)
             end
             if sprite:IsPlaying("PulseWalk") then
-                local target_position = entity:GetData().target.Position
-                local direction_vector = (target_position - entity.Position):Normalized()
+                local target_position = bomb:GetData().target.Position ---@type Vector
+                local direction_vector = (target_position - bomb.Position):Normalized()
                 local angle = direction_vector:GetAngleDegrees() + math.random(-50, 50)
-                entity.Velocity = entity.Velocity + (Vector.FromAngle(angle) * 8)
+                bomb.Velocity = bomb.Velocity + (Vector.FromAngle(angle) * 5)
             end
         end
     end

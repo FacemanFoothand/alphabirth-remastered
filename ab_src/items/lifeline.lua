@@ -9,7 +9,7 @@ local utils = include("ab_src.modules.utils")
 
 local lifeline = Item("Lifeline")
 
-lifeline:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
+lifeline:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, player)
 	local health_roll = utils.random(1, 5)
 	local animate = false
 	if health_roll == 1 then

@@ -3,14 +3,14 @@
 -- Originally from Pack 1
 -- Teleport you to the farthest tear away from you
 ----------------------------------------------------------------------------
-
-local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
-local utils = include("ab_src.modules.utils")
+local g = require("ab_src.modules.globals")
 
 local tearleporter = Item("Tearleporter")
+tearleporter.desc = include("ab_src.integrations.eid").tearleporter
 
-tearleporter:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
+---@param player EntityPlayer
+tearleporter:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, player)
 	local furthest_tear
 	for _, entity in ipairs(Isaac:GetRoomEntities()) do
 		if entity.Type == EntityType.ENTITY_TEAR then
@@ -25,7 +25,9 @@ tearleporter:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
 
 	if furthest_tear then
 		player.Position = furthest_tear.Position
+        g.sfx:Play(SoundEffect.SOUND_HELL_PORTAL1, 1, 0, false, 1)
 		player:AnimateTeleport(false)
+        furthest_tear:Kill()
 	end
 end)
 

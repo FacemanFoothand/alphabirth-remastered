@@ -2,10 +2,20 @@ local utils = include("ab_src.modules.utils")
 local EntityConfig = include("ab_src.api.entity")
 local PickupConfig = utils.class(EntityConfig)
 
+--- @enum PickupCallbacks
 PickupConfig.Callbacks = {
-    PICKUP_PICKUP,
+    PICKUP_PICKUP = true,
 }
 
+--- @class PickupConfig
+--- @field name string
+--- @field subtype integer|nil
+--- @field drop_sound integer|SoundEffect?
+--- @field drop_callback function?
+--- @field collect_sound integer|SoundEffect?
+--- @field collision_class EntityCollisionClass?
+--- @field radius2 integer
+--- @field [string] any
 function PickupConfig:Init(name, subtype)
     EntityConfig.Init(self, name, subtype)
     self.drop_sound = nil
@@ -15,18 +25,22 @@ function PickupConfig:Init(name, subtype)
     self.radius2 = 24*24
 end
 
+---@param sound_id SoundEffect|integer
 function PickupConfig:SetCollectSound(sound_id)
     self.collect_sound = sound_id
 end
 
+---@param r integer
 function PickupConfig:SetRadius(r)
     self.radius2 = r*r
 end
 
+---@param coll_class EntityCollisionClass
 function PickupConfig:SetCollisionClass(coll_class)
     self.collision_class = coll_class
 end
 
+---@param sound_id integer|SoundEffect
 function PickupConfig:SetDropSound(sound_id)
     self.drop_sound = sound_id
     if not self.drop_callback then
@@ -55,8 +69,8 @@ function PickupConfig:AddCallback(enum, fn, a, b, c, d, e, f, g)
                 entity:GetData()["ab_init_pckp"] = true
             end
 
-            local g = require("ab_src.modules.globals")
-            for _, player in ipairs(g.players) do
+            local gl = require("ab_src.modules.globals")
+            for _, player in ipairs(gl.players) do
                 if (not entity:IsDead()) and
                     player:CanPickupItem() and
                     (not entity:GetSprite():IsPlaying("Appear")) and

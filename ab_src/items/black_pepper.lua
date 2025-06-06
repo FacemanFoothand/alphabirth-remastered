@@ -3,36 +3,33 @@
 -- Originally from Pack 1
 -- Fire a monstro's lung-esque volley of tears
 ----------------------------------------------------------------------------
-
 local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local desc = {
-    ["en_us"] = {"Black Pepper", "#{{Throwable}} Fires a volley of booger tears that latch onto enemies"},
-    ["pt_br"] = {"Pimenta-do-Reino", "#{{Throwable}} Atira uma salva de lágrimas que grudam nos inimigos"},
-}
-
-local black_pepper = Item("Black Pepper", desc)
+local black_pepper = Item("Black Pepper") ---@type Item
+black_pepper.desc = include("ab_src.integrations.eid").black_pepper
 
 utils.mixTables(g.defaultPlayerSaveData, {
 	holding_black_pepper = false
 })
 
-black_pepper:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
+---@param player EntityPlayer
+black_pepper:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, player)
 	local save = g.getPlayerSave(player)
 	player:AnimateCollectible(black_pepper.ID, "LiftItem", "PlayerPickup")
 	save.holding_black_pepper = true
 end)
 
-black_pepper:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, player_type)
+---@param player EntityPlayer
+black_pepper:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player)
 	local save = g.getPlayerSave(player)
 	if save.holding_black_pepper then
 		local direction = player:GetFireDirection()
 		local direction_vector = utils.getVectorFromDirection(direction)
 
 		if direction_vector ~= Vector.Zero then
-			for tears = 1, 15 do
+			for _ = 1, 15 do
 				-- Get random angle per tear
 				local angle = 15
 				local random_angle = math.rad(utils.random(-math.floor(angle), math.floor(angle)))

@@ -1,5 +1,8 @@
 local utils = include("ab_src.modules.utils")
 
+--- @class Flag
+--- @field name string
+--- @field [string] any
 local Flag = utils.class()
 
 local function getEntityFromRef(entityref)

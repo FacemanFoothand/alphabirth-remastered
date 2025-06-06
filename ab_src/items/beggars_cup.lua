@@ -3,24 +3,20 @@
 -- Originally from Pack 1
 -- Gives the player more luck the fewer consumables they have
 ----------------------------------------------------------------------------
-
 local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local desc = {
-    ["en_us"] = {"Beggar's Cup", "#{{ArrowUp}} +5 Luck#{{ArrowDown}} For every coin Isaac has he loses {{ColorRed}}0.1{{CR}} of the Luck bonus."},
-    ["pt_br"] = {"Caneca de Pedinte", "#{{ArrowUp}} +5 Sorte#{{ArrowDown}} Para cada moeda que Isaac tem é subtraido {{ColorRed}}0.1{{CR}} Sorte do bonus."},
-}
-
-local beggars_cup = Item("Beggar's Cup", desc)
+local beggars_cup = Item("Beggar's Cup") ---@type Item
+beggars_cup.desc = include("ab_src.integrations.eid").beggars_cup
 
 utils.mixTables(g.defaultPlayerSaveData, {
 	luck_modifier = 0,
 	previous_total = nil
 })
 
-beggars_cup:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, player_type)
+---@param player EntityPlayer
+beggars_cup:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player)
 	local save = g.getPlayerSave(player)
 	local coins = player:GetNumCoins()
 	local total = coins / 10
@@ -42,6 +38,8 @@ beggars_cup:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(player, pl
 	end
 end)
 
+---@param player EntityPlayer
+---@param cache_flag CacheFlag
 beggars_cup:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(player, cache_flag)
 	local save = g.getPlayerSave(player)
 	if cache_flag == CacheFlag.CACHE_LUCK then

@@ -3,32 +3,30 @@
 -- Originally from Pack 1
 -- Ludovico-esque hush laser.
 ----------------------------------------------------------------------------
-
 local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local EntityConfig = include("ab_src.api.entity")
 local utils = include("ab_src.modules.utils")
 
-local desc = {
-    ["en_us"] = {"Divine Wrath", "Isaac's tears are replaced with a controllable laser from the heavens"},
-    ["pt_br"] = {"Fúria Divina", "As lágrimas de Isaac são trocadas por um laser dos céus"},
-}
-
-local divine_wrath = Item("Divine Wrath", desc)
-local laser = EntityConfig("Divine Wrath")
+local divine_wrath = Item("Divine Wrath") ---@type Item
+divine_wrath.desc = include("ab_src.integrations.eid").divine_wrath
+local laser = EntityConfig("Divine Wrath") ---@type EntityConfig
 
 utils.mixTables(g.defaultPlayerSaveData, {
 	divine_wrath_previous_pos = nil
 })
 
+---@param player EntityPlayer
 divine_wrath:AddCallback("ITEM_PICKUP", function(player)
-	laser:Spawn(player.Position, Vector(0,0), player)
+	laser:Spawn(player.Position, Vector.Zero, player)
 end)
 
+---@param familiar EntityFamiliar
 laser:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function(familiar)
 	familiar.GridCollisionClass = GridCollisionClass.COLLISION_NONE
 end)
 
+---@param familiar EntityFamiliar
 laser:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(familiar)
 	local player = familiar.Player
 	local save = g.getPlayerSave(player)

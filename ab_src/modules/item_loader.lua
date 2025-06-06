@@ -4,6 +4,9 @@
 
 local itemLoader = {}
 itemLoader.loadedItems = {}
+
+local descs = include("ab_src.integrations.eid")
+
 local files = {
 	"ab_src.items.addicted",
 	"ab_src.items.alastors_candle",
@@ -50,6 +53,9 @@ function itemLoader.loadAll(Alphabirth)
     for _, file in ipairs(files) do
 		print("Loading item: "..file)
         local mod = include(file)
+        if EID and mod and mod.desc then
+            descs.push(mod.ID, mod.desc)
+        end
 		itemLoader.loadedItems[#itemLoader.loadedItems + 1] = mod
     end
     if EID then

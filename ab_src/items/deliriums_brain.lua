@@ -3,19 +3,18 @@
 -- Originally from Pack 1
 -- Reverse trajectory of all tears and damages enemies
 ----------------------------------------------------------------------------
-
-local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
-local utils = include("ab_src.modules.utils")
 
 local desc = {
     ["en_us"] = {"Delirium's Brain", "Reverses the trajectories of all tears and damages enemies"},
     ["pt_br"] = {"Cerebro do Delirium", "Reverte as trajetórias de todas as lágrimas e causa dano aos inimigos"},
 }
 
-local deliriums_brain = Item("Delirium's Brain", desc)
+local deliriums_brain = Item("Delirium's Brain") ---@type Item
+deliriums_brain.desc = desc
 
-deliriums_brain:AddCallback(ModCallbacks.MC_USE_ITEM, function(id, rng, player)
+---@param player EntityPlayer
+deliriums_brain:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, player)
 	for _, entity in ipairs(Isaac.GetRoomEntities()) do
 		if entity.Type == EntityType.ENTITY_TEAR or entity.Type == EntityType.ENTITY_PROJECTILE then
 			local tear_position = entity.Position

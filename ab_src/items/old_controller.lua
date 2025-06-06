@@ -3,17 +3,12 @@
 -- Originally from Pack 1
 -- Upon death, respawns Isaac as a random starting character with random items.
 ----------------------------------------------------------------------------
-
 local g = require("ab_src.modules.globals")
 local Item = include("ab_src.api.item")
 local utils = include("ab_src.modules.utils")
 
-local desc = {
-    ["en_us"] = {"Old Controller", "{{ArrowUp}} +1 Life#Upon taking mortal damage revives Isaac as a {{Collectible"..CollectibleType.COLLECTIBLE_CLICKER.."}} random character with {{Collectible"..CollectibleType.COLLECTIBLE_D4.."}} random items"},
-    ["pt_br"] = {"Controle Velho", "{{ArrowUp}} +1 Vida#Ao receber dano mortal revive Isaac como um {{Collectible"..CollectibleType.COLLECTIBLE_CLICKER.."}} personagem randomizado com {{Collectible"..CollectibleType.COLLECTIBLE_D4.."}} itens randomizados"},
-}
-
-local old_controller = Item("Old Controller", desc)
+local old_controller = Item("Old Controller") ---@type Item
+old_controller.desc = include("ab_src.integrations.eid").old_controller
 
 utils.mixTables(g.defaultPlayerSaveData, {
 	run = {
@@ -21,11 +16,13 @@ utils.mixTables(g.defaultPlayerSaveData, {
 	}
 })
 
+---@param player EntityPlayer
 old_controller:AddCallback("ITEM_PICKUP", function(player)
 	local save = g.getPlayerSave(player)
 	save.run.old_controller_respanwns = save.run.old_controller_respanwns + 1
 end)
 
+---@param player EntityPlayer
 old_controller:AddCallback(ModCallbacks.MC_POST_UPDATE, function(player)
 	local save = g.getPlayerSave(player)
 	if player:IsDead() then

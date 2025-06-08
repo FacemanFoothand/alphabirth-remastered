@@ -372,7 +372,7 @@ local function start()
 	                    ITEMS.PASSIVE.AIMBOT.id,
 	                    ITEMS.PASSIVE.BRUNCH.id,
 	                    ITEMS.PASSIVE.BIRTH_CONTROL.id,
-	                    ITEMS.PASSIVE.QUILL_FEATHER.id,
+	                    --ITEMS.PASSIVE.QUILL_FEATHER.id,
 						ITEMS.PASSIVE.JUDAS_FEZ.id,
 						ITEMS.PASSIVE.HOT_COALS.id,
 						ITEMS.PASSIVE.ABYSS.id,
@@ -748,8 +748,6 @@ function Alphabirth.itemSetup()
     ITEMS.PASSIVE.BIRTH_CONTROL:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyBirthControlCache)
     ITEMS.PASSIVE.BIRTH_CONTROL:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.useBoxOfFriends, CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS)
 
-    ITEMS.PASSIVE.QUILL_FEATHER = api_mod:registerItem("Quill Feather", "gfx/animations/costumes/accessories/animation_costume_quillfeather.anm2")
-
     ITEMS.PASSIVE.POSSESSED_SHOT = api_mod:registerItem("Possessed Shot", "gfx/animations/costumes/accessories/animation_costume_possessedshot.anm2")
     ITEMS.PASSIVE.POSSESSED_SHOT:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyPossessedShotCache)
     ITEMS.PASSIVE.POSSESSED_SHOT:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.triggerPossessedShot)
@@ -1098,7 +1096,7 @@ function Alphabirth.setupMiscCallbacks()
 	mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.triggerAbyss)
 	mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.entityTakeDmgBookOfTheDead)
 	mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.entityTakeDmgStoneNugget)
-	mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.triggerQuillFeather)
+	--mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.triggerQuillFeather)
 
 	-- Mod Updates
 	mod:AddCallback(ModCallbacks.MC_POST_UPDATE, Alphabirth.modUpdate)
@@ -2492,39 +2490,6 @@ do
 	end
 
 	---------------------------------------
-	-- Quill Feather Logic
-	---------------------------------------
-	local quillFeatherNumberOfTears = 8
-	local quill_angle = 30
-
-	function Alphabirth:triggerQuillFeather(dmg_target, dmg_amount, dmg_flags, dmg_source)
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		if dmg_source.Entity and AlphaAPI.hasFlag(dmg_source, ENTITY_FLAGS.QUILL_FEATHER_SHOT) then
-			Isaac.DebugString("Spawning Quill Feather Tears")
-			for i=1, quillFeatherNumberOfTears do
-				local direction_vector = dmg_source.Entity.Velocity
-				local random_angle = math.rad(random(-math.floor(quill_angle), math.floor(quill_angle)))
-				local cos_angle = math.cos(random_angle)
-				local sin_angle = math.sin(random_angle)
-				local shot_direction = Vector(cos_angle * direction_vector.X - sin_angle * direction_vector.Y,
-					sin_angle * direction_vector.X + cos_angle * direction_vector.Y
-				)
-
-				local shot_vector = shot_direction * ( (random() * 0.4 + 0.8) * player.ShotSpeed)
-
-				tears[i] = player:FireTear(dmg_source.Position, shot_vector, false, false, true)
-				tears[i].Height = -20
-				tears[i].TearFlags = tears[i].TearFlags | TearFlags.TEAR_PIERCING
-				tears[i]:ChangeVariant(TearVariant.CUPID_BLUE)
-				tears[i].Color = Color(0,0,0,1,0,0,0)
-				AlphaAPI.addFlag(tears[i], ENTITY_FLAGS.TEAR_IGNORE)
-			end
-
-			dmg_source.Entity:Remove()
-		end
-	end
-
-	---------------------------------------
 	-- Hoarder Logic
 	---------------------------------------
 	local hoarderDamage = 0
@@ -3877,12 +3842,12 @@ do
 			local effect_granted
 			if AlphaAPI.getLuckRNG(9, 3) then
 				local potential_tear_effects = {}
-				if player:HasCollectible(ITEMS.PASSIVE.QUILL_FEATHER.id) and not AlphaAPI.hasFlag(tear, ENTITY_FLAGS.TEAR_IGNORE) then
-					potential_tear_effects[#potential_tear_effects + 1] = {
-						name = "QuillFeather",
-						weight = 1
-					}
-				end
+				-- if player:HasCollectible(ITEMS.PASSIVE.QUILL_FEATHER.id) and not AlphaAPI.hasFlag(tear, ENTITY_FLAGS.TEAR_IGNORE) then
+				-- 	potential_tear_effects[#potential_tear_effects + 1] = {
+				-- 		name = "QuillFeather",
+				-- 		weight = 1
+				-- 	}
+				-- end
 
 				if player:HasCollectible(ITEMS.PASSIVE.CRACKED_ROCK.id) then
 					potential_tear_effects[#potential_tear_effects + 1] = {
@@ -3908,10 +3873,7 @@ do
 				end
 
 				if tear_effect == "QuillFeather" then
-					tear.Color = Color(0,0,0,1,0,0,0)
-					AlphaAPI.addFlag(tear, ENTITY_FLAGS.QUILL_FEATHER_SHOT)
-					tear:ChangeVariant(TearVariant.CUPID_BLUE)
-					tear.TearFlags = tear.TearFlags | TearFlags.TEAR_PIERCING
+                    -- Moved!
 				elseif tear_effect == "CrackedRock" then
 					local sprite = tear:GetSprite()
 					if sprite:GetFilename() ~= "gfx/animations/effects/animation_tears_crackedrock.anm2" then

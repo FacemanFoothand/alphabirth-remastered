@@ -52,6 +52,7 @@ local files = {
     "ab_src.items.brunch",
     "ab_src.items.blacklight",
     "ab_src.items.infested_baby",
+    "ab_src.items.quill_feather",
 }
 
 function itemLoader.loadAll(Alphabirth)

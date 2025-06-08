@@ -39,7 +39,6 @@ end)
 
 ---@param player EntityPlayer
 ---@param target Entity
----@param _ any
 ---@param source EntityRef
 miniature_meteor:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(player, target, _, _, source)
     if miniature_meteor.TearFlag:EntityHas(source.Entity) and utils.random(0, 4) == 1 then

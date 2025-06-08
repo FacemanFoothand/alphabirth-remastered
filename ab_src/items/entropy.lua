@@ -10,9 +10,10 @@ entropy.desc = include("ab_src.integrations.eid").entropy
 
 local entropy_flag = false
 
-entropy:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(entity)
-    local player = entity:GetLastParent():ToPlayer()
-    if GetPtrHash(entity.Parent) ~= GetPtrHash(player) then
+---@param player EntityPlayer
+---@param entity EntityTear
+entropy:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(player, entity)
+    if GetPtrHash(entity.Parent) ~= GetPtrHash(player) or not player then
         return
     end
 
@@ -26,7 +27,7 @@ entropy:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(entity)
         else
             deviation = utils.random(avoid_center, variance)
         end
-        local length = player.ShotSpeed * 10.0 + entity.Velocity:Length()
+        local length = player.ShotSpeed * 1.0 + entity.Velocity:Length()
         entropy_flag = true
         player:FireTear(
             player.Position,
@@ -37,13 +38,12 @@ entropy:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(entity)
     entropy_flag = false
 end)
 
-entropy:AddCallback(ModCallbacks.MC_POST_LASER_INIT, function(laser)
-    local player = laser:GetLastParent():ToPlayer()
-    if not player then return end
-    if GetPtrHash(laser.Parent) ~= GetPtrHash(player) then
+---@param player EntityPlayer
+---@param laser EntityLaser
+entropy:AddCallback(ModCallbacks.MC_POST_LASER_INIT, function(player, laser)
+    if GetPtrHash(laser.SpawnerEntity) ~= GetPtrHash(player) then
         return
     end
-
 
     if not entropy_flag and utils.getLuckRNG(player, 66, 5) then
         local angle = player:GetLastDirection():GetAngleDegrees()
@@ -76,8 +76,12 @@ entropy:AddCallback(ModCallbacks.MC_POST_LASER_INIT, function(laser)
     entropy_flag = false
 end)
 
+---@param player EntityPlayer
+---@param flag CacheFlag
 entropy:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(player, flag)
     if flag == CacheFlag.CACHE_FIREDELAY then
         player.MaxFireDelay = player.MaxFireDelay - 3
     end
 end)
+
+return entropy

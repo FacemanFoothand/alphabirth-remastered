@@ -199,10 +199,11 @@ function Item:AddCallback(id, func, param)
     end
 end
 
-function Item:AddSimpleFamiliar(familiarVariant, familiarSubType, capCount, ignoreBoxOfFriends)
+function Item:AddSimpleFamiliar(familiarVariant, familiarSubType, capCount, ignoreBoxOfFriends, familiarCount)
+    local countPerItem = familiarCount or 1
     mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, flag)
         if flag == CacheFlag.CACHE_FAMILIARS then
-            local count = self:PlayerCount(player)
+            local count = self:PlayerCount(player) * countPerItem
             if not ignoreBoxOfFriends then
                 count = count * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
             end

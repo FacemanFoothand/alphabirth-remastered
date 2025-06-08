@@ -47,6 +47,11 @@ local files = {
 	"ab_src.items.patience",
 	"ab_src.items.pseudobulbar_affect",
 	"ab_src.items.talisman_of_absorption",
+    "ab_src.items.surgeon_simulator",
+    "ab_src.items.stoned_buddy",
+    "ab_src.items.brunch",
+    "ab_src.items.blacklight",
+    "ab_src.items.infested_baby",
 }
 
 function itemLoader.loadAll(Alphabirth)

@@ -12,16 +12,6 @@ local candle_kit = Item("Candle Kit") ---@type Item
 candle_kit.desc = include("ab_src.integrations.eid").candle_kit
 candle_kit.Familiar = EntityConfig("Candle Kit") ---@type EntityConfig
 
----@param player EntityPlayer
----@param cache_flag CacheFlag
-candle_kit:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(player, cache_flag)
-    if cache_flag == CacheFlag.CACHE_FAMILIARS then
-        local amount_to_spawn = (player:GetCollectibleNum(candle_kit.ID) * 2)
-            * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
-        player:CheckFamiliar(candle_kit.Familiar.Variant, amount_to_spawn, utils.RNG)
-    end
-end)
-
 ---@param familiar EntityFamiliar
 candle_kit.Familiar:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function(familiar)
     familiar.OrbitLayer = 4
@@ -31,9 +21,6 @@ end)
 ---@param familiar EntityFamiliar
 candle_kit.Familiar:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(familiar)
     local player = familiar.Player
-    if player:GetCollectibleNum(candle_kit.ID) < 1 then
-        familiar:Remove()
-    end
     familiar.OrbitDistance = EntityFamiliar.GetOrbitDistance(familiar.OrbitLayer)
     local target_position = familiar:GetOrbitPosition(player.Position)
     familiar.Velocity = target_position - familiar.Position
@@ -44,5 +31,7 @@ candle_kit.Familiar:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(famili
         end
     end
 end)
+
+candle_kit:AddSimpleFamiliar(candle_kit.Familiar.Variant, candle_kit.Familiar.SubType, nil, false, 2)
 
 return candle_kit

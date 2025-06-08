@@ -300,7 +300,7 @@ local function start()
 	                    -- ITEMS.ACTIVE.TRASH_BAG.id,
 	                    -- ITEMS.PASSIVE.ADDICTED.id,
 	                    -- ITEMS.PASSIVE.SATANS_CONTRACT.id,
-	                    ITEMS.PASSIVE.STONED_BUDDY.id,
+	                    -- ITEMS.PASSIVE.STONED_BUDDY.id,
 	                    -- ITEMS.PASSIVE.MUTANT_FETUS.id,
 	                    -- ITEMS.PASSIVE.COLOGNE.id,
 	                    -- ITEMS.PASSIVE.BEGGARS_CUP.id,
@@ -383,7 +383,7 @@ local function start()
 						ITEMS.PASSIVE.SUBCONSCIOUS.id,
 						ITEMS.PASSIVE.BLOODERFLY.id,
 						ITEMS.PASSIVE.SPIRIT_EYE.id,
-						ITEMS.PASSIVE.INFESTED_BABY.id,
+						-- ITEMS.PASSIVE.INFESTED_BABY.id,
 				}
 	            local row = 31
 	            for i, item in ipairs(new_items) do
@@ -499,7 +499,7 @@ end
 
 function Alphabirth.miscTablesSetup()
     birthControl_pool = {
-        ITEMS.PASSIVE.INFESTED_BABY.id,
+        -- ITEMS.PASSIVE.INFESTED_BABY.id,
         ITEMS.PASSIVE.BLOODERFLY.id,
         ITEMS.PASSIVE.SPIRIT_EYE.id,
         CollectibleType.COLLECTIBLE_BROTHER_BOBBY,
@@ -680,10 +680,6 @@ function Alphabirth.itemSetup()
 	-- Passives --
 	--------------
 
-	-- Spawns a familiar that persues the nearest enemy, pushing them away and blocking tears
-	ITEMS.PASSIVE.STONED_BUDDY = api_mod:registerItem("Stoned Buddy")
-    ITEMS.PASSIVE.STONED_BUDDY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateStonedBuddy)
-
 	-- Teleports you to the boss room every time you enter a new floor
 	LOCKS.EMPEROR_CROWN = api_mod:createUnlock("alphaEmperorsCrown")
 	ITEMS.TRINKET.EMPEROR_CROWN = api_mod:registerTrinket("Emperor's Crown")
@@ -703,18 +699,12 @@ function Alphabirth.itemSetup()
     ITEMS.ACTIVE.CAULDRON = api_mod:registerItem("Cauldron")
     ITEMS.ACTIVE.CAULDRON:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerCauldron)
 
-    ITEMS.ACTIVE.SURGEON_SIMULATOR = api_mod:registerItem("Surgeon Simulator")
-    ITEMS.ACTIVE.SURGEON_SIMULATOR:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerSurgeonSimulator)
-
     ITEMS.ACTIVE.BIONIC_ARM = api_mod:registerItem("Bionic Arm")
     ITEMS.ACTIVE.BIONIC_ARM:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerBionicArm)
     ITEMS.ACTIVE.BIONIC_ARM:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyBionicArmCache)
 
     ITEMS.ACTIVE.BLOOD_DRIVE = api_mod:registerItem("Blood Drive")
     ITEMS.ACTIVE.BLOOD_DRIVE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerBloodDrive)
-
-    ITEMS.ACTIVE.BLACKLIGHT = api_mod:registerItem("Blacklight")
-    ITEMS.ACTIVE.BLACKLIGHT:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerBlacklight)
 
     ITEMS.ACTIVE.STONE_NUGGET = api_mod:registerItem("Stone Nugget")
     ITEMS.ACTIVE.STONE_NUGGET:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerStoneNugget)
@@ -767,15 +757,8 @@ function Alphabirth.itemSetup()
     ITEMS.PASSIVE.SPIRIT_EYE = api_mod:registerItem("Spirit Eye")
     ITEMS.PASSIVE.SPIRIT_EYE:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateSpiritEye)
 
-    ITEMS.PASSIVE.INFESTED_BABY = api_mod:registerItem("Infested Baby")
-    ITEMS.PASSIVE.INFESTED_BABY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateInfestedBaby)
-
     ITEMS.PASSIVE.BLOODERFLY = api_mod:registerItem("Blooderfly")
     ITEMS.PASSIVE.BLOODERFLY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateBlooderfly)
-
-    ITEMS.PASSIVE.BRUNCH = api_mod:registerItem("Brunch")
-    ITEMS.PASSIVE.BRUNCH:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyBrunchCache)
-    ITEMS.PASSIVE.BRUNCH:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.pickupBrunch)
 
     ITEMS.PASSIVE.HEMOPHILIA = api_mod:registerItem("Hemophilia", "gfx/animations/costumes/accessories/animation_costume_hemophilia.anm2")
     ITEMS.PASSIVE.HEMOPHILIA:addCallback(AlphaAPI.Callbacks.ENTITY_DEATH, Alphabirth.triggerHemophilia)
@@ -943,10 +926,6 @@ function Alphabirth.entitySetup()
 	}
 	ENTITIES.GLITCH_PICKUP:addLock(LOCKS.GLITCH_PICKUP)
 
-	ENTITIES.STONED_BUDDY = api_mod:getEntityConfig("Stoned Buddy")
-	ENTITIES.STONED_BUDDY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateStonedBuddy)
-	ENTITIES.STONED_BUDDY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initStonedBuddy)
-
     -- Familiars
     ENTITIES.BLOODERFLY = api_mod:getEntityConfig("Blooderfly", 0)
     ENTITIES.BLOODERFLY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.onBlooderflyUpdate)
@@ -954,10 +933,6 @@ function Alphabirth.entitySetup()
 
     ENTITIES.SPIRIT_EYE = api_mod:getEntityConfig("Spirit Eye", 0)
     ENTITIES.SPIRIT_EYE:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.onSpiritEyeUpdate)
-
-    ENTITIES.INFESTED_BABY = api_mod:getEntityConfig("Infested Baby", 0)
-    ENTITIES.INFESTED_BABY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.onInfestedBabyUpdate)
-    ENTITIES.INFESTED_BABY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.onInfestedBabyInit)
 
     ENTITIES.SUBCONSCIOUS = api_mod:getEntityConfig("Subconscious", 0)
     ENTITIES.SUBCONSCIOUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.onSubconsciousInit)
@@ -1132,7 +1107,7 @@ function Alphabirth.setupMiscCallbacks()
 
 	-- Player Init
 	mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Alphabirth.playerInit)
-	api_mod:addCallback(AlphaAPI.Callbacks.RUN_STARTED, Alphabirth.runStarted)
+	-- api_mod:addCallback(AlphaAPI.Callbacks.RUN_STARTED, Alphabirth.runStarted)
 	api_mod:addCallback(AlphaAPI.Callbacks.ROOM_CHANGED, Alphabirth.roomChanged)
 	api_mod:addCallback(AlphaAPI.Callbacks.CHALLENGE_COMPLETED, Alphabirth.completeChallenge)
 
@@ -1565,27 +1540,6 @@ do
 		end
 	end
 
-	---------------------------------------
-	-- Surgeon Simulator Logic
-	---------------------------------------
-	function Alphabirth.triggerSurgeonSimulator()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
-			return
-		end
-
-		local spawnPos = AlphaAPI.GAME_STATE.ROOM:FindFreePickupSpawnPosition(player.Position, 1, true)
-		if player:GetHearts() == 2 then
-			player:AddHearts(-1)
-			Isaac.Spawn(5, 10, 2, spawnPos, Vector(0, 0), player)
-		end
-		if player:GetHearts() > 2 then
-			player:AddHearts(-2)
-			Isaac.Spawn(5, 10, 1, spawnPos, Vector(0, 0), player)
-		end
-		return true
-	end
-
 	----------------------------------------
 	-- Bionic Arm Logic
 	----------------------------------------
@@ -1643,28 +1597,6 @@ do
 			player:AddMaxHearts(-2)
 			AlphaAPI.GAME_STATE.GAME:Darken(1, 8)
 			player:AnimateSad()
-		end
-	end
-
-	----------------------------------------
-	-- Blacklight Logic
-	----------------------------------------
-	local timesTillMax = 20
-
-	function Alphabirth.triggerBlacklight()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
-			return
-		end
-
-		if api_mod.data.run.blacklightUses < timesTillMax then
-			api_mod.data.run.blacklightUses = api_mod.data.run.blacklightUses + 1
-			api_mod.data.run.darkenCooldown = 0
-			for i, entity in ipairs(AlphaAPI.entities.enemies) do
-				entity:TakeDamage(40, 0, EntityRef(player), 30)
-			end
-
-			return true
 		end
 	end
 
@@ -2116,24 +2048,6 @@ do
 	function Alphabirth.onSubconsciousInit(familiar)
 		subconsciousFamiliar = familiar
 		familiar:AddToFollowers()
-	end
-
-	---------------------------------------
-	-- Brunch "Logic"
-	---------------------------------------
-	function Alphabirth.applyBrunchCache(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_FIREDELAY then
-			if player.MaxFireDelay < 4 then
-			elseif player.MaxFireDelay < 6 then
-				player.MaxFireDelay = 4
-			else
-				player.MaxFireDelay = player.MaxFireDelay - 2
-			end
-		end
-	end
-
-	function Alphabirth.pickupBrunch(player)
-		player.Color = Color(0,1,0,1,0,0,0)
 	end
 
 	---------------------------------------
@@ -2666,24 +2580,6 @@ do
 			end
 		end
 	end
-
-
-end
-
-local function handleBlacklight()
-	local timesTillMax = 20
-	if api_mod.data.run.blacklightUses ~= nil then
-			
-		if api_mod.data.run.blacklightUses > 0 and api_mod.data.run.darkenCooldown == 0 then
-			AlphaAPI.GAME_STATE.GAME:Darken(3 - (api_mod.data.run.blacklightUses/((timesTillMax)/2)), 200)
-			api_mod.data.run.darkenCooldown = 195
-		end
-		if api_mod.data.run.darkenCooldown > 0 then
-			api_mod.data.run.darkenCooldown = api_mod.data.run.darkenCooldown - 1
-		end
-
-	end
-
 end
 
 local function handlePossessedShot()
@@ -3423,71 +3319,6 @@ function Alphabirth.evaluateSpiritEye(player, flag)
 end
 
 ---------------------------------------
--- Infested Baby Logic
----------------------------------------
-local infestedEntity
-local infestedBabySpider
-local animationCooldown = 0
-local spiderCooldown = 0
-
-function Alphabirth.onInfestedBabyUpdate(familiar)
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    familiar = familiar:ToFamiliar()
-    familiar.FireCooldown = 999999
-    if animationCooldown == 0 then
-        familiar:Shoot()
-    end
-
-    if infestedBabySpider and infestedBabySpider:IsDead() then
-        infestedBabySpider = nil
-        spiderCooldown = 25
-    end
-
-    local fire_dir = player:GetFireDirection()
-    if fire_dir ~= -1 and infestedBabySpider == nil and spiderCooldown == 0 then
-        infestedBabySpider = Isaac.Spawn(EntityType.ENTITY_FAMILIAR, FamiliarVariant.BLUE_SPIDER, 0, familiar.Position, Vector(0,0), familiar)
-        if fire_dir == Direction.UP then
-            familiar:GetSprite():Play("ShootUp", 1)
-        elseif fire_dir == Direction.DOWN then
-            familiar:GetSprite():Play("ShootDown", 1)
-        elseif fire_dir == Direction.LEFT then
-            familiar:GetSprite():Play("ShootSide", 1)
-            familiar:GetSprite().FlipX = true
-        elseif fire_dir == Direction.RIGHT then
-            familiar:GetSprite():Play("ShootSide", 1)
-        end
-
-        animationCooldown = 8
-        playSound(SoundEffect.SOUND_SPIDER_COUGH, 0.5, 0, false, 1)
-    end
-    for _, e in ipairs(AlphaAPI.entities.friendly) do
-        if e.Parent == familiar and e.Type == EntityType.ENTITY_TEAR then
-            e:Remove()
-        end
-    end
-    if animationCooldown > 0 then
-        animationCooldown = animationCooldown - 1
-    end
-    if spiderCooldown > 0 then
-        spiderCooldown = spiderCooldown - 1
-    end
-
-    familiar:FollowParent()
-end
-
-function Alphabirth.onInfestedBabyInit(familiar)
-    familiar:AddToFollowers()
-end
-
-function Alphabirth.evaluateInfestedBaby(player, flag)
-    if flag == CacheFlag.CACHE_FAMILIARS then
-        local amount_to_spawn = player:GetCollectibleNum(ITEMS.PASSIVE.INFESTED_BABY.id) * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
-        player:CheckFamiliar(ENTITIES.INFESTED_BABY.variant, amount_to_spawn, rng)
-    end
-end
-
-
----------------------------------------
 -- Post-Update Callback
 ---------------------------------------
 
@@ -4174,72 +4005,6 @@ do
 	function Alphabirth.onBombDipDie(entity)
 		Isaac.Explode(entity.Position, entity, 1.0)
 	end
-
-	----------------------------------------
-	-- Stoned Buddy Logic
-	----------------------------------------
-	local function findTarget(familiar)
-		for _, entity in ipairs(AlphaAPI.entities.enemies) do
-			if entity.Type ~= 306 then
-				local enemy = entity:ToNPC()
-				if not enemy:IsBoss() then
-					return enemy
-				end
-			end
-		end
-		return nil
-	end
-
-		local function chooseStonedBuddyTarget(familiar)
-			local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-			local data = familiar:GetData()
-
-			if not data.pathfinder then
-				data.pathfinder = AlphaAPI.getEntityPathfinder(
-					familiar,
-					0.5,
-					25
-				)
-			end
-
-			if not data.stoned_target then
-				familiar:FollowParent()
-				data.stoned_target = findTarget(familiar)
-			else
-				if data.stoned_target:IsDead() then
-					data.stoned_target = nil
-					familiar:AddToFollowers()
-				end
-
-				data.pathfinder:aStarPathing(data.stoned_target.Position,
-					3,
-					function()
-						familiar:FollowPosition(data.stoned_target.Position)
-						data.stoned_target:AddFear(EntityRef(familiar),1)
-						return
-					end
-				)
-			end
-		end
-
-	function Alphabirth.initStonedBuddy(familiar)
-        familiar:AddToFollowers()
-	    familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ENEMIES
-	    familiar.GridCollisionClass = GridCollisionClass.COLLISION_WALLS
-	end
-
-	function Alphabirth.updateStonedBuddy(familiar)
-	    chooseStonedBuddyTarget(familiar)
-		AlphaAPI.animateEntityCardinals(familiar, "WalkUp", "WalkDown", "WalkRight", "WalkLeft", "Idle", false, 0.2)
-	end
-
-    function Alphabirth.evaluateStonedBuddy(player, flag)
-        if flag == CacheFlag.CACHE_FAMILIARS then
-            local amount_to_spawn = player:GetCollectibleNum(ITEMS.PASSIVE.STONED_BUDDY.id) * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
-            player:CheckFamiliar(ENTITIES.STONED_BUDDY.variant, amount_to_spawn, rng)
-        end
-    end
-
 end
 
 -------------------------------------------------------------------------------

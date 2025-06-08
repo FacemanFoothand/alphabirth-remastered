@@ -12,6 +12,10 @@ local entropy_flag = false
 
 entropy:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(entity)
     local player = entity:GetLastParent():ToPlayer()
+    if GetPtrHash(entity.Parent) ~= GetPtrHash(player) then
+        return
+    end
+
     if not entropy_flag and utils.getLuckRNG(player, 66, 5) then
         local angle = player:GetLastDirection():GetAngleDegrees()
         local avoid_center = 6
@@ -36,6 +40,10 @@ end)
 entropy:AddCallback(ModCallbacks.MC_POST_LASER_INIT, function(laser)
     local player = laser:GetLastParent():ToPlayer()
     if not player then return end
+    if GetPtrHash(laser.Parent) ~= GetPtrHash(player) then
+        return
+    end
+
 
     if not entropy_flag and utils.getLuckRNG(player, 66, 5) then
         local angle = player:GetLastDirection():GetAngleDegrees()

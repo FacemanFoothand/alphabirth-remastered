@@ -1,7 +1,14 @@
 local g = require("ab_src.modules.globals")
 local utils = include("ab_src.modules.utils")
 
-local Pathfinder = utils.class()
+--- @class Pathfinder
+--- @field Entity Entity
+--- @field Speed integer
+--- @field UpdateInterval integer
+--- @field collisionDistance integer
+--- @field [string] any
+local Pathfinder = utils.class() ---@type Pathfinder
+
 function Pathfinder:Init(entity, speed, updateInterval, collisionDistance)
     self.Entity = entity
     self.Speed = speed
@@ -12,7 +19,7 @@ end
 local GridTileType = {
     FREE = 0,
     OBSTACLE = 1,
-    INVALID = 2
+    INVALID = 2,
 }
 
 local function heuristicWeight(room, start, target)
@@ -24,7 +31,7 @@ local function getPathToTarget(start, target)
     local startIdx = room:GetGridIndex(start)
     local targetIdx = room:GetGridIndex(target)
     local grid = {}
-    for i=1, room:GetGridSize() do
+    for i = 1, room:GetGridSize() do
         local col = room:GetGridCollision(i)
         if col == 0 then
             grid[i] = GridTileType.FREE
@@ -39,12 +46,12 @@ local function getPathToTarget(start, target)
     openSet[1] = startIdx
     local cameFrom = {}
     local gScore = {}
-    for i=1, #grid do
+    for i = 1, #grid do
         gScore[i] = 99999999
     end
     gScore[startIdx] = 0
     local fScore = {}
-    for i=1, #grid do
+    for i = 1, #grid do
         fScore[i] = 99999999
     end
     fScore[startIdx] = heuristicWeight(room, startIdx, targetIdx)
@@ -52,7 +59,7 @@ local function getPathToTarget(start, target)
         local current
         local current_openSetIndex
         local best_fScore = 99999999
-        for i=1, #openSet do
+        for i = 1, #openSet do
             if fScore[openSet[i]] < best_fScore then
                 current = openSet[i]
                 current_openSetIndex = i
@@ -66,24 +73,24 @@ local function getPathToTarget(start, target)
         table.remove(openSet, current_openSetIndex)
         closedSet[current] = true
         local neighbors = {
-            {idx=current-1, cost=1},
-            {idx=current+1, cost=1},
-            {idx=current-w, cost=1},
-            {idx=current+w, cost=1},
+            { idx = current - 1, cost = 1 },
+            { idx = current + 1, cost = 1 },
+            { idx = current - w, cost = 1 },
+            { idx = current + w, cost = 1 },
         }
-        for _,neigh in pairs(neighbors) do
+        for _, neigh in pairs(neighbors) do
             local n = neigh.idx
             if (grid[n] == GridTileType.FREE or n == targetIdx) and (closedSet[n] ~= true) then
                 local tentative_gScore = gScore[current] + 1
                 local in_openSet = false
-                for i=1, #openSet do
+                for i = 1, #openSet do
                     if openSet[i] == n then
                         in_openSet = true
                         break
                     end
                 end
                 if (not in_openSet) or tentative_gScore < gScore[n] then
-                    openSet[#openSet+1] = n
+                    openSet[#openSet + 1] = n
                     cameFrom[n] = current
                     gScore[n] = tentative_gScore
                     fScore[n] = gScore[n] + heuristicWeight(room, n, targetIdx)
@@ -129,15 +136,21 @@ function Pathfinder:aStarPathing(target, onTargetCollisionFn)
         self.Path = getPathToTarget(self.Entity.Position, target)
         self.Entity:GetData().pathidx = 1
     else
+        if not self.Path[self.Entity:GetData().pathidx] then
+            return
+        end
         local velocity = g.room:GetGridPosition(self.Path[self.Entity:GetData().pathidx]) - self.Entity.Position
         if velocity:Length() < 32 then
             self.Entity:GetData().pathidx = self.Entity:GetData().pathidx + 1
             if not self.Path[self.Entity:GetData().pathidx] then
-                self.Entity:GetData().TargetVelocity = Vector(0,0)
+                self.Entity:GetData().TargetVelocity = Vector(0, 0)
                 self.Path = nil
             end
         end
         self.Entity:GetData().TargetVelocity = velocity:Normalized() * 2
+    end
+    if not self.Entity:GetData().TargetVelocity then
+        return
     end
     self.Entity.Velocity = self.Entity.Velocity * 0.9 + self.Entity:GetData().TargetVelocity * self.Speed
 end

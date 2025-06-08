@@ -22,6 +22,10 @@ utils.mixTables(g.defaultPlayerSaveData, {
 ---@param player EntityPlayer
 ---@param tear EntityTear
 miniature_meteor:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(player, tear)
+    if GetPtrHash(tear.Parent) ~= GetPtrHash(player) then
+        return
+    end
+
     local save = g.getPlayerSave(player)
     if utils.getLuckRNG(player, 10, 3) then
         miniature_meteor.TearFlag:Apply(tear)

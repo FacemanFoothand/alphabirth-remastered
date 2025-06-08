@@ -5,19 +5,19 @@ local g = require("ab_src.modules.globals")
 -- Make sure to load this After Alpha API
 
 -- Setup
-utils.VECTOR_ZERO = Vector(0,0)
+utils.VECTOR_ZERO = Vector(0, 0)
 utils.RNG = RNG()
 utils.RNG:SetSeed(Random(), 1)
 
 utils.direction_list = {
-	Vector(-1, 0),  -- West
-	Vector(0, 1),   -- North
-	Vector(1, 0),   -- East
-	Vector(0, -1),  -- South
-	Vector(1, 1),   -- North East
-	Vector(1, -1),  -- South East
-	Vector(-1, 1),  -- North West
-	Vector(-1, -1)  -- South West
+    Vector(-1, 0), -- West
+    Vector(0, 1), -- North
+    Vector(1, 0), -- East
+    Vector(0, -1), -- South
+    Vector(1, 1), -- North East
+    Vector(1, -1), -- South East
+    Vector(-1, 1), -- North West
+    Vector(-1, -1), -- South West
 }
 
 -- Funcs
@@ -31,23 +31,23 @@ function utils.random(min, max) -- Re-implements math.random()
 end
 
 function utils.isItemInList(list, item)
-	for _, value in ipairs(list) do
-		if value == item then
-			return true
-		end
-	end
-	return false
+    for _, value in ipairs(list) do
+        if value == item then
+            return true
+        end
+    end
+    return false
 end
 
 function utils.getLuckRNG(player, chance, factor)
-	return utils.RNG:RandomInt(100)  + (player.Luck * factor) + chance >= 100
+    return utils.RNG:RandomInt(100) + (player.Luck * factor) + chance >= 100
 end
 
 function utils.isOfType(entity, eType)
-	if entity.Variant == eType.variant and entity.SubType == eType.subtype then
-		return true
-	end
-	return false
+    if entity.Variant == eType.variant and entity.SubType == eType.subtype then
+        return true
+    end
+    return false
 end
 
 function utils.getVectorFromDirection(direction)
@@ -61,12 +61,12 @@ function utils.compareEntities(entity1, entity2)
     return entity1.Index == entity2.Index, entity1.InitSeed == entity2.InitSeed
 end
 
-function utils.radToDeg (rad)
-	return ((rad * 180) / math.pi)
+function utils.radToDeg(rad)
+    return ((rad * 180) / math.pi)
 end
 
-function utils.degToRad (deg)
-	return ((deg * math.pi) / 180)
+function utils.degToRad(deg)
+    return ((deg * math.pi) / 180)
 end
 
 function utils.get_grid_entities()
@@ -74,7 +74,7 @@ function utils.get_grid_entities()
     for i = 0, g.room:GetGridSize() do
         local entity = g.room:GetGridEntity(i)
         if entity then
-            grid_entities[#grid_entities+1] = entity
+            grid_entities[#grid_entities + 1] = entity
         end
     end
     return grid_entities
@@ -85,10 +85,12 @@ function utils.findClosestEnemy(entity)
     local maxDistance = 999999
     local closestEntity
     for _, e in ipairs(entities) do
-        if (entity.Position - e.Position):Length() <= maxDistance and not
-                utils.compareEntities(entity, e) and not
-                e:HasEntityFlags(EntityFlag.FLAG_CHARM) and not
-                e:HasEntityFlags(EntityFlag.FLAG_FRIENDLY) then
+        if
+            (entity.Position - e.Position):Length() <= maxDistance
+            and not utils.compareEntities(entity, e)
+            and not e:HasEntityFlags(EntityFlag.FLAG_CHARM)
+            and not e:HasEntityFlags(EntityFlag.FLAG_FRIENDLY)
+        then
             closestEntity = e
             maxDistance = (entity.Position - e.Position):Length()
         end
@@ -123,7 +125,7 @@ end
 
 function utils.playSound(sfx, vol, delay, loop, pitch) --SFX: SoundEffect.SOUND_SPIDER_COUGH vol: float delay: integer loop:boolean pitch: float
     local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    local sound_entity = Isaac.Spawn(EntityType.ENTITY_FLY, 0, 0, player.Position, Vector(0,0), nil):ToNPC()
+    local sound_entity = Isaac.Spawn(EntityType.ENTITY_FLY, 0, 0, player.Position, Vector(0, 0), nil):ToNPC()
     sound_entity:PlaySound(sfx, vol, delay, loop, pitch)
     sound_entity:Remove()
 end
@@ -138,7 +140,7 @@ function utils.directionToDegree(direction)
             direction = 4
         end
         direction = direction - 1
-        return direction*90
+        return direction * 90
     end
     return 0
 end
@@ -148,12 +150,12 @@ function utils.degreeToDirection(angle)
         angle = angle - 360
     end
     if angle > 269 then
-        return angle/90 - 3
+        return angle / 90 - 3
     end
-    return angle/90 + 1
+    return angle / 90 + 1
 end
 
- function utils.directionToRad(direction)
+function utils.directionToRad(direction)
     return utils.directionToDegree(direction) * math.pi / 180
 end
 
@@ -162,27 +164,27 @@ function utils.radToDirection(angle)
         angle = angle - math.pi * 2
     end
     if angle > (math.pi * 3) / 2 then
-        return angle/(math.pi / 2) - 3
+        return angle / (math.pi / 2) - 3
     end
-    return angle/(math.pi / 2) + 1
+    return angle / (math.pi / 2) + 1
 end
 
-function utils.atan2(a,b)
+function utils.atan2(a, b)
     return utils.degToRad(Vector(a, b):GetAngleDegrees())
 end
 
 function utils.has_collectible(itemID)
-	local players = g.players
-	local playersThatHaveIt = {}
-	for _, player in ipairs(players) do
-		if player:HasCollectible(itemID) then
-			playersThatHaveIt[#playersThatHaveIt+1] = player
-		end
-	end
-	if #playersThatHaveIt == 0 then
-		return nil
-	end
-	return playersThatHaveIt
+    local players = g.players
+    local playersThatHaveIt = {}
+    for _, player in ipairs(players) do
+        if player:HasCollectible(itemID) then
+            playersThatHaveIt[#playersThatHaveIt + 1] = player
+        end
+    end
+    if #playersThatHaveIt == 0 then
+        return nil
+    end
+    return playersThatHaveIt
 end
 
 function utils.class(parent)
@@ -205,7 +207,7 @@ function utils.class(parent)
                 inst:PostInit(...)
             end
             return inst
-        end
+        end,
     })
 
     return newClass
@@ -255,8 +257,8 @@ function utils.deepCopy(tbl, mergeInto) -- Deep copies a table. Can alternativel
     return outTable
 end
 
-function utils.lerp(first,second,percent)
-	return (first + (second - first)*percent)
+function utils.lerp(first, second, percent)
+    return (first + (second - first) * percent)
 end
 
 function utils.getAngleDifference(a1, a2)
@@ -266,6 +268,30 @@ end
 
 function utils.lerpAngleDegrees(aStart, aEnd, percent)
     return aStart + utils.getAngleDifference(aEnd, aStart) * percent
+end
+
+function utils.animate_entity_cardinals(entity, up, down, right, left, idle, forceanim, idle_velocity_threshold)
+    if not entity or not up or not down or not right or not left or not idle then
+        return nil
+    end
+    forceanim = forceanim or false
+    local velocity = entity.Velocity
+    local sprite = entity:GetSprite()
+    if velocity:Length() < idle_velocity_threshold then
+        sprite:Play(idle, forceanim)
+    elseif math.abs(velocity.X) > math.abs(velocity.Y) then
+        if velocity.X < 0 and not sprite:IsPlaying(left) then
+            sprite:Play(left, forceanim)
+        elseif velocity.X >= 0 and not sprite:IsPlaying(right) then
+            sprite:Play(right, forceanim)
+        end
+    else
+        if velocity.Y < 0 and not sprite:IsPlaying(up) then
+            sprite:Play(up, forceanim)
+        elseif velocity.Y >= 0 and not sprite:IsPlaying(down) then
+            sprite:Play(down, forceanim)
+        end
+    end
 end
 
 return utils

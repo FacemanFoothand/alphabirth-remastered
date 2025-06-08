@@ -664,6 +664,62 @@ descriptions.white_candle = {
     },
 }
 
+-- stylua: ignore
+descriptions.surgeon_simulator = {
+    ["en_us"] = {
+        "Surgeon Simulator",
+        "Removes half a red heart and places it on the floor",
+    },
+    ["pt_br"] = {
+        "Surgeon Simulator",
+        "Remove meio coração vermelho e o coloca no chão",
+    },
+}
+
+-- stylua: ignore
+descriptions.stoned_buddy = {
+    ["en_us"] = {
+        "Stoned Buddy",
+        "Spawns a familiar that pushes enemies away from Isaac",
+    },
+    ["pt_br"] = {
+        "Amigo de Pedra",
+        "Cria um familiar de pedra que empurra inimigos",
+    },
+}
+
+-- stylua: ignore
+descriptions.brunch = {
+    ["en_us"] = {
+        "Brunch",
+        "{{ArrowUp}} +1 Health#"..
+        "{{ArrowUp}} +0.6 Tears#"..
+        "Turns Isaac green",
+    },
+    ["pt_br"] = {
+        "Café da Manhã Reforçado",
+        "{{ArrowUp}}+1 Saúde#"..
+        "{{ArrowUp}}+0.6 Lágrimas#"..
+        "Torna Isaac verde",
+    },
+}
+
+-- stylua: ignore
+descriptions.blacklight = {
+    ["en_us"] = {
+        "Blacklight",
+        "{{ArrowUp}} +1 Health#"..
+        "{{ArrowUp}} +0.6 Tears#"..
+        "Turns Isaac green",
+    },
+    ["pt_br"] = {
+        "Café da Manhã Reforçado",
+        "{{ArrowUp}}+1 Saúde#"..
+        "{{ArrowUp}}+0.6 Lágrimas#"..
+        "Torna Isaac verde",
+    },
+}
+
 function descriptions.push(id, desc)
     -- External Item Descriptions integration
     -- TODO: Should use their callback instead. Maybe both.

@@ -20,6 +20,7 @@ g.RegisterProtectionFunction(function(player, damage_flags, damage_source)
 		or (damage_flags & DamageFlag.DAMAGE_SPIKES == DamageFlag.DAMAGE_SPIKES and g.room:GetType() ~= RoomType.ROOM_SACRIFICE)
 		or damage_flags & DamageFlag.DAMAGE_EXPLOSION == DamageFlag.DAMAGE_EXPLOSION
 		or damage_flags & DamageFlag.DAMAGE_TNT == DamageFlag.DAMAGE_TNT
+		or damage_flags & DamageFlag.DAMAGE_CURSED_DOOR == DamageFlag.DAMAGE_CURSED_DOOR
 		or damage_flags & DamageFlag.DAMAGE_POOP == DamageFlag.DAMAGE_POOP
 		or damage_flags & DamageFlag.DAMAGE_CHEST == DamageFlag.DAMAGE_CHEST
 		or damage_source.Type == EntityType.ENTITY_FIREPLACE

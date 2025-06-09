@@ -16,7 +16,7 @@ furnace.desc = include("ab_src.integrations.eid").furnace
 furnace:AddCallback("PLAYER_TAKE_DAMAGE", function(player, _, damage_flags, damage_source)
     if not g.HasProtection(player, damage_flags, damage_source) then
         for _, direction in ipairs(utils.direction_list) do
-            Isaac.Spawn(
+            local fire = Isaac.Spawn(
                 EntityType.ENTITY_EFFECT,
                 EffectVariant.RED_CANDLE_FLAME,
                 0,
@@ -24,6 +24,7 @@ furnace:AddCallback("PLAYER_TAKE_DAMAGE", function(player, _, damage_flags, dama
                 direction:Normalized() * (10 * player.ShotSpeed),
                 player
             )
+			fire:ToEffect().CollisionDamage = 4 * player.Damage
         end
     end
 end)

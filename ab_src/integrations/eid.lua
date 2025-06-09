@@ -193,12 +193,12 @@ descriptions.furnace = {
     ["en_us"] = {
         "Furnace",
         "{{BleedingOut}} Upon taking damage {{Burning}} flames will shoot out of Isaac in all directions#"..
-        "{{Collectible289}} These are Red Candle flames",
+        "{{Collectible289}} These are Red Candle flames that scale with Isaac's Damage",
     },
     ["pt_br"] = {
         "Fornalha",
         "{{BleedingOut}} Ao receber dano Isaac terá {{Burning}} chamas expulsadas ao seu redor#"..
-        "{{Collectible289}} São as chamas da Red Candle",
+        "{{Collectible289}} São as chamas da Red Candle que dão dano de contato proporcional ao dano de Isaac",
     },
 }
 

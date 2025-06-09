@@ -1,0 +1,7 @@
+*.vim
+.undodir
+*.db
+*.it
+.vscode
+.vscode/*
+.luarc.json

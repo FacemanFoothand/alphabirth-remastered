@@ -1,8 +1,4 @@
-if AlphaAPI then
-	print("API Already loaded!")
-else
-	require("alpha_api.lua")
-end
+include("alpha_api.lua")
 
 --------------------------------------------------
 ----------- Alphabirth: Remastered -------------
@@ -12,10 +8,16 @@ end
 -- You can find it here: http://steamcommunity.com/sharedfiles/filedetails/?id=908404046
 -- (sorry for the formatting. -DeadInfinity / meowlala)
 
-
+local g = require("ab_src.modules.globals")
 local mod = RegisterMod("Alphabirth: Remastered", 1) -- Mod variable for callbacks only!
 local api_mod -- The AlphaAPI ModObject created for this mod
-local Alphabirth = {}
+local Alphabirth = {
+	MOD = mod
+}
+
+g.mod = mod
+include("ab_src.modules.save_handler")
+include("ab_src.modules.global_objects")
 
 ----------------------------------------
 -- CONFIG
@@ -116,6 +118,8 @@ local dynamicActiveItems = {}
 local itemSprites = {}
 local birthControl_pool
 
+local itemLoader = include("ab_src.modules.item_loader")
+
 -------------------
 --  API Start
 -------------------
@@ -123,7 +127,9 @@ local function start()
 	sfx_manager = SFXManager()
 	SFX_MANAGER = sfx_manager
     api_mod = AlphaAPI.registerMod(mod) -- Register the mod with the AlphaAPI
+	Alphabirth.API_MOD = api_mod
 
+	itemLoader.loadAll(Alphabirth)
 	Alphabirth.itemSetup()
 	Alphabirth.entitySetup()
 	Alphabirth.setupMiscCallbacks()
@@ -131,6 +137,7 @@ local function start()
 	Alphabirth.curseSetup()
 	Alphabirth.miscTablesSetup()
 	Alphabirth.miscEntityHandling()
+
 	Alphabirth.activeItemRenderSetup()
 
 	SOUNDS = {
@@ -157,9 +164,9 @@ local function start()
 	-- Register the Waxed transformation along with its trigger callback
 	TRANSFORMATIONS.WAXED = api_mod:registerTransformation("Waxed",
 	{
-		ITEMS.ACTIVE.GREEN_CANDLE.id,
-		ITEMS.PASSIVE.WHITE_CANDLE.id,
-		ITEMS.PASSIVE.CANDLE_KIT.id,
+		-- ITEMS.ACTIVE.GREEN_CANDLE.id,
+		-- ITEMS.PASSIVE.WHITE_CANDLE.id,
+		-- ITEMS.PASSIVE.CANDLE_KIT.id,
 		CollectibleType.COLLECTIBLE_RED_CANDLE,
 		CollectibleType.COLLECTIBLE_CANDLE,
 		CollectibleType.COLLECTIBLE_BLACK_CANDLE
@@ -182,54 +189,12 @@ local function start()
 		local room = AlphaAPI.GAME_STATE.ROOM
 		local game = AlphaAPI.GAME_STATE.GAME
 		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
+		local level = AlphaAPI.GAME_STATE.LEVEL
 
-		-- Charity Logic
-		if api_mod.data.run.seenTreasure == false and AlphaAPI.GAME_STATE.ROOM:GetType() == RoomType.ROOM_TREASURE then
-			api_mod.data.run.seenTreasure = true
-			if player:HasCollectible(ITEMS.PASSIVE.TEMPERANCE.id) then
-				player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-				player:AddCacheFlags(CacheFlag.CACHE_SPEED)
-				player:AddCacheFlags(CacheFlag.CACHE_RANGE)
-				player:EvaluateItems()
-			end
-		end
-
-		if room:GetType() == RoomType.ROOM_DEVIL then
-	        api_mod.data.run.seenDevil = true
-			if player:HasCollectible(ITEMS.PASSIVE.CHASTITY.id) then
-				player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-				player:AddCacheFlags(CacheFlag.CACHE_SHOTSPEED)
-				player:AddCacheFlags(CacheFlag.CACHE_RANGE)
-				player:AddCacheFlags(CacheFlag.CACHE_SPEED)
-				player:EvaluateItems()
-			end
-	    end
-
-	    if player:HasCollectible(ITEMS.PASSIVE.CHARITY.id) then
-	        if room:GetType() == RoomType.ROOM_TREASURE
-	                and room:IsFirstVisit() then
-	            local center_position = room:GetCenterPos()
-	            local position = Isaac.GetFreeNearPosition(center_position, 0)
-	            beggartype = random(4, 7)
-	            Isaac.Spawn(
-	                EntityType.ENTITY_SLOT,
-	                beggartype,
-	                0,
-	                position,
-	                Vector(0, 0),
-	                nil
-	            )
-	        end
-	    end
 	    -- Give Null their costume every room so that it never gets overwritten
 	    if player:GetPlayerType() == character_null then
 	        player:AddNullCostume(COSTUMES.NULL)
 	    end
-	    -- White Candle Logic
-	    local level = AlphaAPI.GAME_STATE.LEVEL
-	    if player:HasCollectible(ITEMS.PASSIVE.WHITE_CANDLE.id) and room:IsFirstVisit() and level:GetCurrentRoomIndex() ~= level:GetStartingRoomIndex() then
-	        level:AddAngelRoomChance(0.1)
-		end
 
 		if game.Challenge == CHALLENGES.IT_FOLLOWS and level:GetCurrentRoomIndex() ~= level:GetStartingRoomIndex() then
 			AlphaAPI.callDelayed(function()
@@ -242,7 +207,6 @@ local function start()
 
     function Alphabirth.floorChanged()
         api_mod.data.run.seenTreasure = false
-		api_mod.data.run.miniatureMeteorBonus = 0
 		api_mod.data.run.apparitionRooms = {}
     end
 
@@ -278,7 +242,6 @@ local function start()
 		end
 	end
 	mod:AddCallback(ModCallbacks.MC_POST_UPDATE, Alphabirth.modUpdate)
-	mod:AddCallback(ModCallbacks.MC_POST_RENDER, Alphabirth.handleHumilityEffect)
 
 	function Alphabirth:PostGameStarted(continued)
 		if not continued then
@@ -327,37 +290,37 @@ local function start()
 
 		    if CONFIG.START_ROOM_ENABLED_PACK1 then
 	            local new_items = {
-	                    ITEMS.ACTIVE.LIFELINE.id,
-	                    ITEMS.ACTIVE.ISAAC_APPLE.id,
-	                    ITEMS.ACTIVE.COOL_BEAN.id,
-	                    ITEMS.ACTIVE.BLACK_PEPPER.id,
-	                    ITEMS.ACTIVE.GREEN_CANDLE.id,
-	                    ITEMS.ACTIVE.TEARLEPORTER.id,
-	                    ITEMS.ACTIVE.DELIRIUMS_BRAIN.id,
-	                    ITEMS.ACTIVE.TRASH_BAG.id,
-	                    ITEMS.PASSIVE.ADDICTED.id,
-	                    ITEMS.PASSIVE.SATANS_CONTRACT.id,
-	                    ITEMS.PASSIVE.STONED_BUDDY.id,
-	                    ITEMS.PASSIVE.MUTANT_FETUS.id,
-	                    ITEMS.PASSIVE.COLOGNE.id,
-	                    ITEMS.PASSIVE.BEGGARS_CUP.id,
-	                    ITEMS.PASSIVE.FURNACE.id,
-	                    ITEMS.PASSIVE.WHITE_CANDLE.id,
-						ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT.id,
-						ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id,
-						ITEMS.PASSIVE.DIVINE_WRATH.id,
-						ITEMS.PASSIVE.DILIGENCE.id,
-						ITEMS.PASSIVE.CHARITY.id,
-						ITEMS.PASSIVE.PATIENCE.id,
-						ITEMS.PASSIVE.TEMPERANCE.id,
-						ITEMS.PASSIVE.CHASTITY.id,
-						ITEMS.PASSIVE.HUMILITY.id,
-						ITEMS.PASSIVE.KINDNESS.id,
-						ITEMS.PASSIVE.CANDLE_KIT.id,
+	                    -- ITEMS.ACTIVE.LIFELINE.id,
+	                    -- ITEMS.ACTIVE.ISAAC_APPLE.id,
+	                    -- ITEMS.ACTIVE.COOL_BEAN.id,
+	                    -- ITEMS.ACTIVE.BLACK_PEPPER.id,
+	                    -- ITEMS.ACTIVE.GREEN_CANDLE.id,
+	                    -- ITEMS.ACTIVE.TEARLEPORTER.id,
+	                    -- ITEMS.ACTIVE.DELIRIUMS_BRAIN.id,
+	                    -- ITEMS.ACTIVE.TRASH_BAG.id,
+	                    -- ITEMS.PASSIVE.ADDICTED.id,
+	                    -- ITEMS.PASSIVE.SATANS_CONTRACT.id,
+	                    -- ITEMS.PASSIVE.STONED_BUDDY.id,
+	                    -- ITEMS.PASSIVE.MUTANT_FETUS.id,
+	                    -- ITEMS.PASSIVE.COLOGNE.id,
+	                    -- ITEMS.PASSIVE.BEGGARS_CUP.id,
+	                    -- ITEMS.PASSIVE.FURNACE.id,
+	                    -- ITEMS.PASSIVE.WHITE_CANDLE.id,
+						-- ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT.id,
+						-- ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id,
+						-- ITEMS.PASSIVE.DIVINE_WRATH.id,
+						-- ITEMS.PASSIVE.DILIGENCE.id,
+						-- ITEMS.PASSIVE.CHARITY.id,
+						-- ITEMS.PASSIVE.PATIENCE.id,
+						-- ITEMS.PASSIVE.TEMPERANCE.id,
+						-- ITEMS.PASSIVE.CHASTITY.id,
+						-- ITEMS.PASSIVE.HUMILITY.id,
+						-- ITEMS.PASSIVE.KINDNESS.id,
+						-- ITEMS.PASSIVE.CANDLE_KIT.id,
 						ITEMS.TRINKET.EMPEROR_CROWN.id,
 						ITEMS.TRINKET.BROWN_EYE.id,
-						ITEMS.PASSIVE.OLD_CONTROLLER.id,
-						ITEMS.PASSIVE.GRAPHICS_ERROR.id
+						-- ITEMS.PASSIVE.OLD_CONTROLLER.id,
+						-- ITEMS.PASSIVE.GRAPHICS_ERROR.id
 				}
 	            local row = 31
 	            for i, item in ipairs(new_items) do
@@ -398,8 +361,8 @@ local function start()
 	                    ITEMS.ACTIVE.BIONIC_ARM.id,
 	                    ITEMS.ACTIVE.BLACKLIGHT.id,
 	                    ITEMS.ACTIVE.BLOOD_DRIVE.id,
-	                    ITEMS.ACTIVE.CHALICE_OF_BLOOD.id,
-	                    ITEMS.ACTIVE.STONE_NUGGET.id,
+	                    -- ITEMS.ACTIVE.CHALICE_OF_BLOOD.id,
+	                    --ITEMS.ACTIVE.STONE_NUGGET.id,
 						ITEMS.ACTIVE.BOOK_OF_THE_DEAD.id,
 						ITEMS.ACTIVE.BLASPHEMOUS.id,
 	                    ITEMS.PASSIVE.CRACKED_ROCK.id,
@@ -409,18 +372,18 @@ local function start()
 	                    ITEMS.PASSIVE.AIMBOT.id,
 	                    ITEMS.PASSIVE.BRUNCH.id,
 	                    ITEMS.PASSIVE.BIRTH_CONTROL.id,
-	                    ITEMS.PASSIVE.QUILL_FEATHER.id,
-						ITEMS.PASSIVE.JUDAS_FEZ.id,
+	                    --ITEMS.PASSIVE.QUILL_FEATHER.id,
+						--ITEMS.PASSIVE.JUDAS_FEZ.id,
 						ITEMS.PASSIVE.HOT_COALS.id,
 						ITEMS.PASSIVE.ABYSS.id,
-						ITEMS.PASSIVE.HOARDER.id,
-						ITEMS.PASSIVE.POSSESSED_SHOT.id,
+						--ITEMS.PASSIVE.HOARDER.id,
+						--ITEMS.PASSIVE.POSSESSED_SHOT.id,
 						ITEMS.PASSIVE.ENDOR_HAT.id,
 						ITEMS.PASSIVE.OWL_TOTEM.id,
 						ITEMS.PASSIVE.SUBCONSCIOUS.id,
 						ITEMS.PASSIVE.BLOODERFLY.id,
 						ITEMS.PASSIVE.SPIRIT_EYE.id,
-						ITEMS.PASSIVE.INFESTED_BABY.id,
+						-- ITEMS.PASSIVE.INFESTED_BABY.id,
 				}
 	            local row = 31
 	            for i, item in ipairs(new_items) do
@@ -456,17 +419,10 @@ local function start()
 
 			if CONFIG.START_ROOM_ENABLED_PACK3 then
 				local items = {
-					ITEMS.ACTIVE.ALASTORS_CANDLE.id,
-					ITEMS.ACTIVE.ISAACS_SKULL.id,
-					ITEMS.PASSIVE.SMART_BOMBS.id,
-					ITEMS.PASSIVE.THE_COSMOS.id,
-					ITEMS.PASSIVE.ROCKET_SHOES.id,
-					ITEMS.PASSIVE.MINIATURE_METEOR.id,
-					ITEMS.PASSIVE.ENTROPY.id,
 					ITEMS.PASSIVE.PAINT_PALETTE.id,
 					ITEMS.PASSIVE.CRYSTALLIZED.id,
 					ITEMS.PASSIVE.POLYMITOSIS.id,
-					ITEMS.PASSIVE.HUSHY_FLY.id,
+					--ITEMS.PASSIVE.HUSHY_FLY.id,
 					ITEMS.PASSIVE.SHOOTING_STAR.id,
 					ITEMS.PASSIVE.MR_SQUISHY.id,
 					ITEMS.PASSIVE.PEANUT_BUTTER.id,
@@ -516,7 +472,7 @@ local function start()
 		    elseif challenge == CHALLENGES.EXPLODING_HEAD_SYNDROME then
 		        player:AddCollectible(CollectibleType.COLLECTIBLE_IPECAC, 0, false)
 		        player:AddCollectible(CollectibleType.COLLECTIBLE_CONTINUUM, 0, false)
-		        player:AddCollectible(ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT.id, 0, false)
+		        --player:AddCollectible(ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT.id, 0, false)
 		    elseif challenge == CHALLENGES.FAUST then
 		        player:AddCollectible(CollectibleType.COLLECTIBLE_GOAT_HEAD, 0, false)
 		        player:AddCollectible(CollectibleType.COLLECTIBLE_CHAOS, 0, false)
@@ -543,7 +499,7 @@ end
 
 function Alphabirth.miscTablesSetup()
     birthControl_pool = {
-        ITEMS.PASSIVE.INFESTED_BABY.id,
+        -- ITEMS.PASSIVE.INFESTED_BABY.id,
         ITEMS.PASSIVE.BLOODERFLY.id,
         ITEMS.PASSIVE.SPIRIT_EYE.id,
         CollectibleType.COLLECTIBLE_BROTHER_BOBBY,
@@ -638,7 +594,6 @@ function Alphabirth.miscEntityHandling()
 		LOCKED_ATTEMPT = AlphaAPI.createFlag(),
 		SMART_BOMB = AlphaAPI.createFlag(),
         METEOR_SHOT = AlphaAPI.createFlag(),
-        ENTROPY_TEAR = AlphaAPI.createFlag(),
         PAINTED = AlphaAPI.createFlag(),
         CRYSTAL = AlphaAPI.createFlag(),
         POLYMITOSIS_TEAR = AlphaAPI.createFlag(),
@@ -666,7 +621,7 @@ function Alphabirth.transformationSetup()
 
     local damned_pool = {
         ITEMS.PASSIVE.GLOOM_SKULL,
-        ITEMS.ACTIVE.CHALICE_OF_BLOOD,
+        -- ITEMS.ACTIVE.CHALICE_OF_BLOOD,
         ITEMS.ACTIVE.BLASPHEMOUS,
         CollectibleType.COLLECTIBLE_PENTAGRAM,
         CollectibleType.COLLECTIBLE_CONTRACT_FROM_BELOW,
@@ -714,8 +669,6 @@ function Alphabirth.itemSetup()
 		NULL  = Isaac.GetCostumeIdByPath("gfx/animations/costumes/accessories/animation_costume_null.anm2"),
 		WAXED = Isaac.GetCostumeIdByPath("gfx/animations/costumes/accessories/animation_transformation_waxed.anm2"),
         -- Pack 2
-		CHALICE_OF_BLOOD_COSTUME = Isaac.GetCostumeIdByPath("gfx/animations/costumes/accessories/animation_costume_chaliceofblood.anm2"),
-
         CYBORG_COSTUME = Isaac.GetCostumeIdByPath("gfx/animations/costumes/accessories/animation_transformation_cyborg.anm2"),
         DAMNED_COSTUME = Isaac.GetCostumeIdByPath("gfx/animations/costumes/accessories/animation_transformation_damned.anm2"),
 
@@ -723,141 +676,9 @@ function Alphabirth.itemSetup()
         ENDOR_HEAD_COSTUME = Isaac.GetCostumeIdByPath("gfx/animations/costumes/players/animation_character_endorhead.anm2")
     }
 
-
-	-------------
-	-- Actives --
-	-------------
-	ITEMS.ACTIVE.DEBUG = api_mod:registerItem("Debug")
-	ITEMS.ACTIVE.DEBUG:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerDebug)
-
-	-- Has a chance to either fill all red hearts or remove a red heart container
-	ITEMS.ACTIVE.LIFELINE = api_mod:registerItem("Lifeline")
-	ITEMS.ACTIVE.LIFELINE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerLifeLine)
-
-	-- Stops all tears in their tracks
-	ITEMS.ACTIVE.ISAAC_APPLE = api_mod:registerItem("Isaac's Apple")
-	ITEMS.ACTIVE.ISAAC_APPLE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerIsaacsApple)
-
-	-- Freezes nearby enemies
-	ITEMS.ACTIVE.COOL_BEAN = api_mod:registerItem("Cool Bean")
-	ITEMS.ACTIVE.COOL_BEAN:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerCoolBean)
-
-	-- Fire a monstro's lung-esque volley of tears
-	ITEMS.ACTIVE.BLACK_PEPPER = api_mod:registerItem("Black Pepper")
-	ITEMS.ACTIVE.BLACK_PEPPER:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerBlackPepper)
-	ITEMS.ACTIVE.BLACK_PEPPER:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.updateBlackPepper)
-
-	-- Fire a green fire and poison nearby enemies
-	ITEMS.ACTIVE.GREEN_CANDLE = api_mod:registerItem("Green Candle")
-	ITEMS.ACTIVE.GREEN_CANDLE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerGreenCandle)
-	ITEMS.ACTIVE.GREEN_CANDLE:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.updateGreenCandle)
-
-	-- Teleport you to the farthest tear away from you
-	ITEMS.ACTIVE.TEARLEPORTER = api_mod:registerItem("Tearleporter")
-	ITEMS.ACTIVE.TEARLEPORTER:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerTearleporter)
-
-	-- 28% chance for 3 blue flies, 28% chance for 3 blue spiders,
-	-- 41% chance for a random pickup, 3% chance for a trinket
-	ITEMS.ACTIVE.TRASH_BAG = api_mod:registerItem("Trash Bag")
-	ITEMS.ACTIVE.TRASH_BAG:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerTrashBag)
-
-	-- Reverse trajectory of all tears and damages enemies
-	ITEMS.ACTIVE.DELIRIUMS_BRAIN = api_mod:registerItem("Delirium's Brain")
-	ITEMS.ACTIVE.DELIRIUMS_BRAIN:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerDeliriumsBrain)
-
 	--------------
 	-- Passives --
 	--------------
-	-- Has a chance to swallow a random pill when damage is taken
-	ITEMS.PASSIVE.ADDICTED = api_mod:registerItem("Addicted", "gfx/animations/costumes/accessories/animation_costume_addicted.anm2")
-
-	-- Doubles the player's damage and damage taken
-	ITEMS.PASSIVE.SATANS_CONTRACT = api_mod:registerItem("Satan's Contract", "gfx/animations/costumes/accessories/animation_costume_contract.anm2")
-	ITEMS.PASSIVE.SATANS_CONTRACT:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateSatansContract)
-
-	-- Has a chance to spawn a bomb when you hit an enemy
-	ITEMS.PASSIVE.MUTANT_FETUS = api_mod:registerItem("Mutant Fetus", "gfx/animations/costumes/accessories/animation_costume_mutantfetus.anm2")
-
-    -- Bombs become Bugged Bombs, which have tear flags randomly applied to them.
-	LOCKS.BUGGED_BOMBS = api_mod:createUnlock("alphaBuggedBombs")
-    ITEMS.PASSIVE.BUGGED_BOMBS = api_mod:registerItem("Bugged Bombs")
-    ITEMS.PASSIVE.BUGGED_BOMBS:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.pickupBuggedBombs)
-	ITEMS.PASSIVE.BUGGED_BOMBS:addLock(LOCKS.BUGGED_BOMBS)
-
-	-- Chance to charm nearby enemies
-	ITEMS.PASSIVE.COLOGNE = api_mod:registerItem("Cologne", "gfx/animations/costumes/accessories/animation_costume_cologne.anm2")
-	ITEMS.PASSIVE.COLOGNE:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleCologne)
-	ITEMS.PASSIVE.COLOGNE:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateCologne)
-
-	-- Gives the player more luck the fewer consumables they have
-	ITEMS.PASSIVE.BEGGARS_CUP = api_mod:registerItem("Beggar's Cup", "gfx/animations/costumes/accessories/animation_costume_beggarscup.anm2")
-	ITEMS.PASSIVE.BEGGARS_CUP:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleBeggarsCup)
-	ITEMS.PASSIVE.BEGGARS_CUP:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateBeggarsCup)
-
-	-- Shoots fires in all directions on damage taken
-	ITEMS.PASSIVE.FURNACE = api_mod:registerItem("Furnace", "gfx/animations/costumes/accessories/animation_costume_furnace.anm2")
-
-	-- Increase Angel Room/Soul heart chance. Chance to activate Holy Light on damage taken
-	ITEMS.PASSIVE.WHITE_CANDLE = api_mod:registerItem("White Candle", "gfx/animations/costumes/accessories/animation_costume_whitecandle.anm2")
-
-	-- Pseudobulbar Affect
-	ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT = api_mod:registerItem("Pseudobulbar Affect", "gfx/animations/costumes/accessories/animation_costume_pseudobulbaraffect.anm2")
-	ITEMS.PASSIVE.PSEUDOBULBAR_AFFECT:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handlePseudobulbarAffect)
-
-
-	-- Immunity to lasers plus healing from lasers
-	ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION = api_mod:registerItem("Talisman of Absorption", "gfx/animations/costumes/accessories/animation_costume_talismanofabsorption.anm2")
-
-	-- Spawns a bum in every treasure room and stats up for less consumables
-	ITEMS.PASSIVE.CHARITY = api_mod:registerItem("Charity", "gfx/animations/costumes/accessories/animation_costume_charity.anm2")
-	ITEMS.PASSIVE.CHARITY:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleCharity)
-	ITEMS.PASSIVE.CHARITY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateCharity)
-
-	-- Immunity to fire, spikes, and bombs. 20% chance to dodge all damage
-	ITEMS.PASSIVE.DILIGENCE = api_mod:registerItem("Diligence", "gfx/animations/costumes/accessories/animation_costume_diligence.anm2")
-
-	-- Damage up the longer you're in a room
-	ITEMS.PASSIVE.PATIENCE = api_mod:registerItem("Patience", "gfx/animations/costumes/accessories/animation_costume_patience.anm2")
-	ITEMS.PASSIVE.PATIENCE:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handlePatience)
-	ITEMS.PASSIVE.PATIENCE:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluatePatience)
-
-	-- Stats up if you haven't gone to the treasure room on the floor
-	ITEMS.PASSIVE.TEMPERANCE = api_mod:registerItem("Temperance", "gfx/animations/costumes/accessories/animation_costume_temperance.anm2")
-	ITEMS.PASSIVE.TEMPERANCE:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateTemperance)
-
-	-- Marks a random enemy in the room that takes increased damage
-	ITEMS.PASSIVE.HUMILITY = api_mod:registerItem("Humility", "gfx/animations/costumes/accessories/animation_costume_humility.anm2")
-	ITEMS.PASSIVE.HUMILITY:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleHumility)
-
-	-- Stats up if you haven't gone to the DEVIL room this run
-	ITEMS.PASSIVE.CHASTITY = api_mod:registerItem("Chastity", "gfx/animations/costumes/accessories/animation_costume_chastity.anm2", {CacheFlag.CACHE_DAMAGE, CacheFlag.CACHE_RANGE, CacheFlag.CACHE_SHOTSPEED, CacheFlag.CACHE_SPEED})
-	ITEMS.PASSIVE.CHASTITY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateChastity)
-
-	-- Randomly charms enemies. Chance to spawn hearts on killing enemies
-	ITEMS.PASSIVE.KINDNESS = api_mod:registerItem("Kindness", "gfx/animations/costumes/accessories/animation_costume_kindness.anm2")
-	ITEMS.PASSIVE.KINDNESS:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleKindness)
-
-	-- Ludovico-esque hush laser.
-	ITEMS.PASSIVE.DIVINE_WRATH = api_mod:registerItem("Divine Wrath", "gfx/animations/costumes/accessories/animation_costume_divinewrath.anm2")
-	ITEMS.PASSIVE.DIVINE_WRATH:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.pickupDivineWrath, true)
-	ITEMS.PASSIVE.DIVINE_WRATH:addCallback(AlphaAPI.Callbacks.ITEM_REMOVE, Alphabirth.removeDivineWrath, true)
-
-	-- Spawns a familiar that persues the nearest enemy, pushing them away and blocking tears
-	ITEMS.PASSIVE.STONED_BUDDY = api_mod:registerItem("Stoned Buddy")
-    ITEMS.PASSIVE.STONED_BUDDY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateStonedBuddy)
-
-	-- Grants two Candle orbitals that burn nearby enemies and deal contact damage.
-	ITEMS.PASSIVE.CANDLE_KIT = api_mod:registerItem("Candle Kit")
-    ITEMS.PASSIVE.CANDLE_KIT:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateCandleKit)
-
-	LOCKS.OLD_CONTROLLER = api_mod:createUnlock("alphaOldController")
-	ITEMS.PASSIVE.OLD_CONTROLLER = api_mod:registerItem("Old Controller", "gfx/animations/costumes/accessories/animation_costume_oldcontroller.anm2")
-	ITEMS.PASSIVE.OLD_CONTROLLER:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.initDeathVariable)
-	ITEMS.PASSIVE.OLD_CONTROLLER:addLock(LOCKS.OLD_CONTROLLER)
-
-	LOCKS.GRAPHICS_ERROR = api_mod:createUnlock("alphaGraphicsError")
-	ITEMS.PASSIVE.GRAPHICS_ERROR = api_mod:registerItem("Graphics Error", "gfx/animations/costumes/accessories/animation_costume_graphicserror.anm2")
-	ITEMS.PASSIVE.GRAPHICS_ERROR:addLock(LOCKS.GRAPHICS_ERROR)
 
 	-- Teleports you to the boss room every time you enter a new floor
 	LOCKS.EMPEROR_CROWN = api_mod:createUnlock("alphaEmperorsCrown")
@@ -875,14 +696,8 @@ function Alphabirth.itemSetup()
 	--  PACK 2  --
 	--------------
 
-    ITEMS.ACTIVE.MIRROR = api_mod:registerItem("Mirror")
-    ITEMS.ACTIVE.MIRROR:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerMirror)
-
     ITEMS.ACTIVE.CAULDRON = api_mod:registerItem("Cauldron")
     ITEMS.ACTIVE.CAULDRON:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerCauldron)
-
-    ITEMS.ACTIVE.SURGEON_SIMULATOR = api_mod:registerItem("Surgeon Simulator")
-    ITEMS.ACTIVE.SURGEON_SIMULATOR:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerSurgeonSimulator)
 
     ITEMS.ACTIVE.BIONIC_ARM = api_mod:registerItem("Bionic Arm")
     ITEMS.ACTIVE.BIONIC_ARM:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerBionicArm)
@@ -891,19 +706,8 @@ function Alphabirth.itemSetup()
     ITEMS.ACTIVE.BLOOD_DRIVE = api_mod:registerItem("Blood Drive")
     ITEMS.ACTIVE.BLOOD_DRIVE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerBloodDrive)
 
-    ITEMS.ACTIVE.BLACKLIGHT = api_mod:registerItem("Blacklight")
-    ITEMS.ACTIVE.BLACKLIGHT:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerBlacklight)
-
-    ITEMS.ACTIVE.STONE_NUGGET = api_mod:registerItem("Stone Nugget")
-    ITEMS.ACTIVE.STONE_NUGGET:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerStoneNugget)
-
     ITEMS.ACTIVE.BLASPHEMOUS = api_mod:registerItem("Blasphemous")
     ITEMS.ACTIVE.BLASPHEMOUS:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerBlasphemous)
-
-    ITEMS.ACTIVE.CHALICE_OF_BLOOD = api_mod:registerItem("Chalice of Blood")
-    ITEMS.ACTIVE.CHALICE_OF_BLOOD:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleChaliceOfBlood)
-    ITEMS.ACTIVE.CHALICE_OF_BLOOD:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerChaliceOfBlood)
-    ITEMS.ACTIVE.CHALICE_OF_BLOOD:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyChaliceOfBloodCache)
 
     ITEMS.ACTIVE.BOOK_OF_THE_DEAD = api_mod:registerItem("Book of the Dead")
     ITEMS.ACTIVE.BOOK_OF_THE_DEAD:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleBookOfTheDead)
@@ -941,35 +745,14 @@ function Alphabirth.itemSetup()
     ITEMS.PASSIVE.BIRTH_CONTROL:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyBirthControlCache)
     ITEMS.PASSIVE.BIRTH_CONTROL:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.useBoxOfFriends, CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS)
 
-    ITEMS.PASSIVE.QUILL_FEATHER = api_mod:registerItem("Quill Feather", "gfx/animations/costumes/accessories/animation_costume_quillfeather.anm2")
-
-    ITEMS.PASSIVE.POSSESSED_SHOT = api_mod:registerItem("Possessed Shot", "gfx/animations/costumes/accessories/animation_costume_possessedshot.anm2")
-    ITEMS.PASSIVE.POSSESSED_SHOT:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyPossessedShotCache)
-    ITEMS.PASSIVE.POSSESSED_SHOT:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.triggerPossessedShot)
-
     ITEMS.PASSIVE.SPIRIT_EYE = api_mod:registerItem("Spirit Eye")
     ITEMS.PASSIVE.SPIRIT_EYE:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateSpiritEye)
-
-    ITEMS.PASSIVE.INFESTED_BABY = api_mod:registerItem("Infested Baby")
-    ITEMS.PASSIVE.INFESTED_BABY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateInfestedBaby)
 
     ITEMS.PASSIVE.BLOODERFLY = api_mod:registerItem("Blooderfly")
     ITEMS.PASSIVE.BLOODERFLY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateBlooderfly)
 
-    ITEMS.PASSIVE.BRUNCH = api_mod:registerItem("Brunch")
-    ITEMS.PASSIVE.BRUNCH:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyBrunchCache)
-    ITEMS.PASSIVE.BRUNCH:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.pickupBrunch)
-
     ITEMS.PASSIVE.HEMOPHILIA = api_mod:registerItem("Hemophilia", "gfx/animations/costumes/accessories/animation_costume_hemophilia.anm2")
     ITEMS.PASSIVE.HEMOPHILIA:addCallback(AlphaAPI.Callbacks.ENTITY_DEATH, Alphabirth.triggerHemophilia)
-
-    ITEMS.PASSIVE.HOARDER = api_mod:registerItem("Hoarder", "gfx/animations/costumes/accessories/animation_costume_hoarder.anm2")
-    ITEMS.PASSIVE.HOARDER:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleHoarder)
-    ITEMS.PASSIVE.HOARDER:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyHoarderCache)
-
-    ITEMS.PASSIVE.JUDAS_FEZ = api_mod:registerItem("Judas' Fez", "gfx/animations/costumes/accessories/animation_costume_judasfez.anm2")
-    ITEMS.PASSIVE.JUDAS_FEZ:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleJudasFez)
-    ITEMS.PASSIVE.JUDAS_FEZ:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyJudasFezCache)
 
     ITEMS.PASSIVE.HOT_COALS = api_mod:registerItem("Hot Coals", "gfx/animations/costumes/accessories/animation_costume_hotcoals.anm2")
     ITEMS.PASSIVE.HOT_COALS:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleHotCoals)
@@ -1016,13 +799,6 @@ function Alphabirth.itemSetup()
 	--  PACK 3  --
 	--------------
 
-	ITEMS.ACTIVE.ALASTORS_CANDLE = api_mod:registerItem("Alastor's Candle")
-    ITEMS.ACTIVE.ALASTORS_CANDLE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.useAlastorsCandle)
-
-    ITEMS.ACTIVE.ISAACS_SKULL = api_mod:registerItem("Isaac's Skull")
-    ITEMS.ACTIVE.ISAACS_SKULL:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.useIsaacsSkull)
-    mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Alphabirth.isaacsSkullNewRoom)
-
     ITEMS.PASSIVE.FAITHFUL_AMBIVALENCE = api_mod:registerItem("Faithful Ambivalence", "gfx/animations/costumes/accessories/animation_costume_faithfulambivalence.anm2")
     ITEMS.PASSIVE.FAITHFUL_AMBIVALENCE:addCallback(AlphaAPI.Callbacks.ROOM_NEW, Alphabirth.faithfulAmbivalenceNewRoom)
 
@@ -1030,31 +806,11 @@ function Alphabirth.itemSetup()
     ITEMS.PASSIVE.LIL_ALASTOR:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateLilAlastor)
 
     -- PASSIVES
-    ITEMS.PASSIVE.SMART_BOMBS = api_mod:registerItem("Smart Bombs")
-    ITEMS.PASSIVE.SMART_BOMBS:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.onPickupBombItem)
-
     ITEMS.PASSIVE.LEAK_BOMBS = api_mod:registerItem("Leaking Bombs", "gfx/animations/costumes/accessories/animation_costume_leakybombs.anm2")
     ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.onPickupBombItem)
     ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.leakingBombsUpdate, EntityType.ENTITY_BOMBDROP)
     ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.leakingBombsCreepUpdate, EntityType.ENTITY_EFFECT, EffectVariant.PLAYER_CREEP_BLACKPOWDER)
     ITEMS.PASSIVE.LEAK_BOMBS:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.leakingBombsDamage)
-
-    ITEMS.PASSIVE.ROCKET_SHOES = api_mod:registerItem("Rocket Shoes", "gfx/animations/costumes/accessories/animation_costume_rocketshoes.anm2")
-    ITEMS.PASSIVE.ROCKET_SHOES:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleRocketShoes)
-    ITEMS.PASSIVE.ROCKET_SHOES:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateRocketShoes)
-
-    ITEMS.PASSIVE.THE_COSMOS = api_mod:registerItem("The Cosmos")
-    ITEMS.PASSIVE.THE_COSMOS:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.cosmosDamage)
-    ITEMS.PASSIVE.THE_COSMOS:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateCosmos)
-
-    ITEMS.PASSIVE.MINIATURE_METEOR = api_mod:registerItem("Miniature Meteor", "gfx/animations/costumes/accessories/animation_costume_miniaturemeteor.anm2")
-    ITEMS.PASSIVE.MINIATURE_METEOR:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.miniatureMeteorDamage)
-    ITEMS.PASSIVE.MINIATURE_METEOR:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.miniatureMeteorAppear, EntityType.ENTITY_TEAR)
-    ITEMS.PASSIVE.MINIATURE_METEOR:addCallback(AlphaAPI.Callbacks.ITEM_PICKUP, Alphabirth.onMeteorPickup)
-
-    ITEMS.PASSIVE.ENTROPY = api_mod:registerItem("Entropy", "gfx/animations/costumes/accessories/animation_costume_entropy.anm2")
-    ITEMS.PASSIVE.ENTROPY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.entropyCache)
-    ITEMS.PASSIVE.ENTROPY:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.entropyNewTear, EntityType.ENTITY_TEAR)
 
     ITEMS.PASSIVE.PAINT_PALETTE = api_mod:registerItem("Paint Palette", "gfx/animations/costumes/accessories/animation_costume_palette.anm2")
     ITEMS.PASSIVE.PAINT_PALETTE:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.paintPaletteDamage)
@@ -1091,9 +847,6 @@ function Alphabirth.itemSetup()
     ITEMS.PASSIVE.INFECTION:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.infectionUpdate)
     ITEMS.PASSIVE.INFECTION:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.infectionDamage)
 
-    ITEMS.PASSIVE.HUSHY_FLY = api_mod:registerItem("Hushy Fly")
-    ITEMS.PASSIVE.HUSHY_FLY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateHushyFly)
-
     ITEMS.PASSIVE.LIL_MINER = api_mod:registerItem("Lil Miner")
     ITEMS.PASSIVE.LIL_MINER:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateLilMiner)
 
@@ -1104,13 +857,10 @@ function Alphabirth.itemSetup()
     -- TRINKETS
     ITEMS.TRINKET.MOONROCK = api_mod:registerTrinket("Moonrock")
     ITEMS.TRINKET.MOONROCK:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.moonrockNewTear, EntityType.ENTITY_TEAR)
-
 end
 
 -- Setup Function for Entities
 function Alphabirth.entitySetup()
-	ENTITIES.ICE_FART = api_mod:getEntityConfig("Ice Fart")
-	ENTITIES.GREEN_CANDLE = api_mod:getEntityConfig("Green Candle", 20)
 
 	ENTITIES.BOMB_DIP = api_mod:getEntityConfig("Bomb Dip")
 	ENTITIES.BOMB_DIP:addCallback(AlphaAPI.Callbacks.ENTITY_DEATH, Alphabirth.onBombDipDie)
@@ -1156,18 +906,6 @@ function Alphabirth.entitySetup()
 	}
 	ENTITIES.GLITCH_PICKUP:addLock(LOCKS.GLITCH_PICKUP)
 
-	ENTITIES.STONED_BUDDY = api_mod:getEntityConfig("Stoned Buddy")
-	ENTITIES.STONED_BUDDY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateStonedBuddy)
-	ENTITIES.STONED_BUDDY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initStonedBuddy)
-
-	ENTITIES.DIVINE_WRATH = api_mod:getEntityConfig("Divine Wrath")
-	ENTITIES.DIVINE_WRATH:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateDivineWrath)
-	ENTITIES.DIVINE_WRATH:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initDivineWrath)
-
-	ENTITIES.CANDLE_KIT = api_mod:getEntityConfig("Candle Kit")
-	ENTITIES.CANDLE_KIT:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateCandleKit)
-    ENTITIES.CANDLE_KIT:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initCandleKit)
-
     -- Familiars
     ENTITIES.BLOODERFLY = api_mod:getEntityConfig("Blooderfly", 0)
     ENTITIES.BLOODERFLY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.onBlooderflyUpdate)
@@ -1176,16 +914,9 @@ function Alphabirth.entitySetup()
     ENTITIES.SPIRIT_EYE = api_mod:getEntityConfig("Spirit Eye", 0)
     ENTITIES.SPIRIT_EYE:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.onSpiritEyeUpdate)
 
-    ENTITIES.INFESTED_BABY = api_mod:getEntityConfig("Infested Baby", 0)
-    ENTITIES.INFESTED_BABY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.onInfestedBabyUpdate)
-    ENTITIES.INFESTED_BABY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.onInfestedBabyInit)
-
     ENTITIES.SUBCONSCIOUS = api_mod:getEntityConfig("Subconscious", 0)
     ENTITIES.SUBCONSCIOUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.onSubconsciousInit)
     ENTITIES.SUBCONSCIOUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.onSubconsciousUpdate)
-
-    ENTITIES.STONE_NUGGET = api_mod:getEntityConfig("Stone Nugget", 0)
-    ENTITIES.STONE_NUGGET:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onStonePooterUpdate)
 
     ENTITIES.BLASPHEMOUS_LASER = api_mod:getEntityConfig("Blasphemous Laser", 0)
     ENTITIES.BLASPHEMOUS_LASER:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.onBlasphemousLaserUpdate)
@@ -1196,7 +927,6 @@ function Alphabirth.entitySetup()
 
 
     -- EFFECTS
-    ENTITIES.CHALICE_OF_BLOOD = api_mod:getEntityConfig("Chalice of Blood", 0)
     ENTITIES.BOOK_OF_THE_DEAD_BONES = api_mod:getEntityConfig("BookOfTheDeadEffect", 0)
 
     -- TEARS
@@ -1278,18 +1008,11 @@ function Alphabirth.entitySetup()
 	-- 			PACK 3			 --
 	-------------------------------
 
-	FAMILIARS.MERCURY = api_mod:getEntityConfig("Cosmos Mercury", 0)
-	FAMILIARS.VENUS = api_mod:getEntityConfig("Cosmos Venus", 0)
-	FAMILIARS.PLUTO = api_mod:getEntityConfig("Cosmos Pluto", 0)
-
-	FAMILIARS.HUSHY_FLY = api_mod:getEntityConfig("Hushy Fly", 0)
 	FAMILIARS.LIL_MINER = api_mod:getEntityConfig("Lil Miner", 0)
 	FAMILIARS.HIVE_HEAD = api_mod:getEntityConfig("Hive Head Orbital", 0)
 
 	FAMILIARS.LIL_ALASTOR = api_mod:getEntityConfig("Lil Alastor", 0)
-	FAMILIARS.ALASTORS_FLAME = api_mod:getEntityConfig("Alastor's Flame", 0)
 
-	ENTITIES.METEOR_SHARD = api_mod:getPickupConfig("Meteor Shard", 0)
 	ENTITIES.APPARITION = api_mod:getEntityConfig("Apparition", 0)
 	ENTITIES.MEATHEAD = api_mod:getEntityConfig("Meathead", 0)
 	ENTITIES.CRYSTAL = api_mod:getEntityConfig("Crystal", 0)
@@ -1301,22 +1024,16 @@ function Alphabirth.entitySetup()
 	ENTITIES.BRIMSTONE_HOST = api_mod:getEntityConfig("Brimstone Host", 20)
 	ENTITIES.LARGESACK = api_mod:getPickupConfig("Large Sack", 0)
 
-    FAMILIARS.ALASTORS_FLAME:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateAlastorsFlame)
     FAMILIARS.LIL_ALASTOR:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateLilAlastor)
 
     ENTITIES.LARGESACK:addCallback(AlphaAPI.Callbacks.PICKUP_PICKUP, Alphabirth.onLargeSackPickup)
 
     -- Spawn Familiars
-    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.smartBombsEntityAppear, EntityType.ENTITY_BOMBDROP)
-    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.smartBombsEntityUpdate, EntityType.ENTITY_BOMBDROP)
-
     ENTITIES.LASERUP:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onLaserUpUpdate)
     ENTITIES.LASERDOWN:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onLaserDownUpdate)
     ENTITIES.STARGAZER:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onStarGazerUpdate)
 
     ENTITIES.BRIMSTONE_HOST:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onBrimstoneHostUpdate)
-
-    ENTITIES.METEOR_SHARD:addCallback(AlphaAPI.Callbacks.PICKUP_PICKUP, Alphabirth.meteorShardPickup)
 
     LOCKS.APPARITION = api_mod:createUnlock("alphaApparitionLock")
     ENTITIES.APPARITION:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.apparitionUpdate)
@@ -1333,18 +1050,6 @@ function Alphabirth.entitySetup()
 
     ENTITIES.CRYSTAL:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.crystalUpdate)
 
-    FAMILIARS.MERCURY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeMercury)
-    FAMILIARS.MERCURY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateMercury)
-
-    FAMILIARS.VENUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeVenus)
-    FAMILIARS.VENUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateVenus)
-
-    FAMILIARS.PLUTO:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializePluto)
-    FAMILIARS.PLUTO:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updatePluto)
-
-    FAMILIARS.HUSHY_FLY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeHushyFly)
-    FAMILIARS.HUSHY_FLY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateHushyFly)
-
     FAMILIARS.LIL_MINER:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeLilMiner)
     FAMILIARS.LIL_MINER:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateLilMiner)
 
@@ -1357,43 +1062,14 @@ function Alphabirth.entitySetup()
 
 end
 
-function Alphabirth.activeItemRenderSetup()
-	dynamicActiveItems = {
-
-	cauldron = {
-			item = ITEMS.ACTIVE.CAULDRON.id,
-			sprite = "gfx/animations/animation_collectible_cauldron.anm2",
-			functionality = Alphabirth.cauldronUpdate
-			},
-	chalice = {
-			item = ITEMS.ACTIVE.CHALICE_OF_BLOOD.id,
-			sprite = "gfx/animations/animation_collectible_chaliceofblood.anm2",
-			functionality = Alphabirth.chaliceOfBloodUpdate
-			},
-	}
-
-	for k,v in pairs(dynamicActiveItems) do
-		if itemSprites[k] == nil then
-			itemSprites[k] = Sprite()
-			itemSprites[k]:Load(v.sprite, true)
-		end
-	end
-end
-
 -- Setup Function for Miscellaneous Callbacks
 function Alphabirth.setupMiscCallbacks()
 	api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.entityTakeDamage)
-    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.bugBombsAppear, EntityType.ENTITY_BOMBDROP)
-    api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.bugBombsUpdate, EntityType.ENTITY_BOMBDROP)
-	api_mod:addCallback(AlphaAPI.Callbacks.PLAYER_DIED, Alphabirth.handleOldController)
-	api_mod:addCallback(AlphaAPI.Callbacks.ENTITY_DEATH, Alphabirth.handleGraphicsError)
 
 	-- Take Damage
 	mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.triggerCrackedRockEffect)
 	mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.triggerAbyss)
 	mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.entityTakeDmgBookOfTheDead)
-	mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.entityTakeDmgStoneNugget)
-	mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.triggerQuillFeather)
 
 	-- Mod Updates
 	mod:AddCallback(ModCallbacks.MC_POST_UPDATE, Alphabirth.modUpdate)
@@ -1402,7 +1078,7 @@ function Alphabirth.setupMiscCallbacks()
 
 	-- Player Init
 	mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Alphabirth.playerInit)
-	api_mod:addCallback(AlphaAPI.Callbacks.RUN_STARTED, Alphabirth.runStarted)
+	-- api_mod:addCallback(AlphaAPI.Callbacks.RUN_STARTED, Alphabirth.runStarted)
 	api_mod:addCallback(AlphaAPI.Callbacks.ROOM_CHANGED, Alphabirth.roomChanged)
 	api_mod:addCallback(AlphaAPI.Callbacks.CHALLENGE_COMPLETED, Alphabirth.completeChallenge)
 
@@ -1453,10 +1129,10 @@ end
 
 function Alphabirth.killDelirium()
 	local player_type = AlphaAPI.GAME_STATE.PLAYERS[1]:GetPlayerType()
-	if player_type == character_null and not LOCKS.OLD_CONTROLLER:isUnlocked() then
-		AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/achievement/achievement_oldcontroller.png")
-		LOCKS.OLD_CONTROLLER:setUnlocked(true)
-	end
+	--if player_type == character_null and not LOCKS.OLD_CONTROLLER:isUnlocked() then
+	--	AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/achievement/achievement_oldcontroller.png")
+	--	LOCKS.OLD_CONTROLLER:setUnlocked(true)
+	--end
 	if player_type == endor_type and not LOCKS.SUBCONSCIOUS:isUnlocked() then
 		AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/Achievement/achievement_subconscious.png")
 		LOCKS.SUBCONSCIOUS:setUnlocked(true)
@@ -1477,10 +1153,10 @@ end
 
 function Alphabirth.killMegaSatan()
 	local player_type = AlphaAPI.GAME_STATE.PLAYERS[1]:GetPlayerType()
-	if player_type == character_null and not LOCKS.GRAPHICS_ERROR:isUnlocked() then
-		AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/achievement/achievement_graphicserror.png")
-		LOCKS.GRAPHICS_ERROR:setUnlocked(true)
-	end
+	--if player_type == character_null and not LOCKS.GRAPHICS_ERROR:isUnlocked() then
+	--	AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/achievement/achievement_graphicserror.png")
+	--	LOCKS.GRAPHICS_ERROR:setUnlocked(true)
+	--end
 	local player_type = AlphaAPI.GAME_STATE.PLAYERS[1]:GetPlayerType()
 	if player_type == endor_type and not LOCKS.ENDOR_HAT:isUnlocked() then
 		AlphaAPI.playOverlay(AlphaAPI.OverlayType.UNLOCK, "gfx/ui/Achievement/achievement_endorshat.png")
@@ -1746,346 +1422,6 @@ local BOTD_BLACKLIST = {
 
 -- Active Item Function Definitions
 do
-	----------------------------------------
-	-- Debug Logic
-	----------------------------------------
-	function Alphabirth.triggerDebug()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		ENTITIES.GLITCH_PICKUP:spawn(player.Position, player.Velocity, player)
-	end
-
-	----------------------------------------
-	-- Lifeline Logic
-	----------------------------------------
-	function Alphabirth.triggerLifeLine()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    local health_roll = random(1, 5)
-	    local animate = false
-	    if health_roll == 1 then
-	        -- Only take effect if the player has two or more red heart containers
-	        if player:GetMaxHearts() >= 4 then
-	            player:AddMaxHearts(-2, false) -- Remove one full red heart container
-	            player:AnimateSad()
-	        end
-	    else
-	        player:SetFullHearts() -- Fill all red heart containers
-	        animate = true
-	    end
-	    return animate
-	end
-
-	---------------------------------------
-	-- Trash Bag Logic
-	---------------------------------------
-	function Alphabirth.triggerTrashBag()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    -- Always spawns either spiders or flies
-	    -- 25% chance to spawn extra spiders, 25% for extra flies,
-	    -- 50% to spawn a pickup, 3% to spawn a pickup, 0.2% to spawn an item
-	    local spider_fly_chance = random(1, 2)
-	    if spider_fly_chance == 1 then
-	        for i = 1, random(1, 4) do
-	            player:AddBlueSpider(player.Position)
-	        end
-	    else
-	        player:AddBlueFlies(random(1, 4),
-	            player.Position,
-	            nil)
-	    end
-
-	    local blue_fly_chance = random(1, 4)
-	    if blue_fly_chance == 1 then
-	        player:AddBlueFlies(random(1, 4),
-	            player.Position,
-	            nil)
-	    end
-
-	    local blue_spider_chance = random(1, 4)
-	    if blue_spider_chance == 1 then
-	        for i = 1, random(1, 4) do
-	            player:AddBlueSpider(player.Position)
-	        end
-	    end
-
-	    local pickup_chance = random(1, (100 - (player.Luck * 2)))
-	    if pickup_chance <= 50 then
-	        local pickup_type = random(1, 7)
-	        local subtype_to_spawn = 0 -- seems to be random for most pickups
-	        local pickup_to_spawn = nil
-	        if pickup_type == 1 then
-	            pickup_to_spawn = PickupVariant.PICKUP_HEART
-	        elseif pickup_type == 2 then
-	            pickup_to_spawn = PickupVariant.PICKUP_COIN
-	        elseif pickup_type == 3 then
-	            pickup_to_spawn = PickupVariant.PICKUP_KEY
-	        elseif pickup_type == 4 then
-	            pickup_to_spawn = PickupVariant.PICKUP_GRAB_BAG
-	        elseif pickup_type == 5 then
-	            pickup_to_spawn = PickupVariant.PICKUP_PILL
-	        elseif pickup_type == 6 then
-	            pickup_to_spawn = PickupVariant.PICKUP_LIL_BATTERY
-	        elseif pickup_type == 7 then
-	            pickup_to_spawn = PickupVariant.PICKUP_TAROTCARD
-	        end
-
-	        local spawn_position = AlphaAPI.GAME_STATE.ROOM:FindFreePickupSpawnPosition(player.Position, 1, true)
-	        Isaac.Spawn(EntityType.ENTITY_PICKUP,
-	            pickup_to_spawn,
-	            subtype_to_spawn,
-	            spawn_position,
-	            Vector(0, 0),
-	            player)
-	    end
-
-	    local trinket_chance = random(1, 33)
-	    if trinket_chance == 1 then
-	        local spawn_position = AlphaAPI.GAME_STATE.ROOM:FindFreePickupSpawnPosition(player.Position, 1, true)
-	        Isaac.Spawn(EntityType.ENTITY_PICKUP,
-	            PickupVariant.PICKUP_TRINKET,
-	            0,
-	            spawn_position,
-	            Vector(0, 0),
-	            player)
-	    end
-
-	    local item_chance = random(1, 500)
-	    if item_chance == 1 then
-	        local spawn_position = AlphaAPI.GAME_STATE.ROOM:FindFreePickupSpawnPosition(player.Position, 1, true)
-	        Isaac.Spawn(EntityType.ENTITY_PICKUP,
-	            PickupVariant.PICKUP_COLLECTIBLE,
-	            0,
-	            spawn_position,
-	            Vector(0, 0),
-	            player)
-	    end
-	    return true
-	end
-
-	----------------------------------------
-	-- Tearleporter Logic
-	----------------------------------------
-	function Alphabirth.triggerTearleporter()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    local furthest_tear
-	    for _, entity in ipairs(AlphaAPI.entities.all) do
-	        if entity.Type == EntityType.ENTITY_TEAR then
-	            furthest_tear = furthest_tear or entity
-
-	            local distance_to_this_tear = player.Position:Distance(entity.Position)
-	            local distance_to_furthest_tear = player.Position:Distance(furthest_tear.Position)
-	            if distance_to_furthest_tear < distance_to_this_tear then
-	                furthest_tear = entity
-	            end
-	        end
-	    end
-
-	    if furthest_tear then
-	        player.Position = furthest_tear.Position
-	        player:AnimateTeleport(false)
-	    end
-	end
-
-	----------------------------------------
-	-- Cool Bean Logic
-	----------------------------------------
-	local cool_bean_range = 160
-	local cool_bean_freeze_duration = 150
-	function Alphabirth.triggerCoolBean()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    for _, entity in ipairs(AlphaAPI.entities.all) do
-	        if entity:IsActiveEnemy() then
-	            local distance_to_enemy = player.Position:Distance(entity.Position)
-	            if distance_to_enemy < cool_bean_range then
-	                entity:AddFreeze(
-	                    EntityRef(player),
-	                    cool_bean_freeze_duration
-	                )
-	            end
-	        end
-	    end
-
-	    Isaac.Spawn(ENTITIES.ICE_FART.id,
-	                ENTITIES.ICE_FART.variant,  -- Variant
-	                0,                          -- Subtype
-	                player.Position,
-	                Vector(0, 0),               -- Velocity
-	                player)                     -- Spawner
-	    sfx_manager:Play(SoundEffect.SOUND_FART,1.0,0,false,1.0)
-	    return true
-	end
-
-	----------------------------------------
-	-- Isaac's Apple Logic
-	----------------------------------------
-	function Alphabirth.triggerIsaacsApple()
-		for _, entity in ipairs(AlphaAPI.entities.all) do
-			if entity.Type == EntityType.ENTITY_TEAR or entity.Type == EntityType.ENTITY_PROJECTILE then
-				entity.Velocity = Vector(0, 0)
-			end
-		end
-	    return true
-	end
-
-	----------------------------------------
-	-- Delirium's Brain Logic
-	----------------------------------------
-	function Alphabirth.triggerDeliriumsBrain()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    for _, entity in ipairs(AlphaAPI.entities.all) do
-	        if entity.Type == EntityType.ENTITY_TEAR or entity.Type == EntityType.ENTITY_PROJECTILE then
-	            local tear_position = entity.Position
-	            local reverse_tear_velocity = Vector(-entity.Velocity.X, -entity.Velocity.Y)
-
-	            -- Find Tear Synergies
-	            if player:HasCollectible(CollectibleType.COLLECTIBLE_TECHNOLOGY) then
-	                player:FireTechLaser(tear_position,
-	                                     LaserOffset.LASER_TECH1_OFFSET,
-	                                     reverse_tear_velocity,
-	                                     false,
-	                                     false)
-	            elseif player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X) then
-	                player:FireTechXLaser(tear_position, reverse_tear_velocity, 1) -- radius
-	            elseif player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then
-	                player:FireDelayedBrimstone(reverse_tear_velocity:GetAngleDegrees(), entity)
-	            elseif player:HasCollectible(CollectibleType.COLLECTIBLE_DR_FETUS) then
-	                player:FireBomb(tear_position, reverse_tear_velocity)
-	            else
-	                -- NOTE: Mom's Knife WILL NOT work
-	                player:FireTear(
-	                    tear_position,          -- position
-	                    reverse_tear_velocity,  -- velocity
-	                    false,                  -- From API: CanBeEye?
-	                    false,                  -- From API: NoTractorBeam
-	                    false                   -- From API: CanTriggerStreakEnd
-	                )
-	            end
-
-	            -- Remove The Old Tear
-	            entity:Die()
-	        end
-	    end
-	    return true
-	end
-
-	----------------------------------------
-	-- Black Pepper Logic
-	----------------------------------------
-	local holding_black_pepper = false
-	function Alphabirth.triggerBlackPepper()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    player:AnimateCollectible(ITEMS.ACTIVE.BLACK_PEPPER.id, "LiftItem", "PlayerPickup")
-	    holding_black_pepper = true
-	end
-
-	function Alphabirth.updateBlackPepper()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    if holding_black_pepper == true then
-	        local direction = player:GetFireDirection()
-	        local direction_vector
-	        -- Get head direction vector
-	        if direction == 0 then      -- Left
-	            direction_vector = Vector(-1, 0)
-	        elseif direction == 1 then  -- Up
-	            direction_vector = Vector(0, 1)
-	        elseif direction == 2 then  -- Right
-	            direction_vector = Vector(1, 0)
-	        elseif direction == 3 then  -- Down
-	            direction_vector = Vector(0, -1)
-	        end
-
-	        if direction_vector ~= nil then
-	            for tears = 1, 15 do
-	                -- Get random angle per tear
-	                local angle = 15
-	                local random_angle = math.rad(random(-math.floor(angle), math.floor(angle)))
-
-	                -- Convert angle to a vector per tear
-	                local angular_vector = Vector(0, 0)
-	                angular_vector.X = math.cos(random_angle) * direction_vector.X -
-	                        math.sin(random_angle) * direction_vector.Y
-	                angular_vector.Y = math.sin(random_angle) * direction_vector.X -
-	                        math.cos(random_angle) * direction_vector.Y
-
-	                -- Get random shot speed per tear
-	                local randomMag = random(5, 15)
-	                shot_speed = Vector(angular_vector.X * randomMag, angular_vector.Y * randomMag)
-
-	                -- Fire Tear
-	                tear = player:FireTear(
-	                    player.Position,    -- position
-	                    shot_speed,         -- velocity
-	                    false,              -- From API: CanBeEye?
-	                    false,              -- From API: NoTractorBeam
-	                    false               -- From API: CanTriggerStreakEnd
-	                )
-	                tear:ChangeVariant(26)
-	                tear.TearFlags = tear.TearFlags | TearFlags.TEAR_BOOGER
-	            end
-
-	            player:AnimateCollectible(ITEMS.ACTIVE.BLACK_PEPPER.id, "HideItem", "PlayerPickup")
-	            holding_black_pepper = false
-	        end
-	    end
-	end
-
-	----------------------------------------
-	-- Green Candle Logic
-	----------------------------------------
-	local holding_green_candle = false
-	local green_candle_poison_range = 120
-	local green_candle_poison_duration = 120
-	function Alphabirth.triggerGreenCandle()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    player:AnimateCollectible(ITEMS.ACTIVE.GREEN_CANDLE.id, "LiftItem", "PlayerPickup")
-	    holding_green_candle = true
-	end
-
-	function Alphabirth.updateGreenCandle()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    if holding_green_candle == true then
-	        local direction = player:GetFireDirection()
-	        local direction_vector
-	        -- Get head direction vector
-	        if direction == 0 then      -- Left
-	            direction_vector = Vector(-1, 0)
-	        elseif direction == 1 then  -- Up
-	            direction_vector = Vector(0, -1)
-	        elseif direction == 2 then  -- Right
-	            direction_vector = Vector(1, 0)
-	        elseif direction == 3 then  -- Down
-	            direction_vector = Vector(0, 1)
-	        end
-
-	        if direction_vector ~= nil then
-	            -- Shoot the flame
-	            firevelocity = (direction_vector * player.ShotSpeed) * 28
-	            ENTITIES.GREEN_CANDLE:spawn(
-	                player.Position,
-	                firevelocity,
-	                player
-				)
-
-	            player:AnimateCollectible(ITEMS.ACTIVE.GREEN_CANDLE.id, "HideItem", "PlayerPickup")
-	            holding_green_candle = false
-	        end
-	    end
-	    -- Poison effect
-	    for i,entity in ipairs(AlphaAPI.entities.all) do
-	    	if entity.Variant == ENTITIES.GREEN_CANDLE.variant and entity.SubType == ENTITIES.GREEN_CANDLE.subtype then
-	    		for _, enemy in ipairs(AlphaAPI.entities.enemies) do
-		            local distance_to_enemy = entity.Position:Distance(enemy.Position)
-		            if distance_to_enemy < green_candle_poison_range then
-		                enemy:AddPoison(
-		                    EntityRef(player),
-		                    green_candle_poison_duration,
-		                    player.Damage
-		                )
-		            end
-			    end
-	    	end
-	    end
-	end
-
 	-------------------------------------------------------------------------------
 	---- PACK 2
 	-------------------------------------------------------------------------------
@@ -2175,75 +1511,6 @@ do
 		end
 	end
 
-	---------------------------------------
-	-- Surgeon Simulator Logic
-	---------------------------------------
-	function Alphabirth.triggerSurgeonSimulator()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
-			return
-		end
-
-		local spawnPos = AlphaAPI.GAME_STATE.ROOM:FindFreePickupSpawnPosition(player.Position, 1, true)
-		if player:GetHearts() == 2 then
-			player:AddHearts(-1)
-			Isaac.Spawn(5, 10, 2, spawnPos, Vector(0, 0), player)
-		end
-		if player:GetHearts() > 2 then
-			player:AddHearts(-2)
-			Isaac.Spawn(5, 10, 1, spawnPos, Vector(0, 0), player)
-		end
-		return true
-	end
-
-	----------------------------------------
-	-- Mirror Logic
-	----------------------------------------
-	function Alphabirth.triggerMirror()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		local room = AlphaAPI.GAME_STATE.ROOM
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
-			return
-		end
-
-		-- Get room entities.
-		local ents = AlphaAPI.entities.enemies
-
-		-- Get number of entities, and generate a random number between 1 and the number of entities.
-		local num_ents = #ents
-
-		local rand_key = random(num_ents)
-
-		-- Make sure the entity is an enemy, not a fire, and not a portal.
-		-- Switch Isaac's position with the entity's position.
-		-- Animate the teleportation.
-		-- Further randomize the selection.
-		if room:GetAliveEnemiesCount() > 0 then
-			for rand_key, entity in pairs(ents) do
-				if entity.Type ~= 306 and -- Portals
-						entity.Type ~= 304 and -- The Thing
-						entity.Type ~= EntityType.ENTITY_RAGE_CREEP and
-						entity.Type ~= EntityType.ENTITY_BLIND_CREEP and
-						entity.Type ~= EntityType.ENTITY_WALL_CREEP and
-						entity.Velocity:Length() > 0.1 then
-					local player_pos = player.Position
-					local entity_pos = entity.Position
-
-					player.Position = entity_pos
-					entity.Position = player_pos
-
-					player:AnimateTeleport()
-
-					rand_key = random(1, num_ents)
-				end
-			end
-		else
-			local teleport_pos = room:FindFreePickupSpawnPosition(room:GetDoorSlotPosition(random(DoorSlot.LEFT0, DoorSlot.DOWN0)), 1, true)
-			player.Position = teleport_pos
-			player:AnimateTeleport()
-		end
-	end
-
 	----------------------------------------
 	-- Bionic Arm Logic
 	----------------------------------------
@@ -2301,137 +1568,6 @@ do
 			player:AddMaxHearts(-2)
 			AlphaAPI.GAME_STATE.GAME:Darken(1, 8)
 			player:AnimateSad()
-		end
-	end
-
-	---------------------------------------
-	-- Chalice of Blood Logic
-	---------------------------------------
-	local chalice
-	local soul_limit = 15
-	function Alphabirth.applyChaliceOfBloodCache(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_DAMAGE then
-			player.Damage = player.Damage * api_mod.data.run.CHALICE_STATS.DAMAGE
-		elseif cache_flag == CacheFlag.CACHE_SHOTSPEED then
-			player.ShotSpeed = player.ShotSpeed + api_mod.data.run.CHALICE_STATS.SHOTSPEED
-		end
-	end
-
-	function Alphabirth.triggerChaliceOfBlood()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		local room = AlphaAPI.GAME_STATE.ROOM
-
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
-			return
-		end
-
-		if api_mod.data.run.chaliceSouls < soul_limit then
-
-			if chalice ~= nil then
-			chalice:Remove()
-			end
-
-			chalice = ENTITIES.CHALICE_OF_BLOOD:spawn(
-				player.Position,
-				Vector(0,0),
-				player
-			)
-		else
-			api_mod.data.run.CHALICE_STATS.DAMAGE = 2
-			api_mod.data.run.CHALICE_STATS.SHOTSPEED = 0.4
-			player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-			player:AddCacheFlags(CacheFlag.CACHE_SHOTSPEED)
-			player:AddNullCostume(COSTUMES.CHALICE_OF_BLOOD_COSTUME)
-			player:EvaluateItems()
-			playSound(SoundEffect.SOUND_VAMP_GULP, 1, 0, false, 1)
-			api_mod.data.run.chaliceSouls = 0
-		end
-		return true
-	end
-
-	function Alphabirth.handleChaliceOfBlood()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		local room = AlphaAPI.GAME_STATE.ROOM
-
-		-- Remove Chalice if room is clear
-		if room:GetFrameCount() == 1 then
-			player:TryRemoveNullCostume(COSTUMES.CHALICE_OF_BLOOD_COSTUME)
-			api_mod.data.run.CHALICE_STATS.DAMAGE = 1
-			api_mod.data.run.CHALICE_STATS.SHOTSPEED = 0
-			player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-			player:AddCacheFlags(CacheFlag.CACHE_SHOTSPEED)
-			player:EvaluateItems()
-		end
-
-		if room:IsClear() and chalice ~= nil then
-			Isaac.Spawn(
-				EntityType.ENTITY_EFFECT,
-				EffectVariant.POOF01,
-				0,            -- Entity Subtype
-				chalice.Position,
-				Vector(0, 0), -- Velocity
-				nil
-			)
-			chalice:Remove()
-			chalice = nil
-		end
-
-		if chalice ~= nil then
-			for _, entity in ipairs(AlphaAPI.entities.all) do
-				if entity.Type == EntityType.ENTITY_PLAYER and entity.Position:Distance(chalice.Position) <= 140 and AlphaAPI.GAME_STATE.GAME:GetFrameCount() % 15 == 0 then
-					Isaac.Spawn(EntityType.ENTITY_EFFECT,EffectVariant.PLAYER_CREEP_RED,0,player.Position,Vector(0, 0),player)
-				end
-
-				local entity_is_close = entity.Position:Distance(chalice.Position) <= 140
-				if entity:IsDead() and entity:ToNPC() and entity_is_close and not entity:IsBoss() then
-					playSound(SoundEffect.SOUND_SUMMONSOUND, 0.5, 0, false, 0.8)
-					Isaac.Spawn(
-						EntityType.ENTITY_EFFECT,
-						EffectVariant.POOF02,
-						0,            -- Entity Subtype
-						entity.Position,
-						Vector(0, 0), -- Velocity
-						nil
-					)
-					api_mod.data.run.chaliceSouls = api_mod.data.run.chaliceSouls + 1
-				end
-			end
-		end
-
-		if api_mod.data.run.chaliceSouls >= soul_limit and chalice ~= nil then
-			playSound(SoundEffect.SOUND_SUMMONSOUND, 0.5, 0, false, 0.9)
-			Isaac.Spawn(
-				EntityType.ENTITY_EFFECT,
-				EffectVariant.POOF01,
-				0,            -- Entity Subtype
-				chalice.Position,
-				Vector(0, 0), -- Velocity
-				nil
-			)
-			chalice:Remove()
-			chalice = nil
-		end
-	end
-
-	----------------------------------------
-	-- Blacklight Logic
-	----------------------------------------
-	local timesTillMax = 20
-
-	function Alphabirth.triggerBlacklight()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
-			return
-		end
-
-		if api_mod.data.run.blacklightUses < timesTillMax then
-			api_mod.data.run.blacklightUses = api_mod.data.run.blacklightUses + 1
-			api_mod.data.run.darkenCooldown = 0
-			for i, entity in ipairs(AlphaAPI.entities.enemies) do
-				entity:TakeDamage(40, 0, EntityRef(player), 30)
-			end
-
-			return true
 		end
 	end
 
@@ -2497,67 +1633,7 @@ do
 		end
 	end
 
-	----------------------------------------
-	-- Stone Nugget Logic
-	----------------------------------------
-
-	function Alphabirth.triggerStoneNugget()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
-			return
-		end
-
-		local pooter = ENTITIES.STONE_NUGGET:spawn(
-			player.Position,
-			Vector(0, 0),
-			player)
-		pooter:GetData().roomIdx = AlphaAPI.GAME_STATE.LEVEL:GetCurrentRoomIndex()
-		return true
-	end
-
-	local function Lerp(v1, v2, t)
-		return Vector(
-			(1 - t) * v1.X + t * v2.X,
-			(1 - t) * v1.Y + t * v2.Y
-		)
-	end
-
-	function Alphabirth.onStonePooterUpdate(pooter)
-		local currentRoomIdx = AlphaAPI.GAME_STATE.LEVEL:GetCurrentRoomIndex()
-		if pooter:GetData().roomIdx ~= currentRoomIdx then
-			pooter:Remove()
-		end
-		if random(1, 100) == 1 then
-			pooter.FlipX = not pooter.FlipX
-		end
-
-		local e_frame = pooter.FrameCount
-		if e_frame % 2 == 0 then
-			e_frame = 1.0 - math.cos(e_frame * math.pi * 0.5)
-			local nearest_enemy = AlphaAPI.findNearestEntity(pooter, AlphaAPI.entities.enemies)
-			if nearest_enemy then
-				local direction = (nearest_enemy.Position - pooter.Position):GetAngleDegrees()
-				local move_direction = Vector.FromAngle(random(direction - 35, direction + 35))
-				pooter.Velocity = Lerp(pooter.Velocity, move_direction * (random(50, 150) * 0.01), e_frame)
-			end
-		end
-	end
-
-	function Alphabirth:entityTakeDmgStoneNugget(target, dmg, flag, source, frames)
-		if not source or
-		(source.Type ~= ENTITIES.STONE_NUGGET.id and
-		source.Variant ~= ENTITIES.STONE_NUGGET.variant) then
-			return
-		end
-		if target.HitPoints - dmg <= 0 then
-			local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-			if player:GetActiveItem() == ITEMS.ACTIVE.STONE_NUGGET.id then
-				player:SetActiveCharge(1)
-			end
-		end
-	end
-
-	---------------------------------------
+    ---------------------------------------
 	-- Book of the Dead Logic
 	---------------------------------------
 	function Alphabirth.triggerBookOfTheDead()
@@ -2686,377 +1762,6 @@ end
 
 -- Passive Item Function Definitions
 do
-	----------------------------------------
-	-- Cologne Logic
-	----------------------------------------
-	-- Change tear color for Cologne
-	function Alphabirth.evaluateCologne(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_TEARCOLOR then
-			player.TearColor = Color(
-                                    0.867, 0.627, 0.867,    -- RGB
-									1,                      -- Alpha
-									0, 0, 0                 -- RGB Offset
-                                )
-		end
-	end
-
-	-- Charm nearby enemies
-	local cologne_charm_duration = 100
-	local cologne_charm_chance = 100
-	function Alphabirth.handleCologne(player)
-	    local max_charm_distance = 120 * math.max( player.SpriteScale.X, player.SpriteScale.Y )
-        for _, entity in ipairs(AlphaAPI.entities.all) do
-            if player.Position:Distance(entity.Position) < max_charm_distance
-            and entity:IsVulnerableEnemy() then
-                local charm_roll = random(1, cologne_charm_chance)
-                if charm_roll == 1 then
-                    entity:AddCharmed(EntityRef(player), cologne_charm_duration)
-                end
-            end
-        end
-	end
-
-	----------------------------------------
-	-- Pseudobulbar Affect Logic
-	----------------------------------------
-	function Alphabirth.handlePseudobulbarAffect(player)
-        local direction = player:GetMovementVector():Normalized()
-		local data = player:GetData()
-		if not data.pseudoCharge then
-			data.pseudoCharge = 0
-		end
-
-        if(direction:Length() ~= 0.0) then
-			data.pseudoCharge = data.pseudoCharge + 1
-            if (data.pseudoCharge % (player.MaxFireDelay) == 0) then
-				data.pseudoCharge = 0
-				shot_velocity = player:GetTearMovementInheritance(direction) * (4 * player.ShotSpeed)
-                player:FireTear(player.Position, shot_velocity, false, false, false)
-            end
-		else
-			data.pseudoCharge = 0
-        end
-	end
-
-    -- Bugged Bombs Pickup Logic
-    function Alphabirth.pickupBuggedBombs(player)
-        player:AddBombs(5)
-    end
-
-	----------------------------------------
-	-- Charity Logic
-	----------------------------------------
-	local charity_damage_modifier = 0
-	local charity_speed_modifier = 0
-	local charity_tear_height_modifier = 0
-	local charity_previous_total = 0
-	function Alphabirth.evaluateCharity(player, cache_flag)
-        if(cache_flag == CacheFlag.CACHE_DAMAGE) then
-            player.Damage = player.Damage + charity_damage_modifier
-        elseif(cache_flag == CacheFlag.CACHE_SPEED) then
-            player.MoveSpeed = player.MoveSpeed + charity_speed_modifier
-        elseif(cache_flag == CacheFlag.CACHE_RANGE) then
-            player.TearHeight = player.TearHeight - charity_tear_height_modifier
-        end
-	end
-
-	function Alphabirth.handleCharity(player)
-        local keys = player:GetNumKeys()
-        local coins = player:GetNumCoins()
-        local bombs = player:GetNumBombs()
-        local total = (keys + coins + bombs) / 2
-
-		-- Only run if total has changed
-		if total ~= charity_previous_total then
-
-			charity_previous_total = total
-
-			-- Values are made to be a little higher than magic mushroom.
-			local damage_threshhold = 1.5
-			local speed_threshhold = 0.1
-			local tear_height_threshhold = 7.5
-
-			local damage_minimum = -1.5
-			local speed_minimum = -0.1
-			local tear_height_minimum = -7.5
-
-			-- Values are made so that at 20 of each consumable you hit 0 stat boosts.
-			charity_damage_modifier = damage_threshhold - total * 0.15
-			charity_speed_modifier = speed_threshhold - total * 0.05
-			charity_tear_height_modifier = tear_height_threshhold - total * 0.75
-
-			if charity_damage_modifier < damage_minimum then
-				charity_damage_modifier = damage_minimum
-			end
-
-			if charity_speed_modifier < speed_minimum then
-				charity_speed_modifier = speed_minimum
-			end
-
-			if charity_tear_height_modifier < tear_height_minimum then
-				charity_tear_height_modifier = tear_height_minimum
-			end
-
-			player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-			player:AddCacheFlags(CacheFlag.CACHE_SPEED)
-			player:AddCacheFlags(CacheFlag.CACHE_RANGE)
-            player:EvaluateItems()
-		end
-	end
-
-	----------------------------------------
-	-- Temperance Logic
-	----------------------------------------
-	function Alphabirth.evaluateTemperance(player, cache_flag)
-	    if not api_mod.data.run.seenTreasure then
-	        if(cache_flag == CacheFlag.CACHE_DAMAGE) then
-	            player.Damage = player.Damage + 2
-	        elseif(cache_flag == CacheFlag.CACHE_SPEED) then
-	            player.MoveSpeed = player.MoveSpeed + 0.15
-	        elseif(cache_flag == CacheFlag.CACHE_RANGE) then
-	            player.TearHeight = player.TearHeight - 8.5
-	        end
-	    end
-	end
-
-	----------------------------------------
-	-- Chastity Logic
-	----------------------------------------
-	function Alphabirth.evaluateChastity(player, cache_flag)
-	    if not api_mod.data.run.seenDevil then
-	        if(cache_flag == CacheFlag.CACHE_DAMAGE) then
-	            player.Damage = (player.Damage + 1.5) * 1.5
-	        elseif(cache_flag == CacheFlag.CACHE_SHOTSPEED) then
-	            player.ShotSpeed = player.ShotSpeed + 0.4
-	        elseif(cache_flag == CacheFlag.CACHE_RANGE) then
-	            player.TearHeight = player.TearHeight - 5
-	        elseif (cache_flag == CacheFlag.CACHE_SPEED)then
-	            player.MoveSpeed = player.MoveSpeed + 0.2
-	        end
-	    end
-	end
-
-	----------------------------------------
-	-- Beggar's Cup Logic
-	----------------------------------------
-	local beggarscup_luck_modifier = 0
-	function Alphabirth.evaluateBeggarsCup(player, cache_flag)
-        if(cache_flag == CacheFlag.CACHE_LUCK) then
-            player.Luck = player.Luck + beggarscup_luck_modifier
-        end
-	end
-
-	function Alphabirth.handleBeggarsCup(player)
-        local coins = player:GetNumCoins()
-        local total = coins / 10
-
-		-- Only run if total has changed
-		if total ~= beggarscup_previous_total then
-
-			beggarscup_previous_total = total
-			local luck_threshold = 5
-            local luck_minimum = 0
-
-			beggarscup_luck_modifier = luck_threshold - total
-
-            if beggarscup_luck_modifier < luck_minimum then
-                beggarscup_luck_modifier = luck_minimum
-            end
-
-			player:AddCacheFlags(CacheFlag.CACHE_LUCK)
-            player:EvaluateItems()
-		end
-	end
-
-	----------------------------------------
-	-- Patience Logic
-	----------------------------------------
-	local patience_damage_modifier = 0
-	local patience_damage_modifier_maximum = 0
-	function Alphabirth.evaluatePatience(player, cache_flag)
-	    if player:HasCollectible(ITEMS.PASSIVE.PATIENCE.id) then
-	        if cache_flag ==  CacheFlag.CACHE_DAMAGE and AlphaAPI.GAME_STATE.ROOM:GetFrameCount() > 1 then
-	            player.Damage = player.Damage + patience_damage_modifier
-	        end
-	    end
-	end
-
-	function Alphabirth.handlePatience(player)
-	    local second_has_passed = AlphaAPI.GAME_STATE.ROOM:GetFrameCount() % 61 == 1
-	    local room_is_clear = AlphaAPI.GAME_STATE.ROOM:IsClear()
-	    local last_patience_bonus = patience_damage_modifier
-
-	    if player:HasCollectible(ITEMS.PASSIVE.PATIENCE.id)
-	        and second_has_passed
-	        and not room_is_clear then
-	        patience_damage_modifier = math.min(patience_damage_modifier + 0.2, 5.0)
-	        if last_patience_bonus ~= patience_damage_modifier then
-		        player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-		        player:EvaluateItems()
-		    end
-	    end
-	    if AlphaAPI.GAME_STATE.ROOM:GetFrameCount() == 1 then
-	        patience_damage_modifier = 0
-	    end
-	end
-
-	----------------------------------------
-	-- Humility Logic
-	----------------------------------------
-	local humility_chance = 10 -- 1 out of 20
-	local humility_application_interval = 10
-	local effect_target
-	function Alphabirth.handleHumility(player)
-        local valid_entities = nil
-		local humility_active = false
-		local should_find_target = true
-
-        for _, entity in ipairs(AlphaAPI.entities.enemies) do
-            if entity:IsActiveEnemy(false) then
-                if AlphaAPI.hasFlag(entity, ENTITY_FLAGS.DOUBLE_DAMAGE) then
-                    should_find_target = false
-                    break
-                end
-
-                local enemy = entity:ToNPC()
-                if enemy then
-                    if not enemy:IsBoss() then
-                    	valid_entities = valid_entities or {}
-                        valid_entities[#valid_entities + 1] = entity
-                    end
-                end
-            end
-        end
-
-        if should_find_target == true and
-        	valid_entities ~= nil and
-        	#valid_entities > 0 and
-        	AlphaAPI.GAME_STATE.GAME:GetFrameCount() % humility_application_interval == 0 and
-        	random( 1, math.max( 1, humility_chance - player.Luck ) ) <= 1
-        then
-            local target_entity_index = 1
-            if #valid_entities > 1 then
-                target_entity_index = random(#valid_entities)
-            end
-
-            local target_entity = valid_entities[target_entity_index]
-			effect_target = target_entity
-            AlphaAPI.addFlag(target_entity, ENTITY_FLAGS.DOUBLE_DAMAGE)
-		end
-	end
-
-	local humility_sprite = Sprite()
-	humility_sprite:Load("gfx/animations/effects/animation_effect_humility.anm2", true)
-	humility_sprite:LoadGraphics()
-
-	function Alphabirth.handleHumilityEffect()
-		if effect_target then
-			if effect_target:IsDead() then
-				effect_target = nil
-				return
-			end
-			humility_sprite:Play("Humility")
-			humility_sprite.Offset = effect_target:GetSprite().Offset - Vector(0, effect_target.Size * (effect_target.SizeMulti.Y * 3))
-			humility_sprite:RenderLayer(0, AlphaAPI.GAME_STATE.ROOM:WorldToScreenPosition(effect_target.Position))
-		end
-	end
-
-	----------------------------------------
-	-- Kindness Logic
-	----------------------------------------
-	local kindness_chance = 20 -- 1 out of 100
-	local kindness_charm_duration = 100
-	local kindness_last_charm_frame = 0
-	local kindness_application_interval = 10
-	-- If it's been at least 100 frames since the last kindness application, every 10 frames there's a 1 in (10 - Luck) chance an enemy
-	-- will have kindness applied
-	function Alphabirth.handleKindness(player)
-    	local valid_entities = nil
-        local should_find_target = false
-        local game_frame = AlphaAPI.GAME_STATE.GAME:GetFrameCount()
-        if game_frame - kindness_last_charm_frame >= kindness_charm_duration and
-        	game_frame % kindness_application_interval == 0 and
-        	random( 1, math.max( 1, kindness_chance - player.Luck ) ) <= 1 then
-        	should_find_target = true
-        end
-
-        for _, entity in ipairs(AlphaAPI.entities.enemies) do
-            if entity:HasEntityFlags( EntityFlag.FLAG_CHARM ) and entity:HasMortalDamage() and not entity:IsDead() then
-                Isaac.Spawn(
-                    EntityType.ENTITY_PICKUP,
-                    PickupVariant.PICKUP_HEART,
-                    HeartSubType.HEART_HALF,
-                    entity.Position,
-                    entity.Velocity,
-                    entity
-                )
-            end
-            if should_find_target and entity:IsVulnerableEnemy() then
-            	valid_entities = valid_entities or {}
-                valid_entities[#valid_entities + 1] = entity
-            end
-        end
-
-        if valid_entities ~= nil and should_find_target and #valid_entities > 0 then
-            valid_entities[random(#valid_entities)]:AddCharmed(EntityRef(player), 100)
-            kindness_last_charm_frame = game_frame
-        end
-	end
-
-	----------------------------------------
-	-- Old Conctroller Logic
-	----------------------------------------
-	function Alphabirth.handleOldController()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		if api_mod.data.run.controller_respawn > 0 then
-			api_mod.data.run.controller_respawn = api_mod.data.run.controller_respawn - 1
-
-			AlphaAPI.callDelayed(function(player)
-				player:Revive()
-				AlphaAPI.GAME_STATE.LEVEL:ChangeRoom(AlphaAPI.GAME_STATE.LEVEL:GetPreviousRoomIndex())
-				player:UseActiveItem(CollectibleType.COLLECTIBLE_CLICKER, false, true, true, false)
-				player:UseActiveItem(CollectibleType.COLLECTIBLE_D4, false, true, true, false)
-				player:AddSoulHearts(2)
-			end, 40, false, player)
-		end
-	end
-
-	function Alphabirth.initDeathVariable()
-		api_mod.data.run.controller_respawn = api_mod.data.run.controller_respawn + 1
-	end
-
-	----------------------------------------
-	-- Graphics Error Logic
-	----------------------------------------
-	function Alphabirth.handleGraphicsError(entity, data)
-		if AlphaAPI.GAME_STATE.PLAYERS[1]:HasCollectible(ITEMS.PASSIVE.GRAPHICS_ERROR.id) then
-			if entity:ToNPC() then
-				if math.random(1, math.floor(100 / entity.MaxHitPoints) + 1) == 1 and AlphaAPI.GAME_STATE.PLAYERS[1]:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_GB_BUG) < 5 then
-					-- I reaches this point but crashes on the AddCollectibleEffect
-					-- AlphaAPI.log("YEP")
-					-- AlphaAPI.GAME_STATE.PLAYERS[1]:GetEffects():AddCollectibleEffect(CollectibleType.COLLECTIBLE_GB_BUG, true)
-				end
-			end
-		end
-	end
-
-	----------------------------------------
-	-- Satan's Contract Logic
-	----------------------------------------
-	function Alphabirth.evaluateSatansContract(player, cache_flag)
-        if cache_flag == CacheFlag.CACHE_DAMAGE then
-            player.Damage = player.Damage * 2
-        elseif cache_flag == CacheFlag.CACHE_FLYING then
-            player.CanFly = true
-		elseif cache_flag == CacheFlag.CACHE_TEARCOLOR then
-			player.TearColor = Color(
-            	0.698, 0.113, 0.113,    -- RGB
-				1,                      -- Alpha
-            	0, 0, 0                 -- RGB Offset
-           )
-        end
-	end
-
 	-- Brown Eye Logic
 	function Alphabirth.handleBrownEye(player)
 		-- All poop in the room will shoot at the nearest enemy once every second (61 Frames)
@@ -3116,21 +1821,6 @@ do
             needs_to_tp_emperor_crown = true
 			AlphaAPI.log("HELLO?")
         end
-	end
-
-	-----------------------------
-	-- Familiar Spawning Logic --
-	-----------------------------
-	function Alphabirth.pickupDivineWrath(player)
-		ENTITIES.DIVINE_WRATH:spawn(player.Position, Vector(0,0), player)
-	end
-
-	function Alphabirth.removeDivineWrath()
-		for _, entity in ipairs(AlphaAPI.entities.friendly) do
-			if AlphaAPI.matchConfig(entity, ENTITIES.DIVINE_WRATH) then
-				entity:Remove()
-			end
-		end
 	end
 
 	-------------------------------------------------------------------------------
@@ -3269,24 +1959,6 @@ do
 	function Alphabirth.onSubconsciousInit(familiar)
 		subconsciousFamiliar = familiar
 		familiar:AddToFollowers()
-	end
-
-	---------------------------------------
-	-- Brunch "Logic"
-	---------------------------------------
-	function Alphabirth.applyBrunchCache(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_FIREDELAY then
-			if player.MaxFireDelay < 4 then
-			elseif player.MaxFireDelay < 6 then
-				player.MaxFireDelay = 4
-			else
-				player.MaxFireDelay = player.MaxFireDelay - 2
-			end
-		end
-	end
-
-	function Alphabirth.pickupBrunch(player)
-		player.Color = Color(0,1,0,1,0,0,0)
 	end
 
 	---------------------------------------
@@ -3518,35 +2190,6 @@ do
 	end
 
 	---------------------------------------
-	-- Judas' Fez Logic
-	---------------------------------------
-	function Alphabirth.applyJudasFezCache(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_DAMAGE then
-			player.Damage = player.Damage * 1.35
-			if not api_mod.data.run.fezHealthReduced then
-				local hearts = player:GetMaxHearts() - 2
-				player:AddMaxHearts(hearts * -1)
-				player:AddSoulHearts(hearts)
-				api_mod.data.run.fezHealthReduced = true
-			end
-		end
-	end
-
-	local combat_rooms_visited = 0
-	function Alphabirth.handleJudasFez()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		local room = AlphaAPI.GAME_STATE.ROOM
-		if room:IsFirstVisit() and not room:IsClear() and room:GetFrameCount() == 1 then
-		combat_rooms_visited = combat_rooms_visited + 1
-		if combat_rooms_visited == 3 then
-			player:UseCard(Card.CARD_DEVIL)
-			combat_rooms_visited = 0
-		end
-		end
-	end
-
-
-	---------------------------------------
 	-- Hot Coals Logic
 	---------------------------------------
 	local dmg_modifier = 1
@@ -3726,136 +2369,6 @@ do
 				player.Luck = player.Luck + api_mod.data.run.birthControlStats.Luck
 			elseif flag == CacheFlag.CACHE_RANGE then
 				player.TearFallingSpeed = player.TearFallingSpeed + api_mod.data.run.birthControlStats.Range
-			end
-		end
-	end
-
-	---------------------------------------
-	-- Quill Feather Logic
-	---------------------------------------
-	local quillFeatherNumberOfTears = 8
-	local quill_angle = 30
-
-	function Alphabirth:triggerQuillFeather(dmg_target, dmg_amount, dmg_flags, dmg_source)
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		if dmg_source.Entity and AlphaAPI.hasFlag(dmg_source, ENTITY_FLAGS.QUILL_FEATHER_SHOT) then
-			Isaac.DebugString("Spawning Quill Feather Tears")
-			for i=1, quillFeatherNumberOfTears do
-				local direction_vector = dmg_source.Entity.Velocity
-				local random_angle = math.rad(random(-math.floor(quill_angle), math.floor(quill_angle)))
-				local cos_angle = math.cos(random_angle)
-				local sin_angle = math.sin(random_angle)
-				local shot_direction = Vector(cos_angle * direction_vector.X - sin_angle * direction_vector.Y,
-					sin_angle * direction_vector.X + cos_angle * direction_vector.Y
-				)
-
-				local shot_vector = shot_direction * ( (random() * 0.4 + 0.8) * player.ShotSpeed)
-
-				tears[i] = player:FireTear(dmg_source.Position, shot_vector, false, false, true)
-				tears[i].Height = -20
-				tears[i].TearFlags = tears[i].TearFlags | TearFlags.TEAR_PIERCING
-				tears[i]:ChangeVariant(TearVariant.CUPID_BLUE)
-				tears[i].Color = Color(0,0,0,1,0,0,0)
-				AlphaAPI.addFlag(tears[i], ENTITY_FLAGS.TEAR_IGNORE)
-			end
-
-			dmg_source.Entity:Remove()
-		end
-	end
-
-	---------------------------------------
-	-- Hoarder Logic
-	---------------------------------------
-	local hoarderDamage = 0
-	local ratio = 1/25 --1 dmg up for 25 consumables
-
-	function Alphabirth.handleHoarder()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		local consumables = player:GetNumCoins() + player:GetNumBombs() + player:GetNumKeys()
-		if consumables * ratio ~= hoarderDamage then
-			hoarderDamage = consumables * ratio
-			player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-			player:EvaluateItems()
-		end
-	end
-
-	function Alphabirth.applyHoarderCache(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_DAMAGE then
-			player.Damage = player.Damage + hoarderDamage
-		end
-	end
-
-	---------------------------------------
-	-- Possessed Shot Logic
-	---------------------------------------
-	local POSSESSED_SHOT_BLACKLIST = {
-		EntityType.ENTITY_MASK,
-		EntityType.ENTITY_HEART
-	}
-
-
-	function Alphabirth.applyPossessedShotCache(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_TEARCOLOR then
-			player.TearColor = Color(1,1,0.8,0.7,0,0,0)
-		end
-	end
-
-	function Alphabirth.triggerPossessedShot(dmg_target, dmg_amount, dmg_flags, dmg_source)
-		if dmg_target:IsVulnerableEnemy()
-		and not AlphaAPI.hasFlag(dmg_source, ENTITY_FLAGS.TEAR_IGNORE)
-		and AlphaAPI.GAME_STATE.ROOM:GetAliveEnemiesCount() > 1 then
-			if AlphaAPI.getLuckRNG(6, 2)
-			and not dmg_target:ToNPC():IsBoss()
-			and not AlphaAPI.tableContains(POSSESSED_SHOT_BLACKLIST, dmg_target.Type) then
-				local entities_to_apply = AlphaAPI.findAllRelatives(dmg_target)
-				for _, entity in ipairs(entities_to_apply) do
-					Isaac.DebugString(entity.Type)
-					entity:AddEntityFlags(EntityFlag.FLAG_FRIENDLY)
-					entity:AddEntityFlags(EntityFlag.FLAG_CHARM)
-					entity:GetData()["prevColor"] = entity.Color
-					entity.Color = Color(0.8, 1, 0.8, 0.4, 0, 0, 0)
-					entity:GetData()["isPossessed"] = 300
-				end
-			end
-		end
-	end
-
-	
-end
-
-local function handleBlacklight()
-	if api_mod.data.run.blacklightUses > 0 and api_mod.data.run.darkenCooldown == 0 then
-		AlphaAPI.GAME_STATE.GAME:Darken(3 - (api_mod.data.run.blacklightUses/((timesTillMax)/2)), 200)
-		api_mod.data.run.darkenCooldown = 195
-	end
-	if api_mod.data.run.darkenCooldown > 0 then
-		api_mod.data.run.darkenCooldown = api_mod.data.run.darkenCooldown - 1
-	end
-end
-
-local function handlePossessedShot()
-	local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	for i, entity in ipairs(AlphaAPI.entities.enemies) do
-		if entity:GetData()["isPossessed"] and entity:GetData()["isPossessed"] > 0 then
-			if entity.FrameCount % (player.MaxFireDelay * 6) == 0 then
-				local target_entity = findClosestEnemy(entity)
-				if target_entity then
-					local direction_vector = (target_entity.Position - entity.Position):Normalized()
-					local tear_shot = player:FireTear(entity.Position, (direction_vector * (player.ShotSpeed * 8)), false, true, false)
-					AlphaAPI.addFlag(tear_shot, ENTITY_FLAGS.TEAR_IGNORE)
-				end
-			end
-
-			if not AlphaAPI.GAME_STATE.ROOM:IsClear() then
-				entity:GetData()["isPossessed"] = entity:GetData()["isPossessed"] - 1
-			end
-
-			if entity:GetData()["isPossessed"] == 0 then
-				entity:ClearEntityFlags(EntityFlag.FLAG_FRIENDLY)
-				entity:ClearEntityFlags(EntityFlag.FLAG_CHARM)
-				if entity:GetData()["prevColor"] then
-					entity.Color = entity:GetData()["prevColor"]
-				end
 			end
 		end
 	end
@@ -4570,71 +3083,6 @@ function Alphabirth.evaluateSpiritEye(player, flag)
 end
 
 ---------------------------------------
--- Infested Baby Logic
----------------------------------------
-local infestedEntity
-local infestedBabySpider
-local animationCooldown = 0
-local spiderCooldown = 0
-
-function Alphabirth.onInfestedBabyUpdate(familiar)
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    familiar = familiar:ToFamiliar()
-    familiar.FireCooldown = 999999
-    if animationCooldown == 0 then
-        familiar:Shoot()
-    end
-
-    if infestedBabySpider and infestedBabySpider:IsDead() then
-        infestedBabySpider = nil
-        spiderCooldown = 25
-    end
-
-    local fire_dir = player:GetFireDirection()
-    if fire_dir ~= -1 and infestedBabySpider == nil and spiderCooldown == 0 then
-        infestedBabySpider = Isaac.Spawn(EntityType.ENTITY_FAMILIAR, FamiliarVariant.BLUE_SPIDER, 0, familiar.Position, Vector(0,0), familiar)
-        if fire_dir == Direction.UP then
-            familiar:GetSprite():Play("ShootUp", 1)
-        elseif fire_dir == Direction.DOWN then
-            familiar:GetSprite():Play("ShootDown", 1)
-        elseif fire_dir == Direction.LEFT then
-            familiar:GetSprite():Play("ShootSide", 1)
-            familiar:GetSprite().FlipX = true
-        elseif fire_dir == Direction.RIGHT then
-            familiar:GetSprite():Play("ShootSide", 1)
-        end
-
-        animationCooldown = 8
-        playSound(SoundEffect.SOUND_SPIDER_COUGH, 0.5, 0, false, 1)
-    end
-    for _, e in ipairs(AlphaAPI.entities.friendly) do
-        if e.Parent == familiar and e.Type == EntityType.ENTITY_TEAR then
-            e:Remove()
-        end
-    end
-    if animationCooldown > 0 then
-        animationCooldown = animationCooldown - 1
-    end
-    if spiderCooldown > 0 then
-        spiderCooldown = spiderCooldown - 1
-    end
-
-    familiar:FollowParent()
-end
-
-function Alphabirth.onInfestedBabyInit(familiar)
-    familiar:AddToFollowers()
-end
-
-function Alphabirth.evaluateInfestedBaby(player, flag)
-    if flag == CacheFlag.CACHE_FAMILIARS then
-        local amount_to_spawn = player:GetCollectibleNum(ITEMS.PASSIVE.INFESTED_BABY.id) * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
-        player:CheckFamiliar(ENTITIES.INFESTED_BABY.variant, amount_to_spawn, rng)
-    end
-end
-
-
----------------------------------------
 -- Post-Update Callback
 ---------------------------------------
 
@@ -4656,23 +3104,8 @@ function Alphabirth.collectibleUpdate(entity)
                 sprite:ReplaceSpritesheet(1,"gfx/items/collectibles/collectible_cauldron3.png")
                 sprite:LoadGraphics()
             end
-        elseif entity.SubType == ITEMS.ACTIVE.CHALICE_OF_BLOOD.id then
-            local sprite = entity:GetSprite()
-            if api_mod.data.run.chaliceSouls <= 5 and sprite:GetFilename() ~= "gfx/items/collectibles/collectible_chaliceofblood.png" then
-                sprite:ReplaceSpritesheet(1,"gfx/items/collectibles/collectible_chaliceofblood.png")
-                sprite:LoadGraphics()
-            elseif api_mod.data.run.chaliceSouls <= 10 and sprite:GetFilename() ~= "gfx/items/collectibles/collectible_chaliceofblood2.png" then
-                sprite:ReplaceSpritesheet(1,"gfx/items/collectibles/collectible_chaliceofblood2.png")
-                sprite:LoadGraphics()
-            elseif api_mod.data.run.chaliceSouls < 15 and sprite:GetFilename() ~= "gfx/items/collectibles/collectible_chaliceofblood3.png" then
-                sprite:ReplaceSpritesheet(1,"gfx/items/collectibles/collectible_chaliceofblood3.png")
-                sprite:LoadGraphics()
-            elseif sprite:GetFilename() ~= "gfx/items/collectibles/collectible_chaliceofblood4.png" then
-                sprite:ReplaceSpritesheet(1,"gfx/items/collectibles/collectible_chaliceofblood4.png")
-                sprite:LoadGraphics()
-            end
         end
-    elseif entity.SubType == ITEMS.ACTIVE.CAULDRON.id or entity.SubType == ITEMS.ACTIVE.CHALICE_OF_BLOOD.id then
+    elseif entity.SubType == ITEMS.ACTIVE.CAULDRON.id then
         local sprite = entity:GetSprite()
         if sprite:GetFilename() ~= "gfx/items/collectibles/questionmark.png" then
             sprite:ReplaceSpritesheet(1,"gfx/items/collectibles/questionmark.png")
@@ -4740,6 +3173,7 @@ local endor_type = Isaac.GetPlayerTypeByName("Endor")
 function Alphabirth:runStarted(fromsave)
 	if fromsave then return end
     local challenge = AlphaAPI.GAME_STATE.GAME.Challenge
+	local room = AlphaAPI.GAME_SATE.ROOM
     local player = AlphaAPI.GAME_STATE.PLAYERS[1]
     local player_type = player:GetPlayerType()
 
@@ -4780,16 +3214,10 @@ function Alphabirth:runStarted(fromsave)
         Range = 0
     }
     api_mod.data.run.damnedHasRespawned = false
-    api_mod.data.run.fezHealthReduced = false
     api_mod.data.run.didMaxOutDevilDeal = false
     api_mod.data.run.BOTD_ents = {}
     api_mod.data.run.blacklightUses = 0
     api_mod.data.run.darkenCooldown = 0
-    api_mod.data.run.chaliceSouls = 0
-    api_mod.data.run.CHALICE_STATS = {
-        DAMAGE = 1,
-        SHOTSPEED = 0
-    }
     api_mod.data.run.bloodDriveTimesUsed = 0
     api_mod.data.run.cauldron_points = 0
     api_mod.data.run.active_charge = nil
@@ -4847,22 +3275,22 @@ end
 function Alphabirth.roomChanged(room)
     -- Max Deal with the Devil chance
     local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    if api_mod.data.run.didMaxOutDevilDeal == true then
-        player:GetEffects():AddCollectibleEffect(CollectibleType.COLLECTIBLE_GOAT_HEAD, false)
-    end
-
-    api_mod.data.run.times_used_box_of_friends = 1
-    if not api_mod.data.run.sowiloRooms then
-        api_mod.data.run.sowiloRooms = 0
-    end
-
-    if api_mod.data.run.sowiloRooms > 0 and room:GetAliveEnemiesCount() > 0 then
-        for _, entity in ipairs(AlphaAPI.entities.enemies) do
-            entity:AddBurn(EntityRef(player), 180, player.Damage)
-        end
-
-        api_mod.data.run.sowiloRooms = api_mod.data.run.sowiloRooms - 1
-    end
+    -- if api_mod.data.run.didMaxOutDevilDeal == true then
+    --     player:GetEffects():AddCollectibleEffect(CollectibleType.COLLECTIBLE_GOAT_HEAD, false)
+    -- end
+    --
+    -- api_mod.data.run.times_used_box_of_friends = 1
+    -- if not api_mod.data.run.sowiloRooms then
+    --     api_mod.data.run.sowiloRooms = 0
+    -- end
+    --
+    -- if api_mod.data.run.sowiloRooms > 0 and room:GetAliveEnemiesCount() > 0 then
+    --     for _, entity in ipairs(AlphaAPI.entities.enemies) do
+    --         entity:AddBurn(EntityRef(player), 180, player.Damage)
+    --     end
+    --
+    --     api_mod.data.run.sowiloRooms = api_mod.data.run.sowiloRooms - 1
+    -- end
 end
 
 -- Aimbot Logic
@@ -4896,7 +3324,7 @@ function Alphabirth.laserUpdate(entity, data)
                 local direction_angle = (enemy.Position - player.Position):GetAngleDegrees()
                 entity.Angle = direction_angle
             else
-                if enemy.Position:Distance(e.Position) <= 250 then
+                if enemy.Position:Distance(entity.Position) <= 250 then
                     entity.Velocity = Vector(-(entity.Position.X - enemy.Position.X) / aimbotSpeedMod, -(entity.Position.Y - enemy.Position.Y) / aimbotSpeedMod)
                     entity.Radius = 20
                 end
@@ -4907,7 +3335,7 @@ end
 
 function Alphabirth.blackHeartUpdate(entity, data)
     local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    if player_type == endor_type
+    if player:GetPlayerType() == endor_type
     and entity.Position:Distance(player.Position) < 30  then
         player:TakeDamage(2, 0, EntityRef(player), 0)
         entity:Remove()
@@ -4984,11 +3412,11 @@ function Alphabirth:modUpdate()
         player:EvaluateItems()
     end
 
-    if api_mod.data.run.bloodDriveTimesUsed > 0 then
-        handleBloodDrive()
-    end
-    handlePossessedShot()
-    handleBlacklight()
+    -- if api_mod.data.run.bloodDriveTimesUsed and api_mod.data.run.bloodDriveTimesUsed > 0 then
+    --     Alphabirth.handleBloodDrive()
+    -- end
+    -- handlePossessedShot()
+    -- handleBlacklight()
 
 	Alphabirth.apparitionSpawnCheck()
 	Alphabirth.checkEnemyFlames()
@@ -5010,31 +3438,14 @@ function Alphabirth.cauldronUpdate(sprite)
 	end
 end
 
-function Alphabirth.chaliceOfBloodUpdate(sprite)
-	if api_mod.data.run.chaliceSouls <= 5 then
-		sprite:Play("State1",false)
-	elseif api_mod.data.run.chaliceSouls <= 10 then
-		sprite:Play("State2",false)
-	elseif api_mod.data.run.chaliceSouls < 15 then
-		sprite:Play("State3",false)
-	else
-		sprite:Play("State4",false)
-	end
-end
 
 function Alphabirth.activeItemRenderSetup()
 	dynamicActiveItems = {
-
-	cauldron = {
+		cauldron = {
 			item = ITEMS.ACTIVE.CAULDRON.id,
 			sprite = "gfx/animations/animation_collectible_cauldron.anm2",
 			functionality = Alphabirth.cauldronUpdate
-			},
-	chalice = {
-			item = ITEMS.ACTIVE.CHALICE_OF_BLOOD.id,
-			sprite = "gfx/animations/animation_collectible_chaliceofblood.anm2",
-			functionality = Alphabirth.chaliceOfBloodUpdate
-			},
+		},
 	}
 
 	for k,v in pairs(dynamicActiveItems) do
@@ -5119,18 +3530,6 @@ local function hasTalismanProtection(damage_flags)
 	end
 end
 
-local function hasDiligenceProtection(damage_flags, damage_source)
-	if (
-		damage_flags & DamageFlag.DAMAGE_FIRE == DamageFlag.DAMAGE_FIRE
-		or (damage_flags & DamageFlag.DAMAGE_SPIKES == DamageFlag.DAMAGE_SPIKES and AlphaAPI.GAME_STATE.ROOM:GetType() ~= RoomType.ROOM_SACRIFICE)
-		or damage_flags & DamageFlag.DAMAGE_EXPLOSION == DamageFlag.DAMAGE_EXPLOSION
-		or damage_flags & DamageFlag.DAMAGE_POOP == DamageFlag.DAMAGE_POOP
-		or damage_source.Type == EntityType.ENTITY_FIREPLACE
-	) then
-		return true
-	end
-end
-
 local function hasWaxedProtection(damage_flags, damage_source)
 	if (
 		damage_flags & DamageFlag.DAMAGE_FIRE == DamageFlag.DAMAGE_FIRE
@@ -5143,8 +3542,11 @@ end
 local function hasProtection(player, damage_flags, damage_source)
 	return
 	(AlphaAPI.hasTransformation(TRANSFORMATIONS.WAXED) and hasWaxedProtection(damage_flags, damage_source))
-	or (player:HasCollectible(ITEMS.PASSIVE.DILIGENCE.id) and hasDiligenceProtection(damage_flags, damage_source))
-	or (player:HasCollectible(ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id) and hasTalismanProtection(damage_flags))
+	-- or (player:HasCollectible(ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id) and hasTalismanProtection(damage_flags))
+end
+
+function g.hasProtection(player, damage_flags, damage_source)
+	return hasProtection(player, damage_flags, damage_source)
 end
 
 local direction_list = {
@@ -5158,71 +3560,14 @@ local direction_list = {
 	Vector(-1, -1)  -- South West
 }
 
-local addictionValidEffects = {
-    PillEffect.PILLEFFECT_48HOUR_ENERGY,
-    PillEffect.PILLEFFECT_ADDICTED,
-    PillEffect.PILLEFFECT_AMNESIA,
-    PillEffect.PILLEFFECT_BAD_GAS,
-    PillEffect.PILLEFFECT_BALLS_OF_STEEL,
-    PillEffect.PILLEFFECT_BOMBS_ARE_KEYS,
-    PillEffect.PILLEFFECT_EXPLOSIVE_DIARRHEA,
-    PillEffect.PILLEFFECT_FRIENDS_TILL_THE_END,
-    PillEffect.PILLEFFECT_FULL_HEALTH,
-    PillEffect.PILLEFFECT_GULP,
-    PillEffect.PILLEFFECT_HEALTH_UP,
-    PillEffect.PILLEFFECT_HORF,
-    PillEffect.PILLEFFECT_I_FOUND_PILLS,
-    PillEffect.PILLEFFECT_IM_DROWSY,
-    PillEffect.PILLEFFECT_IM_EXCITED,
-    PillEffect.PILLEFFECT_INFESTED_EXCLAMATION,
-    PillEffect.PILLEFFECT_INFESTED_QUESTION,
-    PillEffect.PILLEFFECT_LARGER,
-    PillEffect.PILLEFFECT_LEMON_PARTY,
-    PillEffect.PILLEFFECT_LUCK_DOWN,
-    PillEffect.PILLEFFECT_LUCK_UP,
-    PillEffect.PILLEFFECT_PRETTY_FLY,
-    PillEffect.PILLEFFECT_RANGE_DOWN,
-    PillEffect.PILLEFFECT_RANGE_UP,
-    PillEffect.PILLEFFECT_SPEED_DOWN,
-    PillEffect.PILLEFFECT_SPEED_UP,
-    PillEffect.PILLEFFECT_TEARS_DOWN,
-    PillEffect.PILLEFFECT_TEARS_UP,
-    PillEffect.PILLEFFECT_TELEPILLS,
-    PillEffect.PILLEFFECT_PARALYSIS,
-    PillEffect.PILLEFFECT_SEE_FOREVER,
-    PillEffect.PILLEFFECT_PHEROMONES,
-    PillEffect.PILLEFFECT_WIZARD,
-    PillEffect.PILLEFFECT_PERCS,
-    PillEffect.PILLEFFECT_RELAX,
-    PillEffect.PILLEFFECT_QUESTIONMARK,
-    PillEffect.PILLEFFECT_SMALLER,
-    PillEffect.PILLEFFECT_POWER,
-    PillEffect.PILLEFFECT_RETRO_VISION,
-    PillEffect.PILLEFFECT_X_LAX,
-    PillEffect.PILLEFFECT_SOMETHINGS_WRONG,
-    PillEffect.PILLEFFECT_SUNSHINE,
-    PillEffect.PILLEFFECT_VURP
-}
-
 -- Take Damage Handling
 function Alphabirth.entityTakeDamage(entity, damage_amount, damage_flags, damage_source, invincibility_frames)
 	if entity.Type == EntityType.ENTITY_PLAYER then
 		local player = entity:ToPlayer()
-		if player:HasCollectible(ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id) and hasTalismanProtection(damage_flags) then
-			player:AddHearts(2)
-			return false
-		end
-
-		if player:HasCollectible(ITEMS.PASSIVE.DILIGENCE.id) then
-			ignore_damage = random(1, 5)
-			if ignore_damage == 1 then
-				return false
-			end
-
-			if hasDiligenceProtection(damage_flags, damage_source) then
-				return false
-			end
-		end
+		--if player:HasCollectible(ITEMS.PASSIVE.TALISMAN_OF_ABSORPTION.id) and hasTalismanProtection(damage_flags) then
+		--	player:AddHearts(2)
+		--	return false
+		--end
 
 		if AlphaAPI.hasTransformation(TRANSFORMATIONS.WAXED) then
 			if hasWaxedProtection(damage_flags, damage_source) then
@@ -5241,97 +3586,13 @@ function Alphabirth.entityTakeDamage(entity, damage_amount, damage_flags, damage
 			end
 		end
 
-	    if player:HasCollectible(ITEMS.PASSIVE.SATANS_CONTRACT.id)
-		and not hasProtection(player, damage_flags, damage_source) then
-	        for i = 1, damage_amount do
-	            if player:GetSoulHearts() > 0 then
-	                player:AddSoulHearts(-1)
-	            else
-	                player:AddHearts(-1)
-	            end
-	        end
-
-	        if player:GetHearts() == 0 and player:GetSoulHearts() == 0 then
-	            player:Die()
-	        end
-	    end
-
-		if player:HasCollectible(ITEMS.PASSIVE.WHITE_CANDLE.id)
-		and not hasProtection(player, damage_flags, damage_source) then
-			local num_lasers = random(2, 8)
-			for i = 1, num_lasers do
-				local entities = AlphaAPI.entities.all
-				local chance_to_hit = random(1, 2)
-				if chance_to_hit == 1 and #entities then
-					local vulnerable_entities = {}
-					for _, entity in ipairs(entities) do
-						if entity:IsVulnerableEnemy() then
-							vulnerable_entities[#vulnerable_entities + 1] = entity
-						end
-					end
-
-					if #vulnerable_entities then
-						local entity = nil
-						if #vulnerable_entities ~= 1 then
-							entity = vulnerable_entities[random(1, #vulnerable_entities)]
-						else
-							entity = vulnerable_entities[1]
-						end
-
-						local position_to_hit = entity.Position
-						Isaac.Spawn(
-							EntityType.ENTITY_EFFECT,
-							EffectVariant.CRACK_THE_SKY,
-							0,              -- Subtype
-							position_to_hit,
-							Vector(0, 0),   -- Velocity
-							player          -- Spawner
-						)
-					end
-				else
-					Isaac.Spawn(
-						EntityType.ENTITY_EFFECT,
-						EffectVariant.CRACK_THE_SKY,
-						0,              -- Subtype
-						AlphaAPI.GAME_STATE.ROOM:GetRandomPosition(0),
-						Vector(0, 0),   -- Velocity
-						player          -- Spawner
-					)
-				end
-			end
-		end
-
-		if player:HasCollectible(ITEMS.PASSIVE.ADDICTED.id)
-		and not hasProtection(player, damage_flags, damage_source) then
-			local pill_chance = random(1, 6)
-			if pill_chance == 1 then
-                local chosen_pill = addictionValidEffects[random(1, #addictionValidEffects)]
-				player:UsePill(chosen_pill, PillColor.PILL_BLUE_BLUE)
-			end
-		end
-
-		if player:HasCollectible(ITEMS.PASSIVE.FURNACE.id)
-		and not hasProtection(player, damage_flags, damage_source) then
-			for _, direction in ipairs(direction_list) do
-				Isaac.Spawn(
-					EntityType.ENTITY_EFFECT,
-					EffectVariant.RED_CANDLE_FLAME,
-					0,
-					player.Position,
-					direction * (10 * player.ShotSpeed),
-					player
-				)
-			end
-		end
 	else
-		if AlphaAPI.hasFlag(entity, ENTITY_FLAGS.DOUBLE_DAMAGE) then
-			entity.HitPoints = entity.HitPoints - damage_amount
-		end
 
 		if AlphaAPI.hasFlag(damage_source, ENTITY_FLAGS.MUTANT_TEAR)
 		and entity:IsActiveEnemy(false) then
 			AlphaAPI.clearFlag(damage_source, ENTITY_FLAGS.MUTANT_TEAR)
 			local bomb_roll = random(1, 200)
+			local player = entity:ToPlayer()
 			if bomb_roll == 1 then
 				Isaac.Spawn(
 					EntityType.ENTITY_BOMBDROP,
@@ -5350,7 +3611,7 @@ function Alphabirth.entityTakeDamage(entity, damage_amount, damage_flags, damage
 
 	local ply = entity:ToPlayer()
 	if ply ~= nil then
-		Alphabirth.removeFlies()
+		--Alphabirth.removeFlies()
  	end
 
     if damage_source ~= nil then
@@ -5372,15 +3633,6 @@ do
 	function Alphabirth.tearAppear(entity)
 		entity = entity:ToTear()
 		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		if entity.SpawnerType == EntityType.ENTITY_PLAYER then
-			if player:HasCollectible(ITEMS.PASSIVE.MUTANT_FETUS.id) and AlphaAPI.getLuckRNG(7, 3) and entity.Variant ~= TearVariant.CHAOS_CARD then
-				AlphaAPI.addFlag(entity, ENTITY_FLAGS.MUTANT_TEAR)
-				local tear_sprite = entity:GetSprite()
-				tear_sprite:Load("gfx/animations/effects/animation_tears_mutantfetus.anm2", true)
-				tear_sprite:Play("Idle")
-				tear_sprite:LoadGraphics()
-			end
-		end
 
 		local tear = entity:ToTear()
 		if tear.SpawnerType and tear.SpawnerType == EntityType.ENTITY_PLAYER and tear.Variant ~= TearVariant.CHAOS_CARD then
@@ -5388,48 +3640,45 @@ do
 			local effect_granted
 			if AlphaAPI.getLuckRNG(9, 3) then
 				local potential_tear_effects = {}
-				if player:HasCollectible(ITEMS.PASSIVE.QUILL_FEATHER.id) and not AlphaAPI.hasFlag(tear, ENTITY_FLAGS.TEAR_IGNORE) then
-					potential_tear_effects[#potential_tear_effects + 1] = {
-						name = "QuillFeather",
-						weight = 1
-					}
-				end
-	
+				-- if player:HasCollectible(ITEMS.PASSIVE.QUILL_FEATHER.id) and not AlphaAPI.hasFlag(tear, ENTITY_FLAGS.TEAR_IGNORE) then
+				-- 	potential_tear_effects[#potential_tear_effects + 1] = {
+				-- 		name = "QuillFeather",
+				-- 		weight = 1
+				-- 	}
+				-- end
+
 				if player:HasCollectible(ITEMS.PASSIVE.CRACKED_ROCK.id) then
 					potential_tear_effects[#potential_tear_effects + 1] = {
 						name = "CrackedRock",
 						weight = 1
 					}
 				end
-	
+
 				if player:HasCollectible(ITEMS.PASSIVE.ABYSS.id) then
 					potential_tear_effects[#potential_tear_effects + 1] = {
 						name = "Abyss",
 						weight = 1
 					}
 				end
-	
+
 				local tear_effect
 				if #potential_tear_effects > 0 then
 					tear_effect = AlphaAPI.getWeightedRNG(potential_tear_effects)
 				end
-	
+
 				if tear_effect then
 					effect_granted = true
 				end
-	
+
 				if tear_effect == "QuillFeather" then
-					tear.Color = Color(0,0,0,1,0,0,0)
-					AlphaAPI.addFlag(tear, ENTITY_FLAGS.QUILL_FEATHER_SHOT)
-					tear:ChangeVariant(TearVariant.CUPID_BLUE)
-					tear.TearFlags = tear.TearFlags | TearFlags.TEAR_PIERCING
+                    -- Moved!
 				elseif tear_effect == "CrackedRock" then
 					local sprite = tear:GetSprite()
 					if sprite:GetFilename() ~= "gfx/animations/effects/animation_tears_crackedrock.anm2" then
 						sprite:Load("gfx/animations/effects/animation_tears_crackedrock.anm2", true)
 						sprite:Play("Stone3Move", true)
 					end
-	
+
 					AlphaAPI.addFlag(tear, ENTITY_FLAGS.CRACKED_ROCK_SHOT)
 				elseif tear_effect == "Abyss" then
 					abyss_sprite = tear:GetSprite()
@@ -5438,8 +3687,8 @@ do
 					AlphaAPI.addFlag(tear, ENTITY_FLAGS.ABYSS_SHOT)
 				end
 			end
-	
-	
+
+
 			if player:HasCollectible(ITEMS.PASSIVE.HEMOPHILIA.id) and entity.Variant ~= TearVariant.BLOOD and not effect_granted then
 				tear:ChangeVariant(TearVariant.BLOOD)
 			end
@@ -5457,26 +3706,6 @@ do
         "TEAR_POISON"
     }
 
-    function Alphabirth.bugBombsAppear(entity, data)
-        local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-        if player:HasCollectible(ITEMS.PASSIVE.BUGGED_BOMBS.id) and entity.Variant ~= BombVariant.BOMB_SUPERTROLL and entity.Variant ~= BombVariant.BOMB_TROLL and entity.SpawnerType == EntityType.ENTITY_PLAYER then
-            local bomb_sprite = entity:GetSprite()
-            if bomb_sprite:GetFilename() ~= "gfx/animations/effects/animation_effect_buggedbombs.anm2" then
-                bomb_sprite:Load("gfx/animations/effects/animation_effect_buggedbombs.anm2", true)
-                bomb_sprite:Play("Idle")
-            end
-        end
-    end
-
-    function Alphabirth.bugBombsUpdate(entity, data)
-        local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-        if player:HasCollectible(ITEMS.PASSIVE.BUGGED_BOMBS.id) and entity.Variant ~= BombVariant.BOMB_SUPERTROLL and entity.Variant ~= BombVariant.BOMB_TROLL and entity.SpawnerType == EntityType.ENTITY_PLAYER then
-            local bomb = entity:ToBomb()
-            if entity.FrameCount % 15 == 0 then
-                bomb.Flags = bomb.Flags | TearFlags[bombFlags[random(1, #bombFlags)]]
-            end
-        end
-    end
 
     local glitch_pickup_animations = {"Battery", "Heart", "Bomb", "Coin", "Key"}
 
@@ -5533,269 +3762,14 @@ do
 			end
 		end
 
-	----------------------------------------
-	-- Divine Wrath Logic
-	----------------------------------------
-	local divine_wrath_previous_pos = nil
-	function Alphabirth.updateDivineWrath(familiar)
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	    local grid_position = AlphaAPI.GAME_STATE.ROOM:GetGridIndex(familiar.Position)
-	    local grid_entity = AlphaAPI.GAME_STATE.ROOM:GetGridEntity(grid_position)
-
-	    player.FireDelay = 1
-
-	    -- Grid entities it touches get hurt every sixth of a second / Excludes secret doors.
-	    if grid_entity then
-	        local is_door = grid_entity.Desc.Type == GridEntityType.GRID_DOOR
-	        local is_wall = grid_entity.Desc.Type == GridEntityType.GRID_WALL
-
-	        if not is_door and not is_wall then
-	            grid_entity:Destroy(true)
-	        end
-	    end
-
-	    if not AlphaAPI.GAME_STATE.ROOM:IsPositionInRoom(familiar.Position, 0) then
-	        familiar.Position = divine_wrath_previous_pos
-	    end
-
-	    familiar.CollisionDamage = player.Damage * 1.5
-
-	    -- Destroy fireplaces.
-	    for _, entity in ipairs(AlphaAPI.entities.all) do
-	        if entity.Type == EntityType.ENTITY_FIREPLACE then
-	            if familiar.Position:Distance(entity.Position) < 20 then
-	                entity:TakeDamage(familiar.CollisionDamage, 0, EntityRef(player), 0)
-	            end
-	        elseif entity.Type == EntityType.ENTITY_PICKUP and entity.Variant == 51 then
-	            if familiar.Position:Distance(entity.Position) < 20 then
-	                entity:ToPickup():TryOpenChest()
-	            end
-	        elseif entity.Type == EntityType.ENTITY_SLOT then
-	            if familiar.Position:Distance(entity.Position) < 20 then
-	                --Isaac.DebugString("Slot")
-	                entity:TakeDamage(familiar.CollisionDamage, DamageFlag.DAMAGE_EXPLOSION, EntityRef(player), 0)
-	            end
-	        end
-	    end
-
-	    local aim_direction = player:GetAimDirection()
-	    aim_direction = aim_direction * (player.ShotSpeed)
-	    if aim_direction:Length() == 0.0 then
-	        -- familiar.Velocity = Vector(0, 0)
-	    else
-	        familiar:AddVelocity(aim_direction)
-	    end
-
-	    divine_wrath_previous_pos = familiar.Position
-	end
-
-	function Alphabirth.initDivineWrath(familiar)
-	    familiar.GridCollisionClass = GridCollisionClass.COLLISION_NONE
-	end
-
 	function Alphabirth.onBombDipDie(entity)
 		Isaac.Explode(entity.Position, entity, 1.0)
 	end
-
-	----------------------------------------
-	-- Stoned Buddy Logic
-	----------------------------------------
-	local function findTarget(familiar)
-		for _, entity in ipairs(AlphaAPI.entities.enemies) do
-			if entity.Type ~= 306 then
-				local enemy = entity:ToNPC()
-				if not enemy:IsBoss() then
-					return enemy
-				end
-			end
-		end
-		return nil
-	end
-
-		local function chooseStonedBuddyTarget(familiar)
-			local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-			local data = familiar:GetData()
-
-			if not data.pathfinder then
-				data.pathfinder = AlphaAPI.getEntityPathfinder(
-					familiar,
-					0.5,
-					25
-				)
-			end
-
-			if not data.stoned_target then
-				familiar:FollowParent()
-				data.stoned_target = findTarget(familiar)
-			else
-				if data.stoned_target:IsDead() then
-					data.stoned_target = nil
-					familiar:AddToFollowers()
-				end
-
-				data.pathfinder:aStarPathing(data.stoned_target.Position,
-					3,
-					function()
-						familiar:FollowPosition(data.stoned_target.Position)
-						data.stoned_target:AddFear(EntityRef(familiar),1)
-						return
-					end
-				)
-			end
-		end
-
-	function Alphabirth.initStonedBuddy(familiar)
-        familiar:AddToFollowers()
-	    familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ENEMIES
-	    familiar.GridCollisionClass = GridCollisionClass.COLLISION_WALLS
-	end
-
-	function Alphabirth.updateStonedBuddy(familiar)
-	    chooseStonedBuddyTarget(familiar)
-		AlphaAPI.animateEntityCardinals(familiar, "WalkUp", "WalkDown", "WalkRight", "WalkLeft", "Idle", false, 0.2)
-	end
-
-    function Alphabirth.evaluateStonedBuddy(player, flag)
-        if flag == CacheFlag.CACHE_FAMILIARS then
-            local amount_to_spawn = player:GetCollectibleNum(ITEMS.PASSIVE.STONED_BUDDY.id) * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
-            player:CheckFamiliar(ENTITIES.STONED_BUDDY.variant, amount_to_spawn, rng)
-        end
-    end
-
-	----------------------------------------
-	-- Candle Kit Logic
-	----------------------------------------
-	function Alphabirth.updateCandleKit(candleEnt)
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-        candleEnt.OrbitDistance = EntityFamiliar.GetOrbitDistance(candleEnt.OrbitLayer)
-        local target_position = candleEnt:GetOrbitPosition(player.Position)
-        candleEnt.Velocity = target_position - candleEnt.Position
-        candleEnt.CollisionDamage = player.Damage * 0.8
-        for i, e in ipairs(AlphaAPI.entities.enemies) do
-            if  e.Position:Distance(candleEnt.Position) < 55 and random(60) == 1 then
-                e:AddBurn(EntityRef(candleEnt), 120, 1.0)
-            end
-        end
-	end
-
-    function Alphabirth.initCandleKit(familiar)
-        familiar.OrbitLayer = 4
-        familiar:RecalculateOrbitOffset(familiar.OrbitLayer, true)
-    end
-
-    function Alphabirth.evaluateCandleKit(player, flag)
-        if flag == CacheFlag.CACHE_FAMILIARS then
-            local amount_to_spawn = (player:GetCollectibleNum(ITEMS.PASSIVE.CANDLE_KIT.id) * 2) * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
-            player:CheckFamiliar(ENTITIES.CANDLE_KIT.variant, amount_to_spawn, rng)
-        end
-    end
 end
 
 -------------------------------------------------------------------------------
 ---- ALASTOR'S RAGE ITEMS AND FAMILIARS
 ------------------------------------------------------------------------------
--------------------
--- Alastor's Candle
--------------------
-function Alphabirth.useAlastorsCandle()
-	local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-
-    if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
-        return
-    end
-
-    local offset
-    for i = 1, 2 do
-        local flame = FAMILIARS.ALASTORS_FLAME:spawn(player.Position, Vector(0,0), nil)
-        local data = flame:GetData()
-        if i == 1 then
-            offset = math.pi
-        elseif i == 2 then
-            offset = 0
-        end
-        data.offset = offset
-        data.roomIdx = AlphaAPI.GAME_STATE.LEVEL:GetCurrentRoomIndex()
-        data.center_distance = 100
-    end
-
-    return true
-end
-
-local dist_modifier
-function Alphabirth.updateAlastorsFlame(flame)
-    local room = AlphaAPI.GAME_STATE.ROOM
-    local room_index = AlphaAPI.GAME_STATE.LEVEL:GetCurrentRoomIndex()
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-
-    local frame = AlphaAPI.GAME_STATE.GAME:GetFrameCount()
-    local data = flame:GetData()
-
-    if data.roomIdx ~= room_index or room:GetFrameCount() == 1 then
-        flame:Remove()
-    end
-
-    if data.center_distance == 100 then
-        dist_modifier = 1
-    elseif data.center_distance == 30 then
-        dist_modifier = -1
-    end
-
-    local off = (frame / 10) + data.offset
-
-    local x_offset = math.cos(off) * data.center_distance
-    local y_offset = math.sin(off) * data.center_distance
-    flame.Velocity = Vector(player.Position.X + x_offset, player.Position.Y + y_offset) - flame.Position
-
-    data.center_distance = data.center_distance - dist_modifier
-
-    --Add Fear to Nearby entities
-    for _, entity in ipairs(AlphaAPI.entities.enemies) do
-        if entity.Position:Distance(flame.Position) < 60 and math.random(100) == 1 then
-            entity:AddFear(EntityRef(flame), 60)
-        end
-    end
-end
-
--------------------
--- Isaac's Skull
--------------------
-function Alphabirth.useIsaacsSkull()
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    if not api_mod.data.run.godheads then
-        api_mod.data.run.godheads = 0
-    end
-
-    if not api_mod.data.run.brimstones then
-        api_mod.data.run.brimstones = 0
-    end
-
-    if random() > 0.5 then
-        player:AddCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE, 0, false)
-        api_mod.data.run.brimstones = api_mod.data.run.brimstones + 1
-    else
-        player:AddCollectible(CollectibleType.COLLECTIBLE_GODHEAD, 0, false)
-        api_mod.data.run.godheads = api_mod.data.run.godheads + 1
-    end
-
-    return true
-end
-
-function Alphabirth.isaacsSkullNewRoom()
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    if api_mod.data.run.godheads or api_mod.data.run.brimstones then
-        for i = 1, api_mod.data.run.godheads do
-            player:RemoveCollectible(CollectibleType.COLLECTIBLE_GODHEAD)
-        end
-
-        for i = 1, api_mod.data.run.brimstones do
-            player:RemoveCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE)
-        end
-
-        api_mod.data.run.godheads = 0
-        api_mod.data.run.brimstones = 0
-    end
-end
-
 -------------------
 -- Lil Alastor
 -------------------
@@ -5907,95 +3881,13 @@ function Alphabirth.faithfulAmbivalenceNewRoom(room)
     end
 end
 
--------------------------------------------------------------------------------
----- PASSIVE ITEM LOGIC
-------------------------------------------------------------------------------
--------------------
--- Smart Bombs
--------------------
-
-local DOOR_SLOTS = {
-    DoorSlot.LEFT0,
-    DoorSlot.UP0,
-    DoorSlot.RIGHT0,
-    DoorSlot.DOWN0,
-    DoorSlot.LEFT1,
-    DoorSlot.UP1,
-    DoorSlot.RIGHT1,
-    DoorSlot.DOWN1
-}
-
 function Alphabirth.onPickupBombItem()
     AlphaAPI.GAME_STATE.PLAYERS[1]:AddBombs(5)
 end
 
-function Alphabirth.smartBombsEntityAppear(bomb, data)
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    local room = AlphaAPI.GAME_STATE.ROOM
-    if player:HasCollectible(ITEMS.PASSIVE.SMART_BOMBS.id)
-    and bomb.SpawnerType == EntityType.ENTITY_PLAYER
-    and not AlphaAPI.hasFlag(bomb, ENTITY_FLAGS.SMART_BOMB)
-    and room:IsClear() then
-        local target_entity
-        for i, entity in pairs(AlphaAPI.entities.grid) do
-            if entity:ToRock() then --It must be a rock
-                local rock_index = entity:GetGridIndex()
-                if rock_index == room:GetDungeonRockIdx() then
-                    target_entity = entity
-                    break
-                elseif rock_index == room:GetTintedRockIdx() then
-                    target_entity = entity
-                    break
-                end
-            end
-        end
-
-
-        for _, slot in pairs(DOOR_SLOTS) do
-            local door = room:GetDoor(slot)
-            if door then
-                if door:IsRoomType(RoomType.ROOM_SECRET) or door:IsRoomType(RoomType.ROOM_SUPERSECRET) then
-                   target_entity = door
-                    break
-                end
-            end
-        end
-
-        if target_entity ~= nil then
-            if target_entity.State == 2 then
-                target_entity = nil
-            else
-                local smart_bomb = bomb:ToBomb()
-                AlphaAPI.addFlag(smart_bomb, ENTITY_FLAGS.SMART_BOMB)
-                smart_bomb:GetData().target = target_entity
-
-                --- smart_bomb:ToBomb():SetExplosionCountdown(???)
-
-                local sprite = smart_bomb:GetSprite()
-                sprite:Load("gfx/animations/familiars/animation_familiar_smartbombs.anm2", true)
-                sprite:Play("LegsAppear", true)
-            end
-        end
-    end
-end
-
-function Alphabirth.smartBombsEntityUpdate(entity, data)
-    if AlphaAPI.hasFlag(entity, ENTITY_FLAGS.SMART_BOMB) then
-        if entity.FrameCount % 20 == 1 then
-            local sprite = entity:GetSprite()
-            if not sprite:IsPlaying("LegsAppear") and not sprite:IsPlaying("PulseWalk") then
-                sprite:Play("PulseWalk", true)
-            end
-            if sprite:IsPlaying("PulseWalk") then
-                local target_position = entity:GetData().target.Position
-                local direction_vector = (target_position - entity.Position):Normalized()
-                local angle = direction_vector:GetAngleDegrees() + math.random(-50, 50)
-                entity.Velocity = entity.Velocity + (Vector.FromAngle(angle) * 6)
-            end
-        end
-    end
-end
-
+-------------------------------------------------------------------------------
+---- PASSIVE ITEM LOGIC
+------------------------------------------------------------------------------
 -------------------
 -- Leaking Bombs
 -------------------
@@ -6111,67 +4003,6 @@ function Alphabirth.infectionUpdate(entity, data)
         end
     end
 end
-
--------------------
--- Rocket Shoes
--------------------
-function Alphabirth.handleRocketShoes()
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    if player:GetLastActionTriggers() & ActionTriggers.ACTIONTRIGGER_MOVED ~= 0 then
-        local max_speed = player.MoveSpeed * 5
-        if player.Velocity:Length() < max_speed then
-            player.Velocity = player:GetMovementVector():Resized(max_speed)
-        end
-    elseif player:GetLastActionTriggers() & ActionTriggers.ACTIONTRIGGER_MOVED == 0 then
-        player.Velocity = player.Velocity * 0
-    end
-end
-
-function Alphabirth.evaluateRocketShoes(player, cache_flag)
-    if cache_flag == CacheFlag.CACHE_SPEED then
-        player.MoveSpeed = player.MoveSpeed + 0.1
-    end
-end
-
--------------------
--- Miniature Meteor
--------------------
-
-function Alphabirth.onMeteorPickup()
-    if not api_mod.data.run.miniatureMeteorBonus then
-        api_mod.data.run.miniatureMeteorBonus = 0
-    end
-end
-
-function Alphabirth.miniatureMeteorAppear(e, _)
-    if AlphaAPI.getLuckRNG(10, 3) then
-        AlphaAPI.addFlag(e, ENTITY_FLAGS.METEOR_SHOT)
-        local tear_sprite = e:GetSprite()
-        tear_sprite:Load("gfx/animations/effects/animation_tears_miniaturemeteor.anm2", true)
-        local sprite_index = math.floor((api_mod.data.run.miniatureMeteorBonus / 2) + 1)
-        if sprite_index > 6 then
-            sprite_index = 6
-        end
-        tear_sprite:Play("Stone"..sprite_index.."Move")
-        tear_sprite:LoadGraphics()
-        if api_mod.data.run.miniatureMeteorBonus then
-            e.CollisionDamage = e.CollisionDamage + (api_mod.data.run.miniatureMeteorBonus * 0.5)
-        end
-    end
-end
-
-function Alphabirth.miniatureMeteorDamage(entity, amount, damage_flag, source, invincibility_frames)
-    if AlphaAPI.hasFlag(source.Entity, ENTITY_FLAGS.METEOR_SHOT) and random() < 0.4 then
-        Isaac.Spawn(ENTITIES.METEOR_SHARD.id, ENTITIES.METEOR_SHARD.variant, 0, entity.Position, Vector(0,0), AlphaAPI.GAME_STATE.PLAYERS[1])
-    end
-end
-
-function Alphabirth.meteorShardPickup()
-    SFX_MANAGER:Play(SoundEffect.SOUND_SCAMPER, 1, 0, false, 1)
-    api_mod.data.run.miniatureMeteorBonus = api_mod.data.run.miniatureMeteorBonus + 1
-    return true
-end
-
 -------------------
 -- Crystallized
 -------------------
@@ -6306,46 +4137,6 @@ local splitFlags = {
 }
 
 local allSplitFlag = TearFlags.TEAR_SPLIT | TearFlags.TEAR_QUADSPLIT | TearFlags.TEAR_BONE
-
--------------------
--- Entropy
--------------------
-function Alphabirth.entropyCache(player, flag)
-    if flag == CacheFlag.CACHE_FIREDELAY then
-        player.MaxFireDelay = player.MaxFireDelay - 3
-    end
-end
-
-function Alphabirth.entropyNewTear(entity)
-    if AlphaAPI.hasFlag(entity, ENTITY_FLAGS.TEAR_IGNORE) then return end
-    if not AlphaAPI.hasFlag(entity, ENTITY_FLAGS.ENTROPY_TEAR) and AlphaAPI.getLuckRNG(66, 5) then
-        local angle = entity.Velocity:GetAngleDegrees()
-        local length = entity.Velocity:Length()
-        local oldTear = entity:ToTear()
-        local flags = oldTear.TearFlags
-        local variance = 10 --in degrees
-        local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-        local entropyTears = {oldTear}
-
-        for _, flag in ipairs(splitFlags) do
-            if flags & flag == flag then
-                if AlphaAPI.getLuckRNG(66, 5) then
-                    local tear = player:FireTear(player.Position, Vector.FromAngle(angle + random(-variance,variance)):Resized(length), true, false, false)
-                    AlphaAPI.addFlag(tear, ENTITY_FLAGS.ENTROPY_TEAR)
-                    entropyTears[#entropyTears + 1] = tear
-                end
-            end
-        end
-
-        local tear = player:FireTear(player.Position, Vector.FromAngle(angle + random(-variance,variance)):Resized(length), true, false, false)
-        entropyTears[#entropyTears + 1] = tear
-        AlphaAPI.addFlag(tear, ENTITY_FLAGS.ENTROPY_TEAR)
-
-        for _, tear in ipairs(entropyTears) do
-            tear.TearFlags = tear.TearFlags & ~allSplitFlag
-        end
-    end
-end
 
 -------------------
 -- Poly-Mitosis
@@ -6766,108 +4557,6 @@ end
 -------------------------------------------------------------------------------
 ---- FAMILIAR LOGIC
 -------------------------------------------------------------------------------
--------------------
--- The Cosmos
--------------------
-function Alphabirth.evaluateCosmos(player, flag)
-    if flag == CacheFlag.CACHE_FAMILIARS then
-        local amount_to_spawn = player:GetCollectibleNum(ITEMS.PASSIVE.THE_COSMOS.id) * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
-        player:CheckFamiliar(FAMILIARS.MERCURY.variant, amount_to_spawn, modRNG)
-        player:CheckFamiliar(FAMILIARS.PLUTO.variant, amount_to_spawn, modRNG)
-        player:CheckFamiliar(FAMILIARS.VENUS.variant, amount_to_spawn, modRNG)
-    end
-end
-
----MERCURY---
-local mercury_burn_chance = 0.05
-local mercury_burn_duration = 60
-function Alphabirth.initializeMercury(familiar)
-    familiar = familiar:ToFamiliar()
-    familiar:AddToOrbit(30)
-    familiar:GetData().orbit_distance = Vector(40, 40)
-end
-
-function Alphabirth.updateMercury(familiar)
-	familiar.OrbitDistance = familiar:GetData().orbit_distance
-    familiar.OrbitAngleOffset = familiar.OrbitAngleOffset + 0.05
-    familiar.Velocity = (familiar:GetOrbitPosition(AlphaAPI.GAME_STATE.PLAYERS[1].Position) - familiar.Position)
-end
-
----VENUS---
-local venus_charm_chance = 0.05
-local venus_charm_duration = 120
-function Alphabirth.initializeVenus(familiar)
-    familiar = familiar:ToFamiliar()
-    familiar:AddToOrbit(31)
-    familiar:GetData().orbit_distance = Vector(60, 60)
-end
-
-function Alphabirth.updateVenus(familiar)
-    familiar.OrbitDistance = familiar:GetData().orbit_distance
-    familiar.OrbitAngleOffset = familiar.OrbitAngleOffset + 0.035
-    familiar.Velocity = (familiar:GetOrbitPosition(AlphaAPI.GAME_STATE.PLAYERS[1].Position) - familiar.Position)
-end
-
----PLUTO---
-local pluto_freeze_chance = 0.05
-local pluto_freeze_duration = 90
-function Alphabirth.initializePluto(familiar)
-    familiar = familiar:ToFamiliar()
-    familiar:AddToOrbit(50)
-    familiar:GetData().orbit_distance = Vector(80, 80)
-end
-
-function Alphabirth.updatePluto(familiar)
-	familiar.OrbitDistance = familiar:GetData().orbit_distance
-    familiar.OrbitAngleOffset = familiar.OrbitAngleOffset + 0.02
-    familiar.Velocity = (familiar:GetOrbitPosition(AlphaAPI.GAME_STATE.PLAYERS[1].Position) - familiar.Position)
-end
-
----DAMAGE---
-function Alphabirth.cosmosDamage(entity, damage_amount, damage_flag, damage_source, invincibility_frames)
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    if damage_source.Entity then
-        if AlphaAPI.matchConfig(damage_source.Entity, FAMILIARS.MERCURY) then
-            if random() < mercury_burn_chance then
-                entity:AddBurn(EntityRef(player), mercury_burn_duration, player.Damage)
-            end
-        elseif AlphaAPI.matchConfig(damage_source.Entity, FAMILIARS.VENUS) then
-            if random() < venus_charm_chance then
-                entity:AddCharmed(venus_charm_duration)
-            end
-        elseif AlphaAPI.matchConfig(damage_source.Entity, FAMILIARS.PLUTO) then
-            if random() < pluto_freeze_chance then
-                entity:AddFreeze(EntityRef(player), pluto_freeze_duration)
-            end
-        end
-    end
-end
-
-
--------------------
--- Hushy Fly
--------------------
-function Alphabirth.evaluateHushyFly(player, flag)
-    if flag == CacheFlag.CACHE_FAMILIARS then
-        local amount_to_spawn = player:GetCollectibleNum(ITEMS.PASSIVE.HUSHY_FLY.id) * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
-        player:CheckFamiliar(FAMILIARS.HUSHY_FLY.variant, amount_to_spawn, modRNG)
-    end
-end
-
-function Alphabirth.initializeHushyFly(fly)
-    fly = fly:ToFamiliar()
-    fly:AddToOrbit(51)
-end
-
-function Alphabirth.updateHushyFly(fly)
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    fly.OrbitDistance = Vector(50,50)
-	fly.Velocity = (fly:GetOrbitPosition(player.Position) - fly.Position) 
-    if player:GetLastActionTriggers() & ActionTriggers.ACTIONTRIGGER_SHOOTING == 0 then
-        fly.OrbitAngleOffset = fly.OrbitAngleOffset + 0.1
-    end
-end
-
 -------------------
 -- Lil Miner
 -------------------

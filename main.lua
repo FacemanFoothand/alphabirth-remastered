@@ -376,8 +376,8 @@ local function start()
 						--ITEMS.PASSIVE.JUDAS_FEZ.id,
 						ITEMS.PASSIVE.HOT_COALS.id,
 						ITEMS.PASSIVE.ABYSS.id,
-						ITEMS.PASSIVE.HOARDER.id,
-						ITEMS.PASSIVE.POSSESSED_SHOT.id,
+						--ITEMS.PASSIVE.HOARDER.id,
+						--ITEMS.PASSIVE.POSSESSED_SHOT.id,
 						ITEMS.PASSIVE.ENDOR_HAT.id,
 						ITEMS.PASSIVE.OWL_TOTEM.id,
 						ITEMS.PASSIVE.SUBCONSCIOUS.id,
@@ -422,7 +422,7 @@ local function start()
 					ITEMS.PASSIVE.PAINT_PALETTE.id,
 					ITEMS.PASSIVE.CRYSTALLIZED.id,
 					ITEMS.PASSIVE.POLYMITOSIS.id,
-					ITEMS.PASSIVE.HUSHY_FLY.id,
+					--ITEMS.PASSIVE.HUSHY_FLY.id,
 					ITEMS.PASSIVE.SHOOTING_STAR.id,
 					ITEMS.PASSIVE.MR_SQUISHY.id,
 					ITEMS.PASSIVE.PEANUT_BUTTER.id,
@@ -745,10 +745,6 @@ function Alphabirth.itemSetup()
     ITEMS.PASSIVE.BIRTH_CONTROL:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyBirthControlCache)
     ITEMS.PASSIVE.BIRTH_CONTROL:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.useBoxOfFriends, CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS)
 
-    ITEMS.PASSIVE.POSSESSED_SHOT = api_mod:registerItem("Possessed Shot", "gfx/animations/costumes/accessories/animation_costume_possessedshot.anm2")
-    ITEMS.PASSIVE.POSSESSED_SHOT:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyPossessedShotCache)
-    ITEMS.PASSIVE.POSSESSED_SHOT:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.triggerPossessedShot)
-
     ITEMS.PASSIVE.SPIRIT_EYE = api_mod:registerItem("Spirit Eye")
     ITEMS.PASSIVE.SPIRIT_EYE:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateSpiritEye)
 
@@ -757,10 +753,6 @@ function Alphabirth.itemSetup()
 
     ITEMS.PASSIVE.HEMOPHILIA = api_mod:registerItem("Hemophilia", "gfx/animations/costumes/accessories/animation_costume_hemophilia.anm2")
     ITEMS.PASSIVE.HEMOPHILIA:addCallback(AlphaAPI.Callbacks.ENTITY_DEATH, Alphabirth.triggerHemophilia)
-
-    ITEMS.PASSIVE.HOARDER = api_mod:registerItem("Hoarder", "gfx/animations/costumes/accessories/animation_costume_hoarder.anm2")
-    ITEMS.PASSIVE.HOARDER:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleHoarder)
-    ITEMS.PASSIVE.HOARDER:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyHoarderCache)
 
     ITEMS.PASSIVE.HOT_COALS = api_mod:registerItem("Hot Coals", "gfx/animations/costumes/accessories/animation_costume_hotcoals.anm2")
     ITEMS.PASSIVE.HOT_COALS:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleHotCoals)
@@ -854,9 +846,6 @@ function Alphabirth.itemSetup()
     ITEMS.PASSIVE.INFECTION:addCallback(AlphaAPI.Callbacks.ENTITY_APPEAR, Alphabirth.infectionTearAppear, EntityType.ENTITY_TEAR)
     ITEMS.PASSIVE.INFECTION:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.infectionUpdate)
     ITEMS.PASSIVE.INFECTION:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.infectionDamage)
-
-    ITEMS.PASSIVE.HUSHY_FLY = api_mod:registerItem("Hushy Fly")
-    ITEMS.PASSIVE.HUSHY_FLY:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateHushyFly)
 
     ITEMS.PASSIVE.LIL_MINER = api_mod:registerItem("Lil Miner")
     ITEMS.PASSIVE.LIL_MINER:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateLilMiner)
@@ -1019,7 +1008,6 @@ function Alphabirth.entitySetup()
 	-- 			PACK 3			 --
 	-------------------------------
 
-	FAMILIARS.HUSHY_FLY = api_mod:getEntityConfig("Hushy Fly", 0)
 	FAMILIARS.LIL_MINER = api_mod:getEntityConfig("Lil Miner", 0)
 	FAMILIARS.HIVE_HEAD = api_mod:getEntityConfig("Hive Head Orbital", 0)
 
@@ -1061,9 +1049,6 @@ function Alphabirth.entitySetup()
     ENTITIES.PLANETOID:addCallback(AlphaAPI.Callbacks.ENTITY_DAMAGE, Alphabirth.planetoidTakeDamage)
 
     ENTITIES.CRYSTAL:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.crystalUpdate)
-
-    FAMILIARS.HUSHY_FLY:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeHushyFly)
-    FAMILIARS.HUSHY_FLY:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateHushyFly)
 
     FAMILIARS.LIL_MINER:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.initializeLilMiner)
     FAMILIARS.LIL_MINER:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.updateLilMiner)
@@ -2384,91 +2369,6 @@ do
 				player.Luck = player.Luck + api_mod.data.run.birthControlStats.Luck
 			elseif flag == CacheFlag.CACHE_RANGE then
 				player.TearFallingSpeed = player.TearFallingSpeed + api_mod.data.run.birthControlStats.Range
-			end
-		end
-	end
-
-	---------------------------------------
-	-- Hoarder Logic
-	---------------------------------------
-	local hoarderDamage = 0
-	local ratio = 1/25 --1 dmg up for 25 consumables
-
-	function Alphabirth.handleHoarder()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		local consumables = player:GetNumCoins() + player:GetNumBombs() + player:GetNumKeys()
-		if consumables * ratio ~= hoarderDamage then
-			hoarderDamage = consumables * ratio
-			player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-			player:EvaluateItems()
-		end
-	end
-
-	function Alphabirth.applyHoarderCache(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_DAMAGE then
-			player.Damage = player.Damage + hoarderDamage
-		end
-	end
-
-	---------------------------------------
-	-- Possessed Shot Logic
-	---------------------------------------
-	local POSSESSED_SHOT_BLACKLIST = {
-		EntityType.ENTITY_MASK,
-		EntityType.ENTITY_HEART
-	}
-
-
-	function Alphabirth.applyPossessedShotCache(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_TEARCOLOR then
-			player.TearColor = Color(1,1,0.8,0.7,0,0,0)
-		end
-	end
-
-	function Alphabirth.triggerPossessedShot(dmg_target, dmg_amount, dmg_flags, dmg_source)
-		if dmg_target:IsVulnerableEnemy()
-		and not AlphaAPI.hasFlag(dmg_source, ENTITY_FLAGS.TEAR_IGNORE)
-		and AlphaAPI.GAME_STATE.ROOM:GetAliveEnemiesCount() > 1 then
-			if AlphaAPI.getLuckRNG(6, 2)
-			and not dmg_target:ToNPC():IsBoss()
-			and not AlphaAPI.tableContains(POSSESSED_SHOT_BLACKLIST, dmg_target.Type) then
-				local entities_to_apply = AlphaAPI.findAllRelatives(dmg_target)
-				for _, entity in ipairs(entities_to_apply) do
-					Isaac.DebugString(entity.Type)
-					entity:AddEntityFlags(EntityFlag.FLAG_FRIENDLY)
-					entity:AddEntityFlags(EntityFlag.FLAG_CHARM)
-					entity:GetData()["prevColor"] = entity.Color
-					entity.Color = Color(0.8, 1, 0.8, 0.4, 0, 0, 0)
-					entity:GetData()["isPossessed"] = 300
-				end
-			end
-		end
-	end
-end
-
-local function handlePossessedShot()
-	local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-	for i, entity in ipairs(AlphaAPI.entities.enemies) do
-		if entity:GetData()["isPossessed"] and entity:GetData()["isPossessed"] > 0 then
-			if entity.FrameCount % (player.MaxFireDelay * 6) == 0 then
-				local target_entity = findClosestEnemy(entity)
-				if target_entity then
-					local direction_vector = (target_entity.Position - entity.Position):Normalized()
-					local tear_shot = player:FireTear(entity.Position, (direction_vector * (player.ShotSpeed * 8)), false, true, false)
-					AlphaAPI.addFlag(tear_shot, ENTITY_FLAGS.TEAR_IGNORE)
-				end
-			end
-
-			if not AlphaAPI.GAME_STATE.ROOM:IsClear() then
-				entity:GetData()["isPossessed"] = entity:GetData()["isPossessed"] - 1
-			end
-
-			if entity:GetData()["isPossessed"] == 0 then
-				entity:ClearEntityFlags(EntityFlag.FLAG_FRIENDLY)
-				entity:ClearEntityFlags(EntityFlag.FLAG_CHARM)
-				if entity:GetData()["prevColor"] then
-					entity.Color = entity:GetData()["prevColor"]
-				end
 			end
 		end
 	end
@@ -4657,30 +4557,6 @@ end
 -------------------------------------------------------------------------------
 ---- FAMILIAR LOGIC
 -------------------------------------------------------------------------------
--------------------
--- Hushy Fly
--------------------
-function Alphabirth.evaluateHushyFly(player, flag)
-    if flag == CacheFlag.CACHE_FAMILIARS then
-        local amount_to_spawn = player:GetCollectibleNum(ITEMS.PASSIVE.HUSHY_FLY.id) * (player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BOX_OF_FRIENDS) + 1)
-        player:CheckFamiliar(FAMILIARS.HUSHY_FLY.variant, amount_to_spawn, modRNG)
-    end
-end
-
-function Alphabirth.initializeHushyFly(fly)
-    fly = fly:ToFamiliar()
-    fly:AddToOrbit(51)
-end
-
-function Alphabirth.updateHushyFly(fly)
-    local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-    fly.OrbitDistance = Vector(50,50)
-	fly.Velocity = (fly:GetOrbitPosition(player.Position) - fly.Position)
-    if player:GetLastActionTriggers() & ActionTriggers.ACTIONTRIGGER_SHOOTING == 0 then
-        fly.OrbitAngleOffset = fly.OrbitAngleOffset + 0.1
-    end
-end
-
 -------------------
 -- Lil Miner
 -------------------

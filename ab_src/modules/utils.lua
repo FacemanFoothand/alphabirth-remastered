@@ -294,5 +294,37 @@ function utils.animate_entity_cardinals(entity, up, down, right, left, idle, for
     end
 end
 
+function utils.tableContains(tbl, a)
+    for _, a_ in ipairs(tbl) do
+        if a_ == a then
+            return true
+        end
+    end
+end
+
+-- Find all parents/children of an entity
+local find_all_relatives_blacklist = {
+    EntityType.ENTITY_RING_OF_FLIES,
+}
+
+function utils.findAllRelatives(entity)
+    local relative_list = {}
+    if not utils.tableContains(find_all_relatives_blacklist, entity.Type) then
+        local farthest_child = entity:GetLastChild()
+        local highest_parent = farthest_child
+        while highest_parent.Parent do
+            highest_parent = highest_parent.Parent
+            relative_list[#relative_list + 1] = highest_parent
+        end
+    else
+        relative_list[#relative_list + 1] = entity
+    end
+
+    if #relative_list == 0 then
+        relative_list[#relative_list + 1] = entity
+    end
+
+    return relative_list
+end
 
 return utils

@@ -8,6 +8,8 @@ local mod = g.mod
 --- @field [string] any
 local EntityConfig = utils.class()
 
+local entity_update_configs = {}
+
 function EntityConfig:Init(name, subtype)
     self.Name = name
 
@@ -81,11 +83,18 @@ EntityConfig.VariantParamCallbacks = {
     [ModCallbacks.MC_POST_LASER_RENDER] = true,
 }
 
+EntityConfig.CustomCallbacks = {
+    ENTITY_UPDATE = true
+}
+
 function EntityConfig:AddCallback(id, func, param)
     if EntityConfig.TypeParamCallbacks[id] then
         param = self.ID
     elseif EntityConfig.VariantParamCallbacks[id] then
         param = self.Variant
+    elseif EntityConfig.CustomCallbacks[id] then
+        entity_update_configs[#entity_update_configs+1] = { ["conf"] = self, ["func"] = func }
+        return
     end
 
     mod:AddCallback(id, function(_, entity, ...)
@@ -94,5 +103,15 @@ function EntityConfig:AddCallback(id, func, param)
         end
     end, param)
 end
+
+mod:AddCallback(ModCallbacks.MC_POST_UPDATE, function ()
+    for _, e in ipairs(Isaac.GetRoomEntities()) do
+        for _, entry in ipairs(entity_update_configs) do
+            if entry.conf:Matches(e) then
+                entry.func(e)
+            end
+        end
+    end
+end)
 
 return EntityConfig

@@ -294,4 +294,5 @@ function utils.animate_entity_cardinals(entity, up, down, right, left, idle, for
     end
 end
 
+
 return utils

@@ -36,7 +36,10 @@ end)
 quill_feather:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, _, _, _, source)
     if quill_feather.TearFlag:EntityHas(source.Entity) and not quill_feather.IgnoreFlag:EntityHas(source.Entity) then
         local player = source.Entity.Parent:ToPlayer()
-        if not player then return end
+        if not player then
+            return
+        end
+
         for _ = 1, quill_feather.number_of_tears do
             local direction_vector = source.Entity.Velocity
             local random_angle =

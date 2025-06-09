@@ -53,6 +53,8 @@ local files = {
     "ab_src.items.blacklight",
     "ab_src.items.infested_baby",
     "ab_src.items.quill_feather",
+    "ab_src.items.stone_nugget",
+    "ab_src.items.judas_fez",
 }
 
 function itemLoader.loadAll(Alphabirth)

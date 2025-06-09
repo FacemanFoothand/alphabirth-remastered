@@ -362,7 +362,7 @@ local function start()
 	                    ITEMS.ACTIVE.BLACKLIGHT.id,
 	                    ITEMS.ACTIVE.BLOOD_DRIVE.id,
 	                    -- ITEMS.ACTIVE.CHALICE_OF_BLOOD.id,
-	                    ITEMS.ACTIVE.STONE_NUGGET.id,
+	                    --ITEMS.ACTIVE.STONE_NUGGET.id,
 						ITEMS.ACTIVE.BOOK_OF_THE_DEAD.id,
 						ITEMS.ACTIVE.BLASPHEMOUS.id,
 	                    ITEMS.PASSIVE.CRACKED_ROCK.id,
@@ -373,7 +373,7 @@ local function start()
 	                    ITEMS.PASSIVE.BRUNCH.id,
 	                    ITEMS.PASSIVE.BIRTH_CONTROL.id,
 	                    --ITEMS.PASSIVE.QUILL_FEATHER.id,
-						ITEMS.PASSIVE.JUDAS_FEZ.id,
+						--ITEMS.PASSIVE.JUDAS_FEZ.id,
 						ITEMS.PASSIVE.HOT_COALS.id,
 						ITEMS.PASSIVE.ABYSS.id,
 						ITEMS.PASSIVE.HOARDER.id,
@@ -706,9 +706,6 @@ function Alphabirth.itemSetup()
     ITEMS.ACTIVE.BLOOD_DRIVE = api_mod:registerItem("Blood Drive")
     ITEMS.ACTIVE.BLOOD_DRIVE:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerBloodDrive)
 
-    ITEMS.ACTIVE.STONE_NUGGET = api_mod:registerItem("Stone Nugget")
-    ITEMS.ACTIVE.STONE_NUGGET:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerStoneNugget)
-
     ITEMS.ACTIVE.BLASPHEMOUS = api_mod:registerItem("Blasphemous")
     ITEMS.ACTIVE.BLASPHEMOUS:addCallback(AlphaAPI.Callbacks.ITEM_USE, Alphabirth.triggerBlasphemous)
 
@@ -764,10 +761,6 @@ function Alphabirth.itemSetup()
     ITEMS.PASSIVE.HOARDER = api_mod:registerItem("Hoarder", "gfx/animations/costumes/accessories/animation_costume_hoarder.anm2")
     ITEMS.PASSIVE.HOARDER:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleHoarder)
     ITEMS.PASSIVE.HOARDER:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyHoarderCache)
-
-    ITEMS.PASSIVE.JUDAS_FEZ = api_mod:registerItem("Judas' Fez", "gfx/animations/costumes/accessories/animation_costume_judasfez.anm2")
-    ITEMS.PASSIVE.JUDAS_FEZ:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleJudasFez)
-    ITEMS.PASSIVE.JUDAS_FEZ:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.applyJudasFezCache)
 
     ITEMS.PASSIVE.HOT_COALS = api_mod:registerItem("Hot Coals", "gfx/animations/costumes/accessories/animation_costume_hotcoals.anm2")
     ITEMS.PASSIVE.HOT_COALS:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleHotCoals)
@@ -936,9 +929,6 @@ function Alphabirth.entitySetup()
     ENTITIES.SUBCONSCIOUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_INIT, Alphabirth.onSubconsciousInit)
     ENTITIES.SUBCONSCIOUS:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.onSubconsciousUpdate)
 
-    ENTITIES.STONE_NUGGET = api_mod:getEntityConfig("Stone Nugget", 0)
-    ENTITIES.STONE_NUGGET:addCallback(AlphaAPI.Callbacks.ENTITY_UPDATE, Alphabirth.onStonePooterUpdate)
-
     ENTITIES.BLASPHEMOUS_LASER = api_mod:getEntityConfig("Blasphemous Laser", 0)
     ENTITIES.BLASPHEMOUS_LASER:addCallback(AlphaAPI.Callbacks.FAMILIAR_UPDATE, Alphabirth.onBlasphemousLaserUpdate)
 
@@ -1095,8 +1085,6 @@ function Alphabirth.setupMiscCallbacks()
 	mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.triggerCrackedRockEffect)
 	mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.triggerAbyss)
 	mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.entityTakeDmgBookOfTheDead)
-	mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.entityTakeDmgStoneNugget)
-	--mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Alphabirth.triggerQuillFeather)
 
 	-- Mod Updates
 	mod:AddCallback(ModCallbacks.MC_POST_UPDATE, Alphabirth.modUpdate)
@@ -1660,67 +1648,7 @@ do
 		end
 	end
 
-	----------------------------------------
-	-- Stone Nugget Logic
-	----------------------------------------
-
-	function Alphabirth.triggerStoneNugget()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_VOID) then
-			return
-		end
-
-		local pooter = ENTITIES.STONE_NUGGET:spawn(
-			player.Position,
-			Vector(0, 0),
-			player)
-		pooter:GetData().roomIdx = AlphaAPI.GAME_STATE.LEVEL:GetCurrentRoomIndex()
-		return true
-	end
-
-	local function Lerp(v1, v2, t)
-		return Vector(
-			(1 - t) * v1.X + t * v2.X,
-			(1 - t) * v1.Y + t * v2.Y
-		)
-	end
-
-	function Alphabirth.onStonePooterUpdate(pooter)
-		local currentRoomIdx = AlphaAPI.GAME_STATE.LEVEL:GetCurrentRoomIndex()
-		if pooter:GetData().roomIdx ~= currentRoomIdx then
-			pooter:Remove()
-		end
-		if random(1, 100) == 1 then
-			pooter.FlipX = not pooter.FlipX
-		end
-
-		local e_frame = pooter.FrameCount
-		if e_frame % 2 == 0 then
-			e_frame = 1.0 - math.cos(e_frame * math.pi * 0.5)
-			local nearest_enemy = AlphaAPI.findNearestEntity(pooter, AlphaAPI.entities.enemies)
-			if nearest_enemy then
-				local direction = (nearest_enemy.Position - pooter.Position):GetAngleDegrees()
-				local move_direction = Vector.FromAngle(random(direction - 35, direction + 35))
-				pooter.Velocity = Lerp(pooter.Velocity, move_direction * (random(50, 150) * 0.01), e_frame)
-			end
-		end
-	end
-
-	function Alphabirth:entityTakeDmgStoneNugget(target, dmg, flag, source, frames)
-		if not source or
-		(source.Type ~= ENTITIES.STONE_NUGGET.id and
-		source.Variant ~= ENTITIES.STONE_NUGGET.variant) then
-			return
-		end
-		if target.HitPoints - dmg <= 0 then
-			local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-			if player:GetActiveItem() == ITEMS.ACTIVE.STONE_NUGGET.id then
-				player:SetActiveCharge(1)
-			end
-		end
-	end
-
-	---------------------------------------
+    ---------------------------------------
 	-- Book of the Dead Logic
 	---------------------------------------
 	function Alphabirth.triggerBookOfTheDead()
@@ -2275,35 +2203,6 @@ do
 			api_mod.data.run.didMaxOutDevilDeal = true
 		end
 	end
-
-	---------------------------------------
-	-- Judas' Fez Logic
-	---------------------------------------
-	function Alphabirth.applyJudasFezCache(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_DAMAGE then
-			player.Damage = player.Damage * 1.35
-			if not api_mod.data.run.fezHealthReduced then
-				local hearts = player:GetMaxHearts() - 2
-				player:AddMaxHearts(hearts * -1)
-				player:AddSoulHearts(hearts)
-				api_mod.data.run.fezHealthReduced = true
-			end
-		end
-	end
-
-	local combat_rooms_visited = 0
-	function Alphabirth.handleJudasFez()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		local room = AlphaAPI.GAME_STATE.ROOM
-		if room:IsFirstVisit() and not room:IsClear() and room:GetFrameCount() == 1 then
-		combat_rooms_visited = combat_rooms_visited + 1
-		if combat_rooms_visited == 3 then
-			player:UseCard(Card.CARD_DEVIL)
-			combat_rooms_visited = 0
-		end
-		end
-	end
-
 
 	---------------------------------------
 	-- Hot Coals Logic
@@ -3415,7 +3314,6 @@ function Alphabirth:runStarted(fromsave)
         Range = 0
     }
     api_mod.data.run.damnedHasRespawned = false
-    api_mod.data.run.fezHealthReduced = false
     api_mod.data.run.didMaxOutDevilDeal = false
     api_mod.data.run.BOTD_ents = {}
     api_mod.data.run.blacklightUses = 0
@@ -3617,7 +3515,7 @@ function Alphabirth:modUpdate()
     -- if api_mod.data.run.bloodDriveTimesUsed and api_mod.data.run.bloodDriveTimesUsed > 0 then
     --     Alphabirth.handleBloodDrive()
     -- end
-    handlePossessedShot()
+    -- handlePossessedShot()
     -- handleBlacklight()
 
 	Alphabirth.apparitionSpawnCheck()
@@ -3813,7 +3711,7 @@ function Alphabirth.entityTakeDamage(entity, damage_amount, damage_flags, damage
 
 	local ply = entity:ToPlayer()
 	if ply ~= nil then
-		Alphabirth.removeFlies()
+		--Alphabirth.removeFlies()
  	end
 
     if damage_source ~= nil then

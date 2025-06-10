@@ -431,7 +431,7 @@ local function start()
 					ITEMS.PASSIVE.LEAK_BOMBS.id,
 					ITEMS.PASSIVE.INFECTION.id,
 					ITEMS.PASSIVE.LIL_ALASTOR.id,
-					ITEMS.PASSIVE.FAITHFUL_AMBIVALENCE.id,
+					--ITEMS.PASSIVE.FAITHFUL_AMBIVALENCE.id,
 					ITEMS.TRINKET.MOONROCK.id
 				}
 				local row = 31
@@ -798,9 +798,6 @@ function Alphabirth.itemSetup()
 	--------------
 	--  PACK 3  --
 	--------------
-
-    ITEMS.PASSIVE.FAITHFUL_AMBIVALENCE = api_mod:registerItem("Faithful Ambivalence", "gfx/animations/costumes/accessories/animation_costume_faithfulambivalence.anm2")
-    ITEMS.PASSIVE.FAITHFUL_AMBIVALENCE:addCallback(AlphaAPI.Callbacks.ROOM_NEW, Alphabirth.faithfulAmbivalenceNewRoom)
 
     ITEMS.PASSIVE.LIL_ALASTOR = api_mod:registerItem("Lil Alastor")
     ITEMS.PASSIVE.LIL_ALASTOR:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateLilAlastor)
@@ -3852,33 +3849,6 @@ function Alphabirth.updateLilAlastor(familiar)
 		end
 		data.charge = fireDelay
 	end
-end
-
--------------------
--- Faithful Ambivalence
--------------------
-function Alphabirth.faithfulAmbivalenceNewRoom(room)
-    local type = room:GetType()
-    local pool = AlphaAPI.GAME_STATE.GAME:GetItemPool()
-    if room:IsFirstVisit() and type == RoomType.ROOM_ANGEL or type == RoomType.ROOM_DEVIL then
-        local item
-        if type == RoomType.ROOM_ANGEL then
-            item = pool:GetCollectible(ItemPoolType.POOL_DEVIL, true, room:GetSpawnSeed())
-        else
-            item = pool:GetCollectible(ItemPoolType.POOL_ANGEL, true, room:GetSpawnSeed())
-        end
-
-        if item then
-            Isaac.Spawn(
-                EntityType.ENTITY_PICKUP,
-                PickupVariant.PICKUP_COLLECTIBLE,
-                item,
-                room:GetCenterPos() + Vector(0, 10),
-                VECTOR_ZERO,
-                nil
-            )
-        end
-    end
 end
 
 function Alphabirth.onPickupBombItem()

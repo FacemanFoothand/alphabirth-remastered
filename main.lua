@@ -374,7 +374,7 @@ local function start()
 	                    ITEMS.PASSIVE.BIRTH_CONTROL.id,
 	                    --ITEMS.PASSIVE.QUILL_FEATHER.id,
 						--ITEMS.PASSIVE.JUDAS_FEZ.id,
-						ITEMS.PASSIVE.HOT_COALS.id,
+						--ITEMS.PASSIVE.HOT_COALS.id,
 						ITEMS.PASSIVE.ABYSS.id,
 						--ITEMS.PASSIVE.HOARDER.id,
 						--ITEMS.PASSIVE.POSSESSED_SHOT.id,
@@ -753,10 +753,6 @@ function Alphabirth.itemSetup()
 
     ITEMS.PASSIVE.HEMOPHILIA = api_mod:registerItem("Hemophilia", "gfx/animations/costumes/accessories/animation_costume_hemophilia.anm2")
     ITEMS.PASSIVE.HEMOPHILIA:addCallback(AlphaAPI.Callbacks.ENTITY_DEATH, Alphabirth.triggerHemophilia)
-
-    ITEMS.PASSIVE.HOT_COALS = api_mod:registerItem("Hot Coals", "gfx/animations/costumes/accessories/animation_costume_hotcoals.anm2")
-    ITEMS.PASSIVE.HOT_COALS:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleHotCoals)
-    ITEMS.PASSIVE.HOT_COALS:addCallback(AlphaAPI.Callbacks.ITEM_CACHE, Alphabirth.evaluateHotCoals)
 
     ITEMS.PASSIVE.ABYSS = api_mod:registerItem("Abyss", "gfx/animations/costumes/accessories/animation_costume_abyss.anm2")
     ITEMS.PASSIVE.ABYSS:addCallback(AlphaAPI.Callbacks.ITEM_UPDATE, Alphabirth.handleAbyss)
@@ -2184,62 +2180,6 @@ do
 
 			api_mod.data.run.didMaxOutDevilDeal = true
 		end
-	end
-
-	---------------------------------------
-	-- Hot Coals Logic
-	---------------------------------------
-	local dmg_modifier = 1
-	local frame_count = 0
-	function Alphabirth.evaluateHotCoals(player, cache_flag)
-		if cache_flag == CacheFlag.CACHE_DAMAGE then
-			player.Damage = player.Damage * dmg_modifier
-		end
-	end
-
-	function Alphabirth.handleHotCoals()
-		local player = AlphaAPI.GAME_STATE.PLAYERS[1]
-		local direction = player:GetMovementVector()
-		if (direction:Length() == 0.0) then
-			dmg_modifier = 0.8
-			frame_count = 0
-		else
-			dmg_modifier = 1.4
-			trail = Isaac.Spawn(EntityType.ENTITY_EFFECT,
-				EffectVariant.PLAYER_CREEP_BLACKPOWDER ,
-				1,
-				player.Position,
-				Vector(0, 0),
-				player
-			):ToEffect()
-
-			trail:SetTimeout(15)
-			trail:SetColor(Color(0.5,0,0,0.5,100,100,100), 0, 0, false, false)
-
-			frame_count = frame_count + 1
-			if frame_count == 150 then
-				Isaac.Spawn(
-					EntityType.ENTITY_EFFECT,
-					EffectVariant.POOF01,
-					0,
-					player.Position,
-					Vector(0, 0),
-					player
-				)
-
-				flame = Isaac.Spawn(
-					EntityType.ENTITY_EFFECT,
-					EffectVariant.RED_CANDLE_FLAME,
-					0,
-					player.Position,
-					Vector(0,0),
-					player
-				):ToEffect()
-				frame_count = 0
-			end
-		end
-		player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-		player:EvaluateItems()
 	end
 
 	---------------------------------------

@@ -58,6 +58,8 @@ local files = {
     "ab_src.items.hoarder",
     "ab_src.items.possessed_shot",
     "ab_src.items.hushy_fly",
+    "ab_src.items.faithful_ambivalence",
+    "ab_src.items.hot_coals",
 }
 
 function itemLoader.loadAll(Alphabirth)
